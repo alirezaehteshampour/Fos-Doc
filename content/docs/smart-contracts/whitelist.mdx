@@ -1,0 +1,123 @@
+---
+title: Whitelist Verification
+description: Merkle tree-based whitelist verification system for secure allowlist implementation.
+---
+
+# Whitelist Verification
+
+FOS uses Merkle trees for gas-efficient whitelist verification, allowing thousands of addresses to be verified with minimal on-chain storage.
+
+## How It Works
+
+1. **Allowlist CSV** - Off-chain list of eligible addresses
+2. **Merkle Tree Generator** - Creates tree structure from addresses
+3. **Root Hash** - Single hash stored on-chain
+4. **Verification** - User provides proof, contract verifies against root
+
+## Generating Proofs
+
+### Backend Service
+
+```typescript
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
+import fs from "fs";
+
+// Load allowlist
+const allowlist = [
+  "0x1234567890123456789012345678901234567890",
+  "0xabcdefABCDEF123456789012345678901234abcd",
+  // ... more addresses
+];
+
+// Build tree
+const tree = StandardMerkleTree.of(
+  allowlist.map(addr => [addr]),
+  ["address"]
+);
+
+// Export root for contract deployment
+console.log("Merkle Root:", tree.root);
+
+// Save tree for proof generation
+fs.writeFileSync("merkle-tree.json", JSON.stringify(tree.dump()));
+```
+
+### Generating User Proof
+
+```typescript
+// Load saved tree
+const tree = StandardMerkleTree.load(
+  JSON.parse(fs.readFileSync("merkle-tree.json", "utf8"))
+);
+
+function getProof(address: string): string[] {
+  for (const [i, v] of tree.entries()) {
+    if (v[0].toLowerCase() === address.toLowerCase()) {
+      return tree.getProof(i);
+    }
+  }
+  throw new Error("Address not in allowlist");
+}
+
+// API endpoint
+app.get("/api/proof/:address", (req, res) => {
+  try {
+    const proof = getProof(req.params.address);
+    res.json({ proof, eligible: true });
+  } catch {
+    res.json({ proof: [], eligible: false });
+  }
+});
+```
+
+## On-Chain Verification
+
+```solidity
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
+contract MerkleVerifier {
+    bytes32 public merkleRoot;
+    
+    function verify(
+        address account,
+        bytes32[] calldata proof
+    ) public view returns (bool) {
+        bytes32 leaf = keccak256(
+            bytes.concat(keccak256(abi.encode(account)))
+        );
+        return MerkleProof.verify(proof, merkleRoot, leaf);
+    }
+    
+    function updateRoot(bytes32 newRoot) external onlyAdmin {
+        merkleRoot = newRoot;
+        emit RootUpdated(newRoot);
+    }
+}
+```
+
+## API Integration
+
+### Request
+
+```bash
+GET /api/allowlist/proof?address=0x1234...
+```
+
+### Response
+
+```json
+{
+  "eligible": true,
+  "proof": [
+    "0xabc123...",
+    "0xdef456...",
+    "0x789012..."
+  ],
+  "tier": "whitelist",
+  "maxMint": 3
+}
+```
+
+---
+
+> **Info**: See [Prize Distribution](/docs/smart-contracts/prizes) for reward mechanics.

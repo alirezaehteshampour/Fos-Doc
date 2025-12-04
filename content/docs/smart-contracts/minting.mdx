@@ -1,0 +1,92 @@
+---
+title: Minting Mechanics
+description: Detailed documentation of public, whitelist, and free mint mechanics with code examples.
+---
+
+# Minting Mechanics
+
+This page covers all minting flows available in the FOS platform.
+
+## Mint Phases
+
+| Phase | Description |
+|-------|-------------|
+| **Whitelist Phase** | Verified addresses only, discounted or free minting, Merkle proof required |
+| **Free Mint Phase** | Zero-cost minting, strict wallet limits, anti-bot protection |
+| **Public Sale** | Open to everyone, fixed price per mint, higher limits |
+
+## Whitelist Mint
+
+### Flow
+
+1. **Eligibility Check** - Frontend fetches Merkle proof from API
+2. **Transaction Submission** - User submits mint transaction with proof
+3. **On-Chain Verification** - Contract verifies proof against stored root
+4. **Token Minting** - NFT minted and transferred to user
+
+### Code Example
+
+```solidity
+function whitelistMint(
+    bytes32[] calldata proof
+) external payable nonReentrant {
+    require(block.timestamp >= whitelistStart, "Not started");
+    require(block.timestamp <= whitelistEnd, "Ended");
+    require(msg.value >= whitelistPrice, "Insufficient payment");
+    require(_verifyProof(msg.sender, proof), "Invalid proof");
+    require(whitelistMinted[msg.sender] < maxWhitelistMint, "Limit reached");
+    
+    whitelistMinted[msg.sender]++;
+    _mintTo(msg.sender);
+}
+```
+
+## Free Mint
+
+Zero-cost minting with strict anti-abuse controls:
+
+```solidity
+function freeMint(
+    bytes32[] calldata proof
+) external nonReentrant {
+    require(freeMintEnabled, "Free mint disabled");
+    require(_verifyFreeProof(msg.sender, proof), "Not eligible");
+    require(!hasFreeMinted[msg.sender], "Already minted");
+    
+    hasFreeMinted[msg.sender] = true;
+    _mintTo(msg.sender);
+}
+```
+
+> **Warning**: Free mints are limited to one per wallet and require whitelist verification.
+
+## Public Sale
+
+```solidity
+function publicMint(uint256 quantity) external payable nonReentrant {
+    require(block.timestamp >= publicStart, "Not started");
+    require(quantity <= maxPerTx, "Exceeds max per tx");
+    require(msg.value >= publicPrice * quantity, "Insufficient payment");
+    require(publicMinted[msg.sender] + quantity <= maxPerWallet, "Wallet limit");
+    
+    publicMinted[msg.sender] += quantity;
+    
+    for (uint256 i = 0; i < quantity; i++) {
+        _mintTo(msg.sender);
+    }
+}
+```
+
+---
+
+## Limits & Caps
+
+| Parameter | Whitelist | Free Mint | Public |
+|-----------|-----------|-----------|--------|
+| **Price** | 0.01 ETH | 0 ETH | 0.05 ETH |
+| **Per Wallet** | 3 | 1 | 10 |
+| **Per Transaction** | 3 | 1 | 5 |
+
+---
+
+> **Info**: See [Whitelist Verification](/docs/smart-contracts/whitelist) for proof generation details.

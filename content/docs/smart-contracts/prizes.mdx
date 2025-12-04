@@ -1,0 +1,81 @@
+---
+title: Prize Distribution
+description: On-chain prize pool management, random selection, and claim settlement mechanisms.
+---
+
+# Prize Distribution
+
+The FOS prize system enables fair, transparent reward distribution using verifiable randomness.
+
+## Architecture
+
+1. **Prize Funding** - Funds deposited to Prize Pool Contract
+2. **Chainlink VRF** - Provides verifiable randomness
+3. **Winner Selection** - Random selection from eligible participants
+4. **Winner Registry** - Stores winner addresses
+5. **Claim Process** - Winners claim their prizes
+6. **Settlement** - Funds transferred to winners
+
+## Prize Tiers
+
+| Tier | Pool % | Winners | Selection |
+|------|--------|---------|-----------|
+| **Jackpot** | 10% | 1 | VRF random |
+| **Gold** | 20% | 10 | Top minters |
+| **Silver** | 30% | 100 | VRF random |
+| **Bronze** | 40% | All eligible | Pro-rata |
+
+## VRF Integration
+
+```solidity
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+
+contract PrizePool is VRFConsumerBaseV2 {
+    function requestRandomWinner() external onlyAdmin {
+        uint256 requestId = COORDINATOR.requestRandomWords(
+            keyHash,
+            subscriptionId,
+            requestConfirmations,
+            callbackGasLimit,
+            numWords
+        );
+        emit RandomnessRequested(requestId);
+    }
+    
+    function fulfillRandomWords(
+        uint256 requestId,
+        uint256[] memory randomWords
+    ) internal override {
+        uint256 winnerIndex = randomWords[0] % eligibleCount;
+        address winner = eligibleAddresses[winnerIndex];
+        winners[requestId] = winner;
+        emit WinnerSelected(requestId, winner);
+    }
+}
+```
+
+## Claim Process
+
+1. **Eligibility Check** - User verifies winner status via contract
+2. **Claim Submission** - Winner calls claim function with tier ID
+3. **Validation** - Contract verifies unclaimed status
+4. **Transfer** - Prize transferred to winner
+
+```solidity
+function claim(uint256 tierId) external nonReentrant {
+    require(isWinner[tierId][msg.sender], "Not a winner");
+    require(!hasClaimed[tierId][msg.sender], "Already claimed");
+    
+    uint256 amount = prizeAmounts[tierId];
+    hasClaimed[tierId][msg.sender] = true;
+    
+    (bool success, ) = msg.sender.call{value: amount}("");
+    require(success, "Transfer failed");
+    
+    emit PrizeClaimed(msg.sender, tierId, amount);
+}
+```
+
+---
+
+> **Info**: See [Security](/docs/smart-contracts/security) for audit and safety information.

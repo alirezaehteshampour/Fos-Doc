@@ -1,26 +1,201 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* ===== FOS Blockchain Documentation Theme ===== */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Brand Colors - Crypto Blue */
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Accent - Electric Purple */
+  --accent: 270 95% 65%;
+  --accent-foreground: 0 0% 100%;
+  
+  /* Background gradients */
+  --gradient-from: 220 60% 5%;
+  --gradient-to: 260 50% 10%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Dark mode overrides for premium feel */
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  
+  --card: 222 47% 8%;
+  --card-foreground: 210 40% 98%;
+  
+  --popover: 222 47% 8%;
+  --popover-foreground: 210 40% 98%;
+  
+  --muted: 217 33% 15%;
+  --muted-foreground: 215 20% 65%;
+  
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Premium glassmorphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Animated crypto gradient background */
+.crypto-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(217, 91%, 60%) 0%,
+    hsl(270, 95%, 65%) 50%,
+    hsl(217, 91%, 60%) 100%
+  );
+  background-size: 200% 200%;
+  animation: gradient-flow 8s ease infinite;
+}
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Premium code block styling */
+[data-rehype-pretty-code-figure] {
+  position: relative;
+}
+
+[data-rehype-pretty-code-figure] pre {
+  border: 1px solid hsl(217, 33%, 17%);
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    180deg,
+    hsl(222, 47%, 8%) 0%,
+    hsl(222, 47%, 6%) 100%
+  ) !important;
+}
+
+/* Solidity syntax highlighting enhancement */
+.token.keyword {
+  color: hsl(270, 95%, 75%);
+}
+
+.token.function {
+  color: hsl(45, 100%, 70%);
+}
+
+.token.string {
+  color: hsl(100, 70%, 60%);
+}
+
+/* Premium sidebar styling */
+.fd-sidebar {
+  background: linear-gradient(
+    180deg,
+    hsl(222, 47%, 7%) 0%,
+    hsl(222, 47%, 5%) 100%
+  );
+}
+
+/* Glowing links on hover */
+.fd-sidebar a:hover,
+.fd-toc a:hover {
+  text-shadow: 0 0 20px hsl(217, 91%, 60%, 0.5);
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(222, 47%, 8%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(217, 33%, 25%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(217, 91%, 50%);
+}
+
+/* Premium card effects */
+.fd-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fd-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 20px 40px -15px rgba(59, 130, 246, 0.3),
+    0 10px 20px -10px rgba(139, 92, 246, 0.2);
+}
+
+/* Blockchain icon animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom selection color */
+::selection {
+  background: hsl(217, 91%, 60%, 0.4);
+  color: white;
+}
+
+/* Premium focus states */
+*:focus-visible {
+  outline: 2px solid hsl(217, 91%, 60%);
+  outline-offset: 2px;
+}
+
+/* Table styling for API docs */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  background: hsl(222, 47%, 10%);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid hsl(217, 91%, 60%, 0.3);
+}
+
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid hsl(217, 33%, 17%);
+}
+
+tr:hover td {
+  background: hsl(222, 47%, 8%);
+}
+
+/* Badge styles for contract status */
+.badge-verified {
+  background: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 70%, 45%));
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-audit {
+  background: linear-gradient(135deg, hsl(45, 93%, 47%), hsl(38, 92%, 50%));
+  color: hsl(0, 0%, 10%);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }

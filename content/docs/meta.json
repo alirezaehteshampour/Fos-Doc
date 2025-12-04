@@ -1,0 +1,14 @@
+{
+    "title": "Documentation",
+    "root": true,
+    "pages": [
+        "index",
+        "whitepaper",
+        "smart-contracts",
+        "platform",
+        "api",
+        "infrastructure",
+        "roadmap",
+        "glossary"
+    ]
+}

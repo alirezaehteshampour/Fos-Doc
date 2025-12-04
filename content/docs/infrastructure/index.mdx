@@ -1,0 +1,101 @@
+---
+title: Infrastructure
+description: DevOps, CI/CD, environments, security, and monitoring documentation.
+---
+
+# Infrastructure & DevOps
+
+Comprehensive infrastructure documentation for the FOS platform.
+
+## Environments
+
+| Environment | Purpose | Chain | URL |
+|-------------|---------|-------|-----|
+| **Development** | Local development | Hardhat | localhost:3000 |
+| **Staging** | QA and testing | Sepolia | staging.fos.ooo |
+| **Production** | Live platform | Mainnet | fos.ooo |
+
+## CI/CD Pipeline
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+      - uses: vercel/actions@v1
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+```
+
+## Monitoring
+
+### Observability Stack
+
+| Component | Tool | Purpose |
+|-----------|------|---------|
+| **Logging** | Axiom/Logtail | Centralized logs |
+| **Metrics** | Grafana Cloud | Application metrics |
+| **Alerts** | PagerDuty | Incident management |
+| **Tracing** | OpenTelemetry | Distributed tracing |
+
+## Security
+
+### Key Management
+
+- **Development**: Local environment variables
+- **Staging/Production**: Vercel encrypted secrets
+- **Smart Contract Admin**: Hardware wallet (Ledger)
+- **Hot Wallets**: Server-side with KMS
+
+### Access Control
+
+| Role | Permissions |
+|------|-------------|
+| **Developer** | Read logs, deploy to staging |
+| **DevOps** | All deployments, secrets management |
+| **Admin** | Contract admin operations |
+
+---
+
+## Testing
+
+### Test Suites
+
+```bash
+# Smart Contract Tests
+npx hardhat test
+
+# Frontend Tests
+npm run test
+
+# E2E Tests
+npm run test:e2e
+```
+
+### Coverage Requirements
+
+| Component | Minimum Coverage |
+|-----------|-----------------|
+| Smart Contracts | 95% |
+| API Routes | 80% |
+| UI Components | 70% |
+
+---
+
+See [Roadmap](/docs/roadmap) for upcoming features and timeline.

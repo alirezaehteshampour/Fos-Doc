@@ -1,0 +1,84 @@
+---
+title: Glossary
+description: Definitions of key terms and concepts used throughout the FOS documentation.
+---
+
+# Glossary & References
+
+Quick reference for blockchain and FOS-specific terminology.
+
+## Blockchain Terms
+
+### Merkle Proof
+A cryptographic proof of inclusion in a set using Merkle trees. Allows verification that an address is in the allowlist without storing all addresses on-chain.
+
+### Merkle Tree
+A hash-based data structure where each leaf node is a hash of data, and each non-leaf node is a hash of its children. Enables efficient and secure verification of large data sets.
+
+### Allowlist (Whitelist)
+A curated list of wallet addresses eligible for restricted minting phases. Verified using Merkle proofs.
+
+### VRF (Verifiable Random Function)
+Cryptographic function that produces provably random outputs. Used for fair, auditable prize selection.
+
+### ERC-721
+Ethereum standard for non-fungible tokens (NFTs). Each token is unique and not interchangeable.
+
+### ERC-1155
+Multi-token standard supporting both fungible and non-fungible tokens in a single contract.
+
+### ERC-2981
+NFT royalty standard allowing creators to receive royalties on secondary sales.
+
+### Gas
+Unit measuring computational effort on Ethereum. Users pay gas fees to compensate validators.
+
+### Smart Contract
+Self-executing code deployed on blockchain. Runs automatically when conditions are met.
+
+### Wallet
+Software or hardware for managing blockchain accounts and signing transactions.
+
+### SIWE
+Sign-In with Ethereum - authentication standard using wallet signatures instead of passwords.
+
+---
+
+## FOS Platform Terms
+
+### Mint Phase
+Specific period during which minting is available. FOS has three phases: whitelist, free mint, and public.
+
+### Free Mint
+Zero-cost NFT minting for eligible wallets. Limited to prevent abuse.
+
+### Prize Pool
+Contract holding rewards for distribution to winners.
+
+### Prize Tier
+Category of rewards (Jackpot, Gold, Silver, Bronze) with different values and selection methods.
+
+---
+
+## Technical References
+
+### Standards
+- [EIP-721: Non-Fungible Token Standard](https://eips.ethereum.org/EIPS/eip-721)
+- [EIP-1155: Multi Token Standard](https://eips.ethereum.org/EIPS/eip-1155)
+- [EIP-2981: NFT Royalty Standard](https://eips.ethereum.org/EIPS/eip-2981)
+- [EIP-4361: Sign-In with Ethereum](https://eips.ethereum.org/EIPS/eip-4361)
+
+### Libraries
+- [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts)
+- [Chainlink VRF](https://docs.chain.link/vrf)
+- [wagmi Documentation](https://wagmi.sh)
+- [The Graph](https://thegraph.com/docs)
+
+### Tools
+- [Hardhat](https://hardhat.org/docs)
+- [Foundry](https://book.getfoundry.sh)
+- [Etherscan](https://etherscan.io)
+
+---
+
+Return to the [Introduction](/docs) to continue exploring the documentation.

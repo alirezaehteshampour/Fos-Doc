@@ -1,0 +1,246 @@
+---
+title: Smart Contracts
+description: Complete smart contract documentation including ERC standards, minting mechanics, whitelist verification, and security patterns.
+---
+
+# Smart Contracts
+
+All FOS smart contracts are open source and available on [GitHub](https://github.com/your-org/fos-contracts). They are written in Solidity ^0.8.20 and follow OpenZeppelin patterns.
+
+## Overview
+
+The FOS smart contract suite consists of four primary contracts:
+
+| Contract | Purpose | Standards |
+|----------|---------|-----------|
+| **FOSToken** | NFT minting and metadata | ERC-721, ERC-2981 |
+| **MerkleVerifier** | Whitelist proof validation | - |
+| **PrizePool** | Reward distribution | - |
+| **AdminRegistry** | Role-based access | AccessControl |
+
+---
+
+## Standards and Interfaces
+
+### ERC-721 Implementation
+
+FOS tokens implement the ERC-721 standard with additional extensions:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
+contract FOSToken is 
+    ERC721,
+    ERC721Enumerable,
+    ERC721URIStorage,
+    ERC2981,
+    AccessControl,
+    ReentrancyGuard 
+{
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    
+    uint256 public constant MAX_SUPPLY = 10000;
+    uint256 public totalMinted;
+    
+    // ... implementation
+}
+```
+
+### Supported Standards
+
+| Standard | Description |
+|----------|-------------|
+| **ERC-721** | Non-fungible token standard for unique digital assets |
+| **ERC-721Enumerable** | Extension enabling token enumeration by owner |
+| **ERC-2981** | NFT royalty standard for marketplace compatibility |
+| **AccessControl** | Role-based permissions for admin operations |
+
+---
+
+## Contract Suite
+
+### FOSToken
+
+The core NFT contract handling minting, transfers, and metadata.
+
+**Key Features:**
+- Configurable supply cap (10,000 default)
+- Phase-based minting (whitelist → free → public)
+- Per-wallet minting limits
+- Royalty configuration (ERC-2981)
+
+```solidity
+// Core minting function
+function mint(
+    address to,
+    bytes32[] calldata merkleProof
+) external payable nonReentrant returns (uint256) {
+    require(totalMinted < MAX_SUPPLY, "Max supply reached");
+    require(_verifyProof(to, merkleProof), "Invalid proof");
+    require(mintedPerWallet[to] < maxPerWallet, "Wallet limit reached");
+    
+    uint256 tokenId = ++totalMinted;
+    mintedPerWallet[to]++;
+    
+    _safeMint(to, tokenId);
+    
+    return tokenId;
+}
+```
+
+### MerkleVerifier
+
+Handles cryptographic verification of whitelist eligibility.
+
+```solidity
+// Merkle proof verification
+function verify(
+    address account,
+    bytes32[] calldata proof
+) public view returns (bool) {
+    bytes32 leaf = keccak256(abi.encodePacked(account));
+    return MerkleProof.verify(proof, merkleRoot, leaf);
+}
+
+// Admin function to update root
+function updateMerkleRoot(bytes32 newRoot) external onlyRole(ADMIN_ROLE) {
+    bytes32 oldRoot = merkleRoot;
+    merkleRoot = newRoot;
+    emit MerkleRootUpdated(oldRoot, newRoot);
+}
+```
+
+### PrizePool
+
+Manages reward deposits, random selection, and claim settlement.
+
+**Prize Distribution Modes:**
+
+| Mode | Description | Selection Method |
+|------|-------------|------------------|
+| **Jackpot** | Single large prize | VRF random |
+| **Tiered** | Multiple prize tiers | VRF + ranking |
+| **Participation** | Rewards for all minters | Pro-rata distribution |
+
+---
+
+## Minting Mechanics
+
+### Phase Configuration
+
+1. **Whitelist Phase**
+   - Only verified addresses can mint
+   - Requires valid Merkle proof
+   - Typically discounted or free
+   - Time-bounded window
+
+2. **Free Mint Phase**
+   - Zero-cost minting for eligible wallets
+   - Strict per-wallet limits (usually 1-2)
+   - Anti-bot measures enforced
+
+3. **Public Sale**
+   - Open to all wallets
+   - Fixed price per mint
+   - No proof required
+   - Higher per-tx limits
+
+### Minting Limits
+
+| Parameter | Whitelist | Free Mint | Public |
+|-----------|-----------|-----------|--------|
+| **Price** | 0.01 ETH | 0 ETH | 0.05 ETH |
+| **Per Wallet** | 3 | 1 | 10 |
+| **Per Transaction** | 3 | 1 | 5 |
+
+---
+
+## Whitelist Verification
+
+### Merkle Tree
+
+Allowlist entries are hashed and organized into a Merkle tree off-chain. The root is stored on-chain; participants supply a proof to validate inclusion. This minimizes storage while preserving verifiability.
+
+### Proof Generation
+
+Off-chain service generates proofs:
+
+```typescript
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
+import fs from "fs";
+
+// Load allowlist
+const allowlist = [
+  "0x1234567890123456789012345678901234567890",
+  "0xabcdefABCDEF123456789012345678901234abcd",
+  // ... more addresses
+];
+
+// Build tree
+const tree = StandardMerkleTree.of(
+  allowlist.map(addr => [addr]),
+  ["address"]
+);
+
+// Export root for contract deployment
+console.log("Merkle Root:", tree.root);
+```
+
+---
+
+## Security
+
+> **Warning**: Security is paramount. All contracts undergo thorough auditing before mainnet deployment.
+
+### Security Patterns
+
+| Pattern | Purpose | Implementation |
+|---------|---------|----------------|
+| **ReentrancyGuard** | Prevent reentrancy attacks | `nonReentrant` modifier |
+| **Checks-Effects-Interactions** | Safe external calls | State updates before calls |
+| **Access Control** | Role separation | OpenZeppelin AccessControl |
+| **Pausable** | Emergency stop | `whenNotPaused` modifier |
+
+### Example: Safe Withdrawal
+
+```solidity
+// Pull pattern for safe withdrawals
+function withdraw() external nonReentrant {
+    uint256 amount = pendingWithdrawals[msg.sender];
+    require(amount > 0, "Nothing to withdraw");
+    
+    // Effects
+    pendingWithdrawals[msg.sender] = 0;
+    
+    // Interactions
+    (bool success, ) = msg.sender.call{value: amount}("");
+    require(success, "Transfer failed");
+    
+    emit Withdrawn(msg.sender, amount);
+}
+```
+
+---
+
+## Deployment Addresses
+
+Contract addresses will be published here after mainnet deployment.
+
+| Contract | Network | Address |
+|----------|---------|---------|
+| FOSToken | Sepolia | `0x...` (testnet) |
+| MerkleVerifier | Sepolia | `0x...` (testnet) |
+| PrizePool | Sepolia | `0x...` (testnet) |
+
+---
+
+See the [API Reference](/docs/api) for backend integration details.
