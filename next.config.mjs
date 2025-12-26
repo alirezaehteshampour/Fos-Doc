@@ -12,6 +12,10 @@ const nextConfig = {
             },
         ],
     },
+    devIndicators: {
+        appIsrStatus: false,
+        buildActivity: false,
+    },
 };
 
 const withMDX = createMDX();
