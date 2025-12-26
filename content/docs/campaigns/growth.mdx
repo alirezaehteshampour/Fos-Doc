@@ -1,0 +1,90 @@
+---
+title: Growth Campaign
+description: Promotional campaign activated at 5,000 users
+---
+
+# Growth Campaign
+
+The Growth Campaign is a promotional incentive layer that activates when the FOS ecosystem reaches 5,000 active users.
+
+---
+
+## Status
+
+**Current Status:** Pending activation (requires 5,000 users)
+
+---
+
+## How It Works
+
+1. **Activation:** When FOS reaches 5,000 active users, the campaign automatically activates
+2. **Duration:** 30-day promotional period
+3. **Funding:** Protocol admin fees are redirected to a Community Allocation Pool
+4. **Distribution:** At revenue milestones, top 3 leaderboard users receive promotional allocations
+
+---
+
+## Milestone Allocations
+
+| Milestone | Pool Size | 1st (50%) | 2nd (30%) | 3rd (20%) |
+| :--- | :--- | :--- | :--- | :--- |
+| $20,000 | $20,000 | $10,000 | $6,000 | $4,000 |
+| $50,000 | $50,000 | $25,000 | $15,000 | $10,000 |
+| $100,000 | $100,000 | $50,000 | $30,000 | $20,000 |
+| $200,000 | $200,000 | $100,000 | $60,000 | $40,000 |
+| $500,000 | $500,000 | $250,000 | $150,000 | $100,000 |
+| $1,000,000 | $1,000,000 | $500,000 | $300,000 | $200,000 |
+| $2,000,000 | $2,000,000 | $1,000,000 | $600,000 | $400,000 |
+
+---
+
+## How to Participate
+
+### Build Your Leaderboard Rank
+
+Earn points through these actions:
+
+| Action | Points |
+| :--- | :--- |
+| Valid Referral | +1 |
+| Buddy Purchase ($3) | +2 |
+| Samurai Purchase ($13) | +4 |
+| Noble Purchase ($25) | +6 |
+
+### Claim Your Allocation
+
+When a milestone is reached and you're in the top 3:
+1. Navigate to the Campaign section in the app
+2. Call the `claim(milestone)` function
+3. Pay gas fee to execute the claim
+4. Allocation is sent to your wallet
+
+---
+
+## Important Notes
+
+- This is a **promotional campaign**, not a lottery
+- Participation is **optional** and does not affect NFT purchases
+- Allocations are based on leaderboard rankings at snapshot time
+- The campaign is temporary (30 days) and does not affect core protocol
+- Gas fees for claiming are paid by the user
+
+---
+
+## Technical Implementation
+
+The Growth Campaign uses a dedicated smart contract:
+- Admin funds the pool from protocol share
+- Rankings are snapshot at milestone triggers
+- Pull-based claiming (you must claim your allocation)
+- On-chain verification of all distributions
+
+For developer details, see [Campaign Contract](/docs/technical/campaign-contract).
+
+---
+
+## Related Documentation
+
+- [Leaderboard](/docs/leaderboard) - How rankings work
+- [Referral Program](/docs/referral) - Earn referral points
+- [Roadmap](/docs/roadmap) - Phase 5 details

@@ -1,0 +1,32 @@
+---
+title: Free Mint Contract
+description: Allowlisted free mint mechanics
+---
+
+# Free Mint Contract
+
+Enables a scheduled, allowlisted free mint. Early eligible wallets receive a special allocation of higher-value NFTs (configurable).
+
+## Whitelist & Schedule
+
+- Allowlist via Merkle tree: leaf example `keccak256(abi.encode(wallet, quota, phaseId))`. Root stored on-chain.
+- Enforce `perWalletQuota`, `perTxLimit`, and `phase` windows (`start`/`end` timestamps).
+- Anti-bot: cooldowns, optional signature-based gating (`EIP-712`), and same-block mint protections.
+- Schedule: start time is configured (TBD) via config keys and will be finalized closer to launch.
+
+## Early Allocation
+
+- Parameters: `earlyAdoptersCount` (e.g., 10), `allocationPerAdopter` (e.g., 10 NFTs), `allocationTier` (e.g., $100 tier).
+- Selection: first `N` distinct wallets successfully minting after phase start. Deterministic tie-break by transaction ordering.
+- Guarantees: ensure allocations do not exceed supply; track `awarded[wallet]` to prevent double-allocation.
+
+## Interfaces & Events
+
+- `mintFree(proof, quota, phaseId)`: validates Merkle proof; mints; applies early allocation if eligible.
+- Events: `FreeMintStarted(phaseId)`, `FreeMinted(wallet, qty, phaseId)`, `EarlyAllocation(wallet, qty, tier)`.
+
+## Security
+
+- Merkle root rotation requires admin; proofs validated with exact leaf structure and domain separation by `phaseId`.
+- Pause and supply guardrails; `nonReentrant` on minting pathways.
+- **Immutability & Fairness**: Free-mint eligibility and allocation are enforced entirely by the contract; operators cannot "hand-pick" or alter outcomes.

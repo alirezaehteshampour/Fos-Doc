@@ -1,0 +1,17 @@
+{
+    "title": "Technical Docs",
+    "pages": [
+        "index",
+        "---Smart Contracts---",
+        "smart-contracts",
+        "allocation-contract",
+        "referral-contract",
+        "verification-contract",
+        "free-mint-contract",
+        "campaign-contract",
+        "---Application---",
+        "application",
+        "security",
+        "apis"
+    ]
+}

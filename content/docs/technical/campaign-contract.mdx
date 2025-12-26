@@ -1,0 +1,49 @@
+---
+title: Campaign & Leaderboard Contract
+description: Growth campaign and milestone distribution system
+---
+
+# Campaign (Incentive Layer): Allocation Pool / Leaderboard Contract
+
+Activated when total users reach 5,000. For one month, site revenue is funneled to the pool. Upon hitting milestones ($20k, $50k, $100k, $200k, $500k, $1M, $2M), distribute 50/30/20 to top three accounts on the leaderboard.
+
+**Campaign Classification**: The Campaign Leaderboard is a promotional engagement mechanism. It does not require payment to participate, does not constitute a competition of chance, and allocations are promotional distributions rather than prizes or winnings. Leaderboard participation is optional and independent of NFT ownership.
+
+## Activation & Funding
+
+- Activation condition: `usersCount ≥ 5000` (fed from an oracle or admin-set flag accompanied by evidence).
+- Funding source: on-chain revenues from the **Referral** contract (admin share of $10 payments) and the **Allocation Distribution** contract (admin share of purchases), funneled into the allocation pool.
+- Accrual window: `activationTime` to `activationTime + 30 days`. Post-window, continue accrual toward next milestones as configured.
+- **Protocol Revenue Clarification**: Protocol revenue refers solely to internal accounting flows used to fund predefined promotional allocations and operational costs. It does not represent profit sharing, dividends, or investment returns.
+
+## Milestones & Distribution
+
+- Milestones: 20k, 50k, 100k, 200k, 500k, 1M, 2M (configurable). On crossing each, a protocol distribution is triggered.
+- Leaderboard source: on-chain accumulation or an oracle feed from the main app. Snapshot height defined and immutable per milestone.
+- Split: 1st 50%, 2nd 30%, 3rd 20%. Rounding: allocate remainder to admin or largest rank deterministically to prevent dust drifting.
+- Distribution method: claim-based recommended — write allocations, users call `claim()`; prevents reentrancy and failed transfer halts.
+
+**Example Campaign Accruals (Illustrative)**
+
+| Milestone | Pool at Milestone | First (50%) | Second (30%) | Third (20%) | Remainder Handling |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| $20k | $20,000 | $10,000 | $6,000 | $4,000 | Any rounding dust to Admin |
+| $50k | $50,000 | $25,000 | $15,000 | $10,000 | Any rounding dust to Admin |
+
+Tie-breaking on the leaderboard is deterministic: ties on the primary score metric are first resolved by higher cumulative Activity Score, then by earlier on-chain activity timestamp at or before the snapshot height, and finally (if still tied) by lexicographically lower wallet address.
+
+This is a **temporary growth campaign**. The core protocol (Buddy/Samurai/Noble pools, distributions, and protocol distributions) continues indefinitely regardless of campaign status. The campaign share of each mint is routed **directly** to a dedicated campaign vault and can be turned off without affecting the 500-mint cycles.
+
+## Interfaces & Events
+
+- `recordRevenue(amount)`: called by revenue wallet or adapter; updates pool and checks milestones.
+- `setLeaders(milestone, addresses[3])` (admin/oracle): freezes selected participants for that milestone.
+- `claim(milestone)`: eligible leaders withdraw their allocation; idempotent via claimed flags.
+- Events: `RevenueAdded(amount)`, `MilestoneReached(milestone, pool)`, `LeadersSet(milestone, first, second, third)`, `Claimed(milestone, account, amount)`.
+
+## Security & Invariants
+
+- Multi-sig admin for parameter changes; milestone leader sets logged and immutable after confirmation.
+- Pool accounting must be conserved: sum(allocations at milestone) ≤ poolAtMilestone; any remainder handled deterministically.
+- Use `nonReentrant`, CEI; avoid push transfers; support `ERC-20` safe operations.
+- **Trustless Operation**: Allocation accruals, leader snapshots, and claims are executed by contract rules; neither operators nor developers can alter selected participants or redirect funds.

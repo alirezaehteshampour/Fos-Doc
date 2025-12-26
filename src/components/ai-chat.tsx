@@ -126,14 +126,19 @@ export function AIChat() {
                     <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-neutral-900">
                         {messages.length === 0 && (
                             <div className="text-center text-sm text-neutral-400 py-6 sm:py-8">
-                                <p className="mb-4">👋 Hi! I can help you with:</p>
-                                <ul className="space-y-2 text-left max-w-xs mx-auto">
-                                    <li>• Smart contract questions</li>
-                                    <li>• Minting mechanics</li>
-                                    <li>• Whitelist verification</li>
-                                    <li>• API integration</li>
-                                    <li>• Platform features</li>
+                                <p className="mb-4">👋 Hi! I'm the FOS Assistant.</p>
+                                <p className="mb-3 text-xs">I can help you understand:</p>
+                                <ul className="space-y-2 text-left max-w-xs mx-auto text-xs">
+                                    <li>• How NFT purchases work</li>
+                                    <li>• Referral program details</li>
+                                    <li>• Whitelist requirements</li>
+                                    <li>• Promotional distributions</li>
+                                    <li>• Smart contract features</li>
+                                    <li>• Wallet setup on Base</li>
                                 </ul>
+                                <p className="mt-4 text-xs text-neutral-500">
+                                    Note: I only answer FOS-related questions
+                                </p>
                             </div>
                         )}
                         {messages.map((msg, i) => (
@@ -143,8 +148,8 @@ export function AIChat() {
                             >
                                 <div
                                     className={`max-w-[85%] sm:max-w-[80%] p-3 rounded-2xl text-sm text-white ${msg.role === 'user'
-                                            ? 'bg-gradient-to-r from-orange-500 to-pink-500 rounded-br-md'
-                                            : 'bg-neutral-800 rounded-bl-md'
+                                        ? 'bg-gradient-to-r from-orange-500 to-pink-500 rounded-br-md'
+                                        : 'bg-neutral-800 rounded-bl-md'
                                         }`}
                                 >
                                     <p className="whitespace-pre-wrap break-words">{msg.content}</p>

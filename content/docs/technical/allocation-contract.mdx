@@ -1,0 +1,89 @@
+---
+title: Allocation Distribution Contract
+description: Main NFT minting and allocation distribution contract
+---
+
+# Allocation Distribution Contract
+
+Allows users to purchase Fos Digital Collectibles wherein each eligible purchase results in minting/awarding an NFT and recording the user in the purchaser set for allocation distributions.
+
+## State & Configuration
+
+- `maxSupply`, `minted`, `baseURI`, optional `reveal` mechanics.
+- `saleWindow` (start/end), per-wallet cap, per-tx cap.
+- Randomness: production uses **Chainlink VRF** (subscription on Base). Test builds may use deterministic/pseudo randomness and must not be deployed to mainnet.
+
+## Infinite Cycle Reset
+
+- Each pool follows a **500-mint cycle**. Upon the **500th mint** and successful protocol distribution, the pool's minted counter resets to 0 in the *same transaction*.
+- `cycleId` increments atomically for that pool. Indexing can rely on `(poolType, cycleId, mintIndex)`.
+- **Greek Numbering**: user-facing labels use 1–100 blocks; after the 500th mint, labels restart at 1.
+- **The Cycle Structure:** The protocol consists of **100 Sequential Generations** (e.g., Cycle 1 to Cycle 100).
+- **Per-Cycle Supply:** Each Generation contains exactly **500 Unique NFTs**.
+- **The Reset Trigger:** Upon the sale of the **500th NFT** (The Green Eye) in the current cycle:
+  1. The Atomic Protocol Distribution executes.
+  2. The `cycleId` increments (e.g., Buddy I → Buddy II).
+  3. The `minted` counter resets to 0.
+  4. The next generation becomes immediately active.
+- **Clarification:** "1-100" refers to the **Cycle Generations**, not the NFT numbering. Inside any active pool, NFTs are unique from 1 to 500.
+
+## Time-Based Liquidation (Failsafe)
+
+To prevent liquidity lock-up in slower-moving pools, the protocol enforces a hard-coded 365-Day Liquidation Trigger.
+
+- **Trigger Condition:** If `block.timestamp >= cycleStartTime + 365 days` AND `mintCount < 500`.
+- **Mechanism:** A public function `liquidatePool()` becomes callable by any user.
+- **Execution:** This function triggers the standard `distributeAllocations()` logic using the current accrued pool balance and the current participant set. It applies the same selection weighting and 50/30/20 split logic.
+- **Outcome:** Funds are distributed to 17 selected participants (or fewer if total participants < 17), and the cycle atomic resets to Cycle ID + 1. This ensures funds are never indefinitely locked.
+
+## Free Number Tiers
+
+- Certain numbers (e.g., **10**, **100**, **200**, **300**, **400**) are designated as free-entry tiers; users pay only network gas.
+- Eligibility and "free" status are enforced on-chain; contract logic prevents fee collection for these tiers while still requiring gas.
+- **Scope**: The free-number policy applies uniformly across all three pools (Buddy, Samurai, Noble).
+- Note: While labels display 1–100 segments, free tiers 200/300/400 refer to the cycle-wide mint indices (1..500).
+
+## Two-Contract Architecture
+
+- **Contract A (Payment & Mint)**: Receives user payment (per selected pool: Buddy/Samurai/Noble) unless a free-number tier applies, mints the NFT, delivers it to the user, and allocates the admin share as configured.
+- **Contract B (Allocation Distribution)**: Receives the remaining funds earmarked for the selected pool and orchestrates that pool's automated selection and allocation distribution.
+- The flow is non-custodial: funds are programmatically routed; the app server never takes custody.
+
+## Green Eye Gas Treasury (Mint #500)
+
+- The **500th mint** includes an additional gas stipend to cover the on-chain costs of executing the batch protocol distribution for selected participants (up to 18 atomic transfers as designed).
+- The payer of mint #500 receives a special NFT (the **Green Eye**) and remains eligible to receive allocations like any other participant.
+- The extra ETH is stored in a dedicated `gasStipend` variable reserved exclusively for the protocol distribution transaction(s).
+- Protocol distributions allocate to **17 selected participants** per pool (1/6/10). If actual gas is less than the stipend, the *leftover* is forwarded to the Admin wallet per policy.
+- The stipend amount follows a contract-defined policy; parameters are configurable and audited. VRF costs are handled separately via LINK subscription on Base.
+- **User-Funded Execution:** The participant initiating Mint #500 acts as the "Executor." They pay the standard NFT price PLUS the full L2 Gas cost required to execute the distribution loop (17 atomic transfers + Chainlink callback handling).
+- **Atomic Revert Protection:** If the provided gas is insufficient to complete the full batch of transfers, or if the contract lacks sufficient LINK/ETH for the VRF request, the transaction MUST revert atomically. No partial state changes (e.g., resetting the cycle without paying) are permitted.
+- **Example (Illustrative)**: If the configured gas stipend is 0.02 ETH and the actual gas required for the protocol distribution is 0.017 ETH, 0.017 ETH is consumed by the distribution transaction and 0.003 ETH is forwarded to the Admin wallet under the configured policy.
+- **Insufficient Stipend Behavior**: If the stipend is misconfigured and proves insufficient to cover the full protocol distribution, the distribution transaction reverts atomically. No partial allocations occur; the admin can update parameters (or fund the contract as designed), and any authorized or public retry function can then successfully complete the pending distribution.
+
+## External Interfaces
+
+- `buyAndMint()`/`mint()`: mints an NFT for caller if within constraints; records purchaser.
+- `distributeAllocations()` (admin/operator): resolves selected participants using VRF callback or deterministic method; awards allocations if applicable.
+
+## Randomness
+
+- Selected participant selection uses **Chainlink VRF**; random seeds are verifiable on-chain; results cannot be influenced by the team.
+- Randomness does not affect allocation size, value, or probability of receipt, and does not create entitlement or expectation for any participant.
+- VRF requests are tracked per pool and per `cycleId` using explicit nonces; the contract rejects stale or duplicate fulfillments and enforces a single active request per pool at a time.
+- In production, there is **no** manual or off-VRF fallback for allocation selection; distributions remain pending until a valid VRF response is received or a re-request succeeds.
+- In non-production environments (dev/testnet), a deterministic or pseudo-random fallback may be used **for testing only** and must never be deployed to mainnet.
+- **Contract-Funded VRF:** The contract maintains its own balance of ETH/LINK (on Base) to pay for Chainlink VRF requests. The user does not pay the Chainlink fee directly. If the contract balance is too low, the request transaction reverts (safety).
+
+## Events
+
+- `Mint(address account, uint256 tokenId)`, `DistributionRequested(bytes32 requestId)`, `DistributionResult(uint256 round, address[] selectedParticipants)`.
+- **Note**: Distribution events are protocol-level accounting events, not prize announcements.
+
+## Invariants & Security
+
+- Never exceed `maxSupply`; per-wallet and phase caps enforced on-chain.
+- Randomness is provided via Chainlink VRF; validate callback origin, manage nonces, and reject stale/duplicate fulfillments.
+- Use CEI; protect mint functions with `nonReentrant`. Pause mechanism for emergency.
+- No application-layer override exists to redirect funds or alter selected participant results; controls are strictly contract-gated.
+- **Anti-Griefing (Atomic Transfers):** Protocol distributions are "Push" transfers. If a selected recipient's wallet rejects the ETH transfer (e.g., a smart contract without a `receive()` function), the entire transaction reverts. The cycle remains open at Mint #499. The protocol relies on the `retryDistribution()` function or Admin intervention to resolve the blockage (e.g., by skipping the malicious address).

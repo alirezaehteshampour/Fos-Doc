@@ -1,0 +1,23 @@
+---
+title: Landing Website
+description: Purpose, structure, and tech stack
+---
+
+# Landing Website
+
+## Purpose & Structure
+The landing site introduces the product, previews key application modules (Whitelist, Free Mint, Rewards), and routes users into the app. It includes sections such as feature highlights, whitelist teaser, and reward/milestones preview with CTAs to the corresponding app pages.
+
+## Tech Stack
+*   Server-rendered PHP templates with shared styles and components.
+*   Client-side JS enhances interactivity and integrates wallet connectors where needed.
+*   Calls internal APIs for dynamic counters and previews.
+
+## Previews and CTAs
+*   Whitelist preview linking to `/app/whitelist.php` with requirement highlights.
+*   Free Mint preview linking to `/app/FreeMint.php` with countdown teaser.
+*   Rewards preview linking to `/app/rewards.php` showing pool/milestones overview.
+
+## Performance & SEO
+*   Static content where possible; defer non-critical scripts; cache API previews.
+*   Structured metadata, social cards, and Core Web Vitals monitoring.

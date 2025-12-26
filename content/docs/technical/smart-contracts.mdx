@@ -1,0 +1,73 @@
+---
+title: Smart Contracts Overview
+description: Overview of the FOS smart contract suite
+---
+
+# Smart Contracts
+
+The FOS protocol is powered by a suite of smart contracts deployed on Base (Ethereum L2).
+
+## Contract Suite Overview
+
+| Contract | Purpose |
+| :--- | :--- |
+| **Allocation Distribution** | User participation that awards/mints an NFT per purchase and registers purchasers for allocation distribution outcomes. |
+| **Referral** | Handles a fixed $10 payment and revenue split (82% referrer, 18% admin) when a valid referral is present; otherwise 100% to admin. |
+| **Verification** | Canonical on-chain registry to verify whether a project NFT is officially verified. |
+| **Free Mint** | Scheduled, allowlisted free mint with a special early-user allocation (configurable) of higher-value NFTs. |
+| **Allocation Pool / Leaderboard** | Accrues revenue upon activation threshold and distributes 50/30/20 to top-3 leaderboard at defined milestones. |
+
+## Three-Pool Architecture (Single Contract)
+
+The core protocol implements three distinct pools within a single allocation distribution/mint contract. Pools are isolated logically and accounted separately; a `poolType` (e.g., enum) indicates the active pool for each mint and distribution.
+
+| Pool | Entry Price | Allocation |
+| :--- | :--- | :--- |
+| **Buddy** | ~$3 | $1,000 |
+| **Samurai** | ~$12 | $5,000 |
+| **Noble** | ~$25 | $10,000 |
+
+Per-pool state tracks purchasers, dedicated pool balances, and distribution outcomes. Events include the `poolType` to enable precise indexing/analytics.
+
+### Per-Pool Selected Participants & Distribution
+
+- **Selected participants per pool**: 17 total — 1 (first), 6 (second tier), 10 (third tier).
+- **Split**: 50% to first place, 30% split equally among 6 selected participants, 20% split equally among 10 selected participants.
+- All accounting is pool-scoped, preventing cross-pool mixing of balances or allocations.
+
+## Common Standards & Interfaces
+
+- **Tokens**: **ERC-721** (current deployment). `ERC-1155` remains optional only if multiple classes are needed. Use OpenZeppelin implementations with `Ownable` or `AccessControl`.
+- **Payments**: `ERC-20` stablecoin or native currency (TBD). All transfers use safe patterns and check return values.
+- **Access Control**: Admin and Operator roles. Admin is multi-sig where possible; time-locked changes for sensitive parameters.
+- **Upgradeability**: Transparent/UUPS proxies (if chosen) via audited libraries; otherwise immutable for reduced attack surface.
+
+## Global Assumptions
+
+- All external calls are wrapped with checks-effects-interactions and `nonReentrant` guards where value transfer occurs.
+- Monotonic parameters (e.g., supply caps) never increase after deployment unless governed via timelocked admin process.
+- Events are emitted for every state change that impacts accounting, access control, minting, verification, and distributions.
+
+### Monetary Figures Disclaimer
+
+All monetary figures referenced in this document (e.g., entry prices, allocation amounts, milestone thresholds) are illustrative protocol parameters used for system design and testing. They do not represent promises, guarantees, expected returns, or user entitlements. Actual allocations depend entirely on protocol execution and selection mechanics.
+
+### Deployment References (Per Environment)
+
+Deployed contract addresses and interface versions are tracked per environment (dev, testnet, production) in an internal registry and configuration table.
+
+| Environment | Network | Allocation Distribution | Referral | Verification | Free Mint | Campaign / Leaderboard | ABI / Interface Version |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Dev | Base Sepolia | `0x...` | `0x...` | `0x...` | `0x...` | `0x...` | `v1-alpha` |
+| Testnet | Base Sepolia | `0x...` | `0x...` | `0x...` | `0x...` | `0x...` | `v1-rc` |
+| Mainnet | Base (L2) | `0x...` | `0x...` | `0x...` | `0x...` | `0x...` | `v1.0` |
+
+---
+
+## Next: Individual Contract Documentation
+
+- [Allocation Distribution Contract](/docs/technical/allocation-contract)
+- [Referral Contract](/docs/technical/referral-contract)
+- [Verification Contract](/docs/technical/verification-contract)
+- [Free Mint Contract](/docs/technical/free-mint-contract)
+- [Campaign & Leaderboard Contract](/docs/technical/campaign-contract)

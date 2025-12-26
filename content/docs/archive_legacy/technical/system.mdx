@@ -1,0 +1,21 @@
+---
+title: System Overview
+description: Architecture, components, and network choice
+---
+
+# System Overview
+
+## Architecture
+
+The system comprises on-chain smart contracts, a public-facing landing site, and an authenticated main application. Off-chain services provide indexing, allowlist generation, and analytics. The architecture is modular to enable independent deployment and upgrades.
+
+## Components
+*   **Smart Contracts**: Core token/NFT logic, whitelist verification, free-mint enforcement, and reward settlement.
+*   **Landing**: Public marketing and interaction entry point with whitelist, free mint initiation, and reward discovery.
+*   **Main App**: User dashboard, claims, admin controls, and operational tooling.
+*   **Off-chain Services**: Allowlist generation (e.g., Merkle trees), notifications, data indexing, and analytics.
+
+## Network Choice: Base
+*   **Why Base?** Lower gas fees, high throughput, and robust L2 security inherit from Ethereum while providing a smoother UX.
+*   **Innovation**: We introduce a novel reward distribution/referral construct on Base with no direct analogue among existing projects at time of writing.
+*   **Exploration & Analytics**: We read and verify transactions/events from `BaseScan` for user receipts, reward tracking, and diagnostics.

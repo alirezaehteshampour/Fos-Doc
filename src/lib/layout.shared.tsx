@@ -14,7 +14,7 @@ export function baseOptions(): BaseLayoutProps {
                         className="rounded-lg"
                     />
                     <span className="font-bold bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-                        FOS Docs
+                        FOS Documentation
                     </span>
                 </div>
             ),
@@ -22,22 +22,23 @@ export function baseOptions(): BaseLayoutProps {
         },
         links: [
             {
+                text: 'Documentation',
+                url: '/docs',
+            },
+            {
                 text: 'Whitepaper',
                 url: '/docs/whitepaper',
             },
             {
-                text: 'Smart Contracts',
-                url: '/docs/smart-contracts',
+                text: 'Market Analysis',
+                url: '/docs/market-insights',
             },
             {
-                text: 'Platform',
-                url: '/docs/platform',
-            },
-            {
-                text: 'API',
-                url: '/docs/api',
+                text: 'GitHub',
+                url: 'https://github.com/fosooo',
+                external: true,
             },
         ],
-        githubUrl: 'https://github.com/your-org/fos',
+        githubUrl: 'https://github.com/fosooo',
     };
 }

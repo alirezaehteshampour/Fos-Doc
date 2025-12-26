@@ -1,0 +1,33 @@
+---
+title: Process Flow
+description: User journey and protocol interaction
+---
+
+# 5. Detailed Process Flow Overview
+
+## 5.1 User Journey & Protocol Interaction
+
+*   **Pre-Mint Visualization:** Prior to execution, the interface renders a preview of the specific NFT attributes (Tier/Collection) to ensure transparency.
+*   **Immutable Consent:** The user executes a one-time signature to acknowledge the protocol terms. This step serves as the on-chain acceptance of the "Product-First" mechanics, distinguishing the interaction from speculative gaming.
+*   **Atomic Settlement:** Upon confirmation, the user transmits the NFT price (Native ETH). The smart contract atomically mints the asset and registers the buyer’s Immutable Provenance (Wallet ID + Unique Hash) in the same transaction block.
+
+## 5.2 Special Access: The Gas-Only Protocol
+To democratize access and maintain standardized cycle progression, specific sequence identifiers are designated as "Gas-Only Entries."
+
+*   **The Designated Tiers:** Mints #10, #100, #200, #300, and #400 of every cycle are exempt from the protocol fee.
+*   **The Mechanic:** For these specific transactions, the smart contract logic bypasses the pricing requirement. The user is required to pay only the Base Network Gas Fee to execute the mint. These units retain full utility and identical reward eligibility to paid units.
+
+## 5.3 Provenance Registration & Scoring
+
+*   **Minting Event:** The contract generates a unique tokenId and cryptographically binds it to the minter's address.
+*   **Incentive Scoring:** The protocol automatically assigns the Participation Weight:
+    *   **Mints 1–100:** Assigned a 2x Priority Score (Early Adopter Bonus).
+    *   **Mints 101–500:** Assigned a 1x Standard Score.
+*   **Registry Logging:** These parameters are permanently written to the Distribution Registry, ensuring the user's eligibility is secured regardless of future wallet activity.
+
+## 5.4 The Autonomous Distribution Cycle
+
+*   **The "Green Eye" Trigger:** The cycle is strictly capped at 500 units. The purchase of the 500th NFT (The Green Eye) acts as the Atomic Trigger, initiating the distribution logic immediately within the purchase transaction.
+*   **Verifiable Selection:** The contract invokes Chainlink VRF to secure a tamper-proof random seed. This seed drives the weighted selection algorithm to identify recipients for the Primary, Secondary, and Tertiary tiers.
+*   **Push-Based Settlement:** For the Reward Pool, the smart contract executes Direct Push Transfers, sending ETH automatically to the winning wallet addresses without requiring a claim action.
+*   **Cycle Reset:** Post-distribution, the cycle ID increments, and the pool resets to 0, ensuring the system runs perpetually without manual intervention.

@@ -1,0 +1,32 @@
+---
+title: Platform Infrastructure
+description: Blockchain architecture and wallet integration
+---
+
+# Platform Infrastructure & Access Layer
+
+## Blockchain Architecture (Base L2)
+
+The Fos Protocol is deployed on the Base Network, an Ethereum Layer-2 solution. This infrastructure choice is strategic, ensuring the system inherits Ethereum's robust security while providing the high throughput and sub-cent transaction fees necessary for a high-frequency reward ecosystem.
+
+## Protocol Economy (Native ETH)
+
+To ensure stability and liquidity, the ecosystem operates strictly on Native ETH (Base).
+
+**Source of Truth:** While the frontend utilizes an integrated API to display real-time USD equivalents for user convenience, the smart contract logic relies exclusively on the on-chain ETH value at the moment of the transaction.
+
+**No Volatility Risk:** By avoiding proprietary tokens for payments, we protect users from volatility and speculative dumping.
+
+## Non-Custodial Wallet Integration
+
+Fos employs a strictly non-custodial connection model, ensuring users retain full control of their assets until the moment of interaction.
+
+**Supported Providers:** The platform features native integration for MetaMask and Coinbase Wallet, covering the vast majority of the Web3 user base.
+
+**Smart Wallet Compatibility:** The protocol is engineered to be compatible with Account Abstraction (ERC-4337) by explicitly avoiding tx.origin checks, ensuring future-proof access for smart contract wallets.
+
+## Cross-Device Accessibility
+
+**Mobile-First Design (Deep-Linking):** For mobile users, the platform supports automated deep-linking. Visiting the Fos domain on a mobile device automatically triggers the wallet's in-app browser (e.g., MetaMask Mobile), ensuring a seamless "Connect & Mint" experience without switching apps.
+
+**Desktop Experience:** Users on desktop environments (Chrome, Brave, Edge) interact via standard browser extensions, enabling one-click transaction signing and management.

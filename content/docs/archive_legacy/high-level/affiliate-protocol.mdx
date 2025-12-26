@@ -1,0 +1,32 @@
+---
+title: Affiliate Protocol
+description: Architecture of the referral system
+---
+
+# 6. The Affiliate Protocol (Referral System)
+
+## 6.1 Architecture Overview
+The Fos Affiliate Protocol is a decentralized growth engine designed to reward community expansion. Unlike traditional multi-level marketing (MLM) schemes, this system is Single-Level and Linear, ensuring sustainability and preventing pyramid structures.
+
+## 6.2 Activation Pathways
+Users participate in the growth economy via two distinct on-chain methods:
+
+**Method A: The Partner Route (Via Referral Link)**
+*   **Mechanism:** A new user activates their account using an existing member's code.
+*   **Cost:** $10.00 (ETH Equivalent) + Gas.
+*   **Smart Contract Split:** The protocol automatically divides the fee:
+    *   82% ($8.20): Allocated to the Referrer.
+    *   18% ($1.80): Allocated to the Protocol Treasury.
+
+**Method B: The Direct Route (No Referral)**
+*   **Mechanism:** A user joins the platform independently without an invite code.
+*   **Cost:** $10.00 (ETH Equivalent) + Gas.
+*   **Smart Contract Split:**
+    *   100% ($10.00): Allocated to the Protocol Treasury (as no referrer exists to compensate).
+
+## 6.3 Commission Distribution (Pull Pattern)
+To optimize gas efficiency and security for high-volume referrers, the protocol utilizes a "Claim-Based" (Pull) architecture for commissions.
+
+*   **Instant Allocation:** Commissions are calculated and added to the referrer's on-chain balance immediately upon the invitee's transaction.
+*   **User-Controlled Withdrawal:** Referrers may withdraw their accrued earnings at any time via the `withdraw()` function. This prevents "Dust Attacks" and reentrancy vulnerabilities associated with automatic push payments for frequent earners.
+*   **No Human Intermediary:** The entire ledger is managed by the smart contract; the Admin cannot freeze, delay, or manually adjust earned commissions.

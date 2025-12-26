@@ -1,0 +1,113 @@
+---
+title: Main Application
+description: Authentication, pages, and integrations
+---
+
+# Main Application
+
+## Authentication
+Wallet-based authentication and gating for on-chain interactions. OAuth is used for social verifications on the Whitelist page (X/Twitter, Discord) and Telegram/YouTube checks. Sessions are minimal; client performs most flows with API verification.
+
+## App Pages
+
+### Whitelist Page
+Users connect wallet and complete social steps to qualify. The page reads dynamic requirements from the database and enforces unique social accounts per user as configured.
+
+*   **Path**: `/app/whitelist.php`
+*   **Requirements (dynamic)**: loaded from table `data`, e.g. `require_twitter`, `require_discord`, `require_youtube`, `require_youtube_subscribe`, `require_telegram_join`, `enforce_unique_socials`, `require_base_transaction`, `base_rpc_url`, `oauth_allowed_origins`.
+*   **Settings**: `whitelist_settings` table for capacity and toggle; `whitelist_users` stores registrations.
+*   **Social Connections**:
+    *   X/Twitter OAuth: popup via `/api/oauth_twitter.php`/`includes/config/oauth.php`; scopes include `users.read`.
+    *   Discord OAuth: popup via `/api/oauth_discord.php` callbacks; scope `identify`.
+    *   YouTube: OAuth client configured via `data` keys (`youtube_oauth_client_id`, `youtube_channel_id`); subscription check if enabled.
+    *   Telegram: Join-and-verify flow using bot token and channel id/username via `/api/telegram_verify.php`.
+*   **API**: `/api/whitelist_handler.php` validates inputs against dynamic flags and persists registration; enforces Base transaction requirement if enabled.
+*   **Security**: restrict popup message origins via `oauth_allowed_origins`; rate-limit submissions; enforce one wallet per set of socials if `enforce_unique_socials` is true.
+
+### Free Mint Page
+Whitelist users see a countdown and can mint when the window opens. Configuration and eligibility checks are performed through APIs and the `data` table.
+
+*   **Path**: `/app/FreeMint.php`
+*   **Config** (`data` table): `freemint_start_unix` or `freemint_start_iso`, `freemint_nft_price_usd`, `freemint_max_per_user`.
+*   **Eligibility**: calls `/api/whitelist_handler.php?action=check_wallet&wallet=...` to validate whitelist membership before enabling mint.
+*   **Click/Claim Queue**: `/api/freemint_click.php` maintains `free_mint_state(hard_cap, claimed_count)` and `free_mint_clicks` with row locks to prevent race conditions.
+*   **UX**: countdown to start time; mint button enabled only if time ≥ start, wallet connected, and whitelist=true.
+*   **Security**: server-side locking on claims, anti-duplicate checks; later integrated with on-chain free mint contract for final settlement.
+
+### Rewards Page
+Displays current reward pool, milestones, and recipients/leaderboard information. Integrates with API endpoints and the reward contract lifecycle.
+
+*   **Path**: `/app/rewards.php`
+*   **Pool Display**: shows current wallet/balance and provides copy/view explorer actions.
+*   **Milestones**: renders configured thresholds (e.g., 20k→2M) and status.
+*   **Leaderboard** (JS in `core/index.php`):
+    *   Totals: `/api/leaderboard_handler.php?action=get_total_users` updates the 5,000-user activation progress.
+    *   Leaderboard data: `/api/leaderboard_handler.php?action=get_leaderboard&period=day|week|all&page=...` with pagination.
+    *   Recipients modal: dynamically renders recipients and reward amounts when available.
+*   **Security**: sanitize API outputs, cache and rate-limit leaderboard endpoints; avoid exposing sensitive admin data.
+
+### Landing Page (App Shell)
+*   Provides navigation to Whitelist, Free Mint, and Rewards pages with shared header/footer and styles.
+*   Hides or reveals CTAs contextually depending on page and user state (e.g., wallet connection).
+
+## Integrations
+*   Wallet connectors for Base network; RPC URL configurable via `data.base_rpc_url`.
+*   OAuth providers for X/Twitter, Discord, YouTube; Telegram Bot API for membership verification.
+*   Internal APIs under `/api/` for whitelist, freemint, leaderboard, and telegram verification.
+*   **Explorer**: Read transaction data and receipts from `BaseScan` for user-facing confirmations and admin diagnostics.
+*   **VRF**: Chainlink VRF is funded via **LINK subscription** on Base. User checks rely on `msg.sender` (not `tx.origin`) for Account Abstraction compatibility.
+
+## Core App (core/index.php)
+This is the main single-page application shell. It manages navigation, wallet connections, on-chain NFT minting and purchasing, leaderboard rendering, profile, gallery, and recipients pages. Client logic coordinates with APIs and smart contracts.
+
+### Routing & Navigation
+*   **Router**: `showPage(pageId)` toggles visibility across sections: `overviewContent`, `allCollectionsContent`, `mintNftContent`, `leaderboardContent`, `profileContent`, `recipientsContent`, `galleryContent`, `aboutContent`.
+*   **Menu**: sidebar listeners map to pages (Home, Profile, Collection list, Gallery, Leaderboard, Recipients, About). Returning home uses `goHome()` with context to restore previous list view.
+*   **Contextual UI**: CTA elements (e.g., "Mint Now") are shown on the overview and hidden on subpages; overlays adjust based on wallet state (e.g., profile overlay when disconnected).
+
+### Wallet Connections
+*   **MetaMask**: `connectMetaMask()` requests accounts, updates localStorage (`walletConnected`, `currentAccount`, `lastConnectionTime`), then invokes `registerOrLoginUser`, `loadProfileData`, `checkRecipientStatus`.
+*   **Coinbase**: `connectCoinBase()` uses CoinbaseWalletSDK; provider targets Base Sepolia (id 84432). Event listeners handle `accountsChanged`, `chainChanged`, and `disconnect`.
+*   **Auto-restore**: `checkAllWalletConnections()` attempts restoration within 24h by checking `eth_accounts` or Coinbase SDK; on success rehydrates profile and status.
+*   **UX**: gallery/profile refresh after connect; overlays prompt connection when required.
+
+### Live ETH Price (USD)
+*   Fetch live ETH/USD price from a reliable API and display it in the UI for user context.
+*   Values are informational; on-chain logic remains source of truth. Base network gas costs are reflected in wallet prompts.
+
+### NFT Minting & Purchase
+*   **Entry**: "Mint Now" resolves `selectedCollectionType` then navigates to `mintNftContent`. If no wallet, shows wallet-required overlay.
+*   **On-chain mint**: Using `ethers.js`, calls contract `buyAndMint(collectionType, tokenURI, { value: collectionPrice })`. The `tokenURI` is derived from selected collection metadata; `collectionPrice` is fetched via `collectionPrices(collectionType)`.
+*   **Persistence**: Upon confirmation, saves transaction via API (wallet, tx hash, token id/URI, type, amount), increments sold NFTs and user mint counters, updates UI and opens success modal.
+*   **State**: Maintains `currentCollectionData`, `selectedCollectionType`; provides helpers like `setRandomNft()` for display.
+*   **VRF**: Reward distributions are resolved with Chainlink VRF; randomness is verifiable and tamper-resistant.
+
+### Leaderboard & Recipients
+*   **Leaderboard**: `loadLeaderboardData(period, page)` calls `/api/leaderboard_handler.php?action=get_leaderboard` to populate podium (top 3) and paginated list; supports periods (day, month, year) and pagination state.
+*   **Grand reward progress**: `updateGrandRewardProgress()` fetches total users via API and updates the 5,000-user activation bar.
+*   **Recipients**: Modal and recipients page render recent recipients and reward info; UI helpers format and paginate the view.
+*   **Points System**:
+    *   Each valid referral: **+1** point.
+    *   Collection purchase **$3**: **+2** points.
+    *   Collection purchase **$13**: **+4** points.
+    *   Collection purchase **$25**: **+6** points.
+
+### Profile & Gallery
+*   **Profile**: Loads data via `/api/profile_handler.php?wallet_address=...` to update username/avatar; tabs include invited friends, transactions, and settings; referral card is shown when a link exists.
+*   **Gallery**: Displays user's NFTs; initialized when opening gallery with a connected wallet.
+
+### APIs & Data Flow
+*   **Transactions**: Saved post-mint via transaction handler API (wallet, tx hash, NFT details, amount).
+*   **Leaderboard**: `/api/leaderboard_handler.php` for podium/list and diagnostics (test/debug endpoints).
+*   **Profile**: `/api/profile_handler.php` for user profile data and referral info.
+*   **Explorer Sync**: Periodically read and cross-check user transactions and events from `BaseScan` for transparency.
+
+### Security & Reliability
+*   **On-chain safety**: Relies on contract-side guards (CEI, `nonReentrant`, role gating). Client-side enforces wallet connection, network selection, and amount checks before submitting transactions.
+*   **API hygiene**: API responses are validated; lists are paginated; UI avoids blocking on transient failures and logs client-side errors.
+*   **Resilience**: Auto-restore wallet sessions, graceful UI fallbacks, and state refresh after critical actions. Gallery/profile auto-refresh on connect.
+*   **Failover (Distribution/Payout)**: If the auto-distribution at the 500th mint does not execute, a *public* retry/distribution function can be called to complete the distribution and pay recipients immediately. Payouts are push transfers; if a recipient reverts, the transaction reverts and can be retried.
+
+### Performance
+*   Defer heavy UI until navigation into a page; cache leaderboard pages client-side; minimize re-renders; lazy-load images and modals.
+*   Use batched API calls for leaderboard and profile where possible; throttle DOM updates when scrolling lists.

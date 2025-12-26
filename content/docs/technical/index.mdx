@@ -1,0 +1,89 @@
+---
+title: Technical Overview
+description: FOS technical architecture and implementation overview
+---
+
+# Technical Documentation
+
+**Version:** v0.1 (Draft)  
+**Audience:** Engineering, Product, Security  
+**Scope:** Architecture, Contracts, Web App, Ops
+
+## Executive Summary
+
+This document provides a comprehensive, technical overview of **FOS**, covering smart contracts, the public landing website, and the main application. It is intended to be sufficiently detailed to form the basis of the project's whitepaper and related external documentation.
+
+### Objectives
+
+- Define the end-to-end architecture and component responsibilities.
+- Describe minting, whitelisting, and allocation distribution mechanics.
+- Explain security posture, operational processes, and testing strategy.
+
+### Non-Goals
+
+- Legal or tokenomics advisory beyond technical mechanisms.
+- Marketing materials or visual brand guidelines.
+
+---
+
+## System Overview
+
+### Architecture
+
+The system comprises on-chain smart contracts, a public-facing landing site, and an authenticated main application. Off-chain services provide indexing, allowlist generation, and analytics. The architecture is modular to enable independent deployment and upgrades.
+
+### Components
+
+- **Smart Contracts**: Core token/NFT logic, whitelist verification, free-mint enforcement, and allocation settlement.
+- **Landing**: Public marketing and interaction entry point with whitelist, free mint initiation, and allocation discovery.
+- **Main App**: User dashboard, claims, admin controls, and operational tooling.
+- **Off-chain Services**: Allowlist generation (e.g., Merkle trees), notifications, data indexing, and analytics.
+
+### Network Choice: Base
+
+- **Why Base?** Lower gas fees, high throughput, and robust L2 security inherit from Ethereum while providing a smoother UX.
+- **Innovation**: We introduce a novel allocation distribution/referral construct on Base with no direct analogue among existing projects at time of writing.
+- **Exploration & Analytics**: We read and verify transactions/events from `BaseScan` for user receipts, allocation tracking, and diagnostics.
+
+---
+
+## Documentation Sections
+
+Navigate to specific technical documentation:
+
+| Section | Description |
+| :--- | :--- |
+| [Smart Contracts Overview](/docs/technical/smart-contracts) | Contract suite, three-pool architecture, standards |
+| [Allocation Distribution Contract](/docs/technical/allocation-contract) | Main NFT minting and distribution mechanics |
+| [Referral Contract](/docs/technical/referral-contract) | Referral system and 82/18 split |
+| [Verification Contract](/docs/technical/verification-contract) | NFT verification registry |
+| [Free Mint Contract](/docs/technical/free-mint-contract) | Allowlisted free mint mechanics |
+| [Campaign & Leaderboard](/docs/technical/campaign-contract) | Growth campaign and milestone distribution |
+| [Main Application](/docs/technical/application) | Web app architecture and pages |
+| [Security & Infrastructure](/docs/technical/security) | Security, compliance, and DevOps |
+| [APIs & Data Models](/docs/technical/apis) | Endpoints and schemas |
+
+---
+
+## Landing Website
+
+### Purpose & Structure
+
+The landing site introduces the product, previews key application modules (Whitelist, Free Mint, Allocations), and routes users into the app.
+
+### Tech Stack
+
+- Server-rendered PHP templates with shared styles and components.
+- Client-side JS enhances interactivity and integrates wallet connectors where needed.
+- Calls internal APIs for dynamic counters and previews.
+
+### Performance & SEO
+
+- Static content where possible; defer non-critical scripts; cache API previews.
+- Structured metadata, social cards, and Core Web Vitals monitoring.
+
+---
+
+© 2025 FOS — Technical Documentation
+
+*This is a living document. Update version and sections as the project evolves.*

@@ -1,0 +1,82 @@
+---
+title: Affiliate Protocol
+description: Referral system and commission structure
+---
+
+# The Affiliate Protocol (Referral System)
+
+## Architecture Overview
+
+The Fos Affiliate Protocol is a decentralized growth engine designed to reward community expansion. Unlike traditional multi-level marketing (MLM) schemes, this system is Single-Level and Linear, ensuring sustainability and preventing pyramid structures.
+
+## Activation Pathways
+
+Users participate in the growth economy via two distinct on-chain methods:
+
+### Method A: The Partner Route (Via Referral Link)
+
+**Mechanism:** A new user activates their account using an existing member's code.
+
+**Cost:** $10.00 (ETH Equivalent) + Gas.
+
+**Smart Contract Split:** The protocol automatically divides the fee:
+- 82% ($8.20): Allocated to the Referrer.
+- 18% ($1.80): Allocated to the Protocol Treasury.
+
+### Method B: The Direct Route (No Referral)
+
+**Mechanism:** A user joins the platform independently without an invite code.
+
+**Cost:** $10.00 (ETH Equivalent) + Gas.
+
+**Smart Contract Split:**
+- 100% ($10.00): Allocated to the Protocol Treasury (as no referrer exists to compensate).
+
+## Commission Distribution (Pull Pattern)
+
+To optimize gas efficiency and security for high-volume referrers, the protocol utilizes a "Claim-Based" (Pull) architecture for commissions.
+
+**Instant Allocation:** Commissions are calculated and added to the referrer's on-chain balance immediately upon the invitee's transaction.
+
+**User-Controlled Withdrawal:** Referrers may withdraw their accrued earnings at any time via the withdraw() function. This prevents "Dust Attacks" and reentrancy vulnerabilities associated with automatic push payments for frequent earners.
+
+**No Human Intermediary:** The entire ledger is managed by the smart contract; the Admin cannot freeze, delay, or manually adjust earned commissions.
+
+---
+
+## The Economic Growth Engine (Affiliate Math)
+
+### The "Fair-Share" Architecture
+
+The Fos Affiliate Protocol eliminates the complexity of opaque, multi-level marketing schemes. It relies on a transparent, Single-Level Protocol Economy where rewards are mathematically fixed and verifiable.
+
+**Universal Activation:** Participation requires a standardized activation fee of $10.00 (ETH Base).
+
+**The 82/18 Immutable Split:** The smart contract enforces a hard-coded revenue division for every referral event:
+- Referrer Share (82%): $8.20 is allocated directly to the inviter.
+- Protocol Share (18%): $1.80 is allocated to the Operational Treasury.
+
+### Illustrative Fee Allocation Example (Non-Income)
+
+Referral allocations are protocol-defined fee splits for promotional participation. They do not represent wages, investment returns, or guaranteed income. The system places no cap on the number of active connections a user can maintain ("Unlimited Width"), allowing for exponential individual growth within a linear system.
+
+**Unit Economics:**
+
+| Activations | Earnings |
+| :--- | :--- |
+| 1 | $8.20 |
+| 10 | $82.00 |
+| 100 | $820.00 |
+| 1,000 | $8,200.00 |
+
+The Affiliate Protocol is single-level, non-recursive, and does not reward downstream activity beyond direct referrals. No pyramidal compensation structure exists.
+
+### Real-Time Settlement Layer
+
+Unlike traditional affiliate platforms that rely on monthly "Net-30" batch processing, the Fos Protocol operates on Block-Time Settlement.
+
+**Instant Allocation:** Earnings are recorded on the internal ledger immediately upon the successful confirmation of the invitee's transaction.
+
+**Claim-Based Efficiency:** To minimize gas costs for power users and prevent reentrancy attacks, the system utilizes a "Pull" Withdrawal Pattern. Users may aggregate earnings and withdraw to their wallet in a single transaction at their discretion.
+
+Referral allocations are derived solely from protocol fees paid for activation and are not dependent on NFT purchase outcomes.

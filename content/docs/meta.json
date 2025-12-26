@@ -1,14 +1,22 @@
 {
-    "title": "Documentation",
     "root": true,
+    "title": "FOS Documentation",
     "pages": [
         "index",
-        "whitepaper",
-        "smart-contracts",
-        "platform",
-        "api",
-        "infrastructure",
+        "protocol",
+        "technical",
+        "---Features---",
+        "campaigns",
+        "referral",
+        "leaderboard",
         "roadmap",
-        "glossary"
+        "---Resources---",
+        "whitepaper",
+        "market-insights",
+        "---Help & Legal---",
+        "about",
+        "faq",
+        "privacy",
+        "terms"
     ]
 }

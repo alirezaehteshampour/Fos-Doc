@@ -1,0 +1,245 @@
+---
+title: FAQ
+description: Frequently Asked Questions about the FOS Protocol
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+# FOS Help Center & FAQ
+
+Find answers to common questions about the FOS Protocol. Click on any question to expand the answer.
+
+---
+
+## General & Basics
+
+<Accordions>
+<Accordion title="What is FOS?">
+FOS is a decentralized digital art protocol on the Base (Ethereum L2) network. We offer unique **Fos Digital Collectibles** (NFTs). The protocol features an automated, trustless **Reward Distribution** mechanism that acts as a loyalty perk for our community of collectors.
+</Accordion>
+
+<Accordion title="Is FOS a lottery or gambling site?">
+**No.** FOS is a digital collectibles marketplace. You are purchasing a piece of digital art (an NFT). The "Promotional Distributions" are incidental loyalty rewards, similar to store reward points. You do not "bet" or "wager" funds.
+</Accordion>
+
+<Accordion title="What blockchain does FOS use?">
+FOS operates on the **Base Network**, an Ethereum Layer-2 solution. We chose Base for low gas fees, high security, and fast transactions. You will need ETH on Base to participate.
+</Accordion>
+
+<Accordion title="Is FOS safe?">
+Yes. FOS is **non-custodial**. We never hold your funds. All transactions are executed automatically via immutable smart contracts. Code is publicly auditable, and no one can modify the rules or steal assets locked in the protocol.
+</Accordion>
+</Accordions>
+
+---
+
+## Eligibility & Access
+
+<Accordions>
+<Accordion title="Who can participate?">
+You must be **18 years or older** to participate in the FOS Protocol.
+</Accordion>
+
+<Accordion title="Which countries are restricted?">
+Residents of the following jurisdictions **cannot participate**:
+
+- United States
+- Canada
+- United Kingdom
+- European Economic Area (EU, Norway, Iceland, Liechtenstein)
+- China and sanctioned countries (North Korea, Iran, Russia, etc.)
+</Accordion>
+
+<Accordion title="Can I use a VPN to bypass restrictions?">
+**No.** Using a VPN to circumvent geoblocking is a violation of our Terms of Service and considered fraud.
+</Accordion>
+</Accordions>
+
+---
+
+## Minting & Collectibles
+
+<Accordions>
+<Accordion title="What are Fos Digital Collectibles?">
+Unique ERC-721 tokens (NFTs) featuring on-chain artwork. Ownership is permanently recorded on the blockchain.
+</Accordion>
+
+<Accordion title="What are the three tiers?">
+| Tier | Price (ETH Equiv.) | Description |
+| :--- | :--- | :--- |
+| **FOS Buddy** | ~$3 USD | Entry Tier |
+| **FOS Samurai** | ~$13 USD | Mid Tier |
+| **FOS Noble** | ~$25 USD | Premium Tier |
+
+*ETH prices fluctuate with market rates.*
+</Accordion>
+
+<Accordion title="What are Free Gas-Only Mints?">
+Specific mint numbers (#10, #100, #200, #300, #400) are **free NFT mints**, where users pay **only the network gas fee**.
+</Accordion>
+
+<Accordion title="How do I mint an NFT?">
+1. Connect your wallet (MetaMask or Coinbase Wallet)
+2. Select your preferred tier (Buddy, Samurai, or Noble)
+3. Confirm the transaction in your wallet
+4. Your NFT will be minted and sent to your wallet automatically
+</Accordion>
+</Accordions>
+
+---
+
+## The "Green Eye" & Gas Fees
+
+<Accordions>
+<Accordion title="What is the 'Green Eye'?">
+The **500th NFT** in every cycle is a special collectible called the **Green Eye**. This unique NFT triggers the reward distribution for all participants in that cycle.
+</Accordion>
+
+<Accordion title="Why is gas so high for the 500th mint?">
+The 500th transaction triggers the **Reward Distribution Protocol** for all participants of that cycle, which requires complex computations.
+
+- **Cost:** Gas approximately 18x normal cost
+- **Trade-off:** By minting, you voluntarily accept this cost
+- **Note:** Fees go to the network validators and are **non-refundable**
+</Accordion>
+
+<Accordion title="What happens if the 500th mint fails?">
+If the transaction fails due to insufficient gas, the cycle remains open. A public `retryDistribution()` function can be called by anyone to complete the pending distribution.
+</Accordion>
+</Accordions>
+
+---
+
+## Reward Protocol & Allocations
+
+<Accordions>
+<Accordion title="How are recipients selected?">
+Via **Chainlink VRF**, a provably fair and tamper-proof random number generator. Results are verifiable on-chain and cannot be influenced by the team.
+</Accordion>
+
+<Accordion title="Do I need to claim my rewards?">
+- **Cycle Rewards (Buddy/Samurai/Noble):** Automatic push to your wallet at cycle close (500th mint)
+- **Growth Campaign Leaderboard Rewards:** Manual claim via `claim(milestone)` in the UI. Gas fees apply.
+</Accordion>
+
+<Accordion title="Does buying more NFTs guarantee rewards?">
+**No.** Rewards are randomly selected. Purchasing an NFT only guarantees ownership of the digital collectible. However, early minters (1-100) receive a 2x weight in the selection algorithm.
+</Accordion>
+
+<Accordion title="What is the distribution split?">
+Each cycle distributes rewards to 17 selected participants:
+
+- **Primary Recipient (1):** 50% of the pool
+- **Secondary Group (6):** 30% split equally
+- **Tertiary Group (10):** 20% split equally
+</Accordion>
+
+<Accordion title="What is the 365-day failsafe?">
+If a cycle doesn't complete within 365 days, a public `liquidatePool()` function becomes callable. This ensures funds are never indefinitely locked and distributes rewards to current participants.
+</Accordion>
+</Accordions>
+
+---
+
+## Referral Program
+
+<Accordions>
+<Accordion title="How does the Affiliate Program work?">
+Pay a one-time $10 USD activation fee (in ETH) to get a referral link.
+
+- **Earnings:** 82% of the activation fee from direct referrals ($8.20)
+- **Protocol Share:** 18% for maintenance ($1.80)
+</Accordion>
+
+<Accordion title="Is this MLM or multi-level marketing?">
+**No.** The FOS Affiliate Protocol is single-level and linear. Only direct referrals earn rewards. There is no passive income from downstream activity or multi-tier compensation.
+</Accordion>
+
+<Accordion title="How do I withdraw my referral earnings?">
+Referral commissions accumulate in your on-chain balance. You can withdraw at any time via the `withdraw()` function in the UI. This pull-based system prevents dust attacks and reentrancy vulnerabilities.
+</Accordion>
+
+<Accordion title="Do I need to buy an NFT to participate in referrals?">
+**No.** Referral participation is optional and independent of NFT ownership.
+</Accordion>
+</Accordions>
+
+---
+
+## Leaderboard & Points
+
+<Accordions>
+<Accordion title="How does the points system work?">
+| Action | Points |
+| :--- | :--- |
+| Valid Referral | +1 |
+| Buddy Purchase ($3) | +2 |
+| Samurai Purchase ($13) | +4 |
+| Noble Purchase ($25) | +6 |
+</Accordion>
+
+<Accordion title="What is the Growth Campaign?">
+When the ecosystem reaches 5,000 active users, a 30-day Growth Campaign activates. During this period, protocol revenue is redirected to a Community Reward Pool distributed at milestones ($20k, $50k, $100k, etc.) to the top 3 leaderboard participants.
+</Accordion>
+
+<Accordion title="Can I transfer my points to another wallet?">
+**No.** Points are tied to your wallet address. Switching wallets creates a new account; previous points do not transfer.
+</Accordion>
+</Accordions>
+
+---
+
+## Technical & Troubleshooting
+
+<Accordions>
+<Accordion title="What if my transaction fails?">
+Gas fees are **non-refundable**, even if transactions fail due to network congestion, slippage, or user error. Always ensure adequate gas before confirming transactions.
+</Accordion>
+
+<Accordion title="Which wallets are supported?">
+The platform supports:
+
+- **MetaMask** (browser extension and mobile)
+- **Coinbase Wallet**
+- Future support for WalletConnect and additional wallets is planned.
+</Accordion>
+
+<Accordion title="Do you store my social account data for whitelist?">
+No. Only minimal verification (OAuth) is used to prevent bots. Passwords and private data are never stored.
+</Accordion>
+
+<Accordion title="Can I disconnect my wallet?">
+Yes. Disconnect via your wallet provider (e.g., MetaMask settings). FOS does not maintain persistent user accounts.
+</Accordion>
+
+<Accordion title="Who controls FOS?">
+Currently maintained by founding developers. Governance may transition to DAO or Foundation in the future via a phased approach as outlined in Phase 16 of the roadmap.
+</Accordion>
+
+<Accordion title="Is the code audited?">
+Smart contracts undergo security audits, static analysis (Slither/Mythril), and fuzzing tests. Bug bounty programs are planned for additional security assurance.
+</Accordion>
+</Accordions>
+
+---
+
+## Quick Reference
+
+| Question | Answer |
+| :--- | :--- |
+| **Network** | Base (Ethereum L2) |
+| **Randomness** | Chainlink VRF, verifiable on-chain |
+| **Free Mints** | #10, 100, 200, 300, 400 |
+| **Custody** | Non-custodial |
+| **Points** | Referral +1; $3→+2, $13→+4, $25→+6 |
+| **ETH Display** | Informational; actual uses real-time rate |
+
+---
+
+## Still Have Questions?
+
+If you couldn't find the answer you're looking for, please check:
+
+- [FOS Protocol Documentation](/docs/protocol) for detailed protocol information
+- [Technical Documentation](/docs/technical) for developer resources
+- [Terms of Service](/docs/terms) for legal information

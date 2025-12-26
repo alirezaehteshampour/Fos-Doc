@@ -1,0 +1,41 @@
+---
+title: APIs & Data Models
+description: API endpoints and data schemas
+---
+
+# APIs & Data Models
+
+## Endpoints
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/status` | GET | System health and current phases |
+| `/allowlist/proof` | POST | Returns Merkle proof for a wallet |
+| `/allocation/:wallet` | GET | Allocation eligibility and claim status |
+
+## Application APIs
+
+- **Transactions**: Saved post-mint via transaction handler API (wallet, tx hash, NFT details, amount).
+- **Leaderboard**: `/api/leaderboard_handler.php` for podium/list and diagnostics (test/debug endpoints).
+- **Profile**: `/api/profile_handler.php` for user profile data and referral info.
+- **Explorer Sync**: Periodically read and cross-check user transactions and events from `BaseScan` for transparency.
+
+## Schemas
+
+- **User**: wallet, roles, preferences.
+- **Mint**: tx hash, phase, amount, timestamp.
+- **Allocation**: tier, allocation, claimedAt, tx hash.
+
+## Glossary & References
+
+| Term | Definition |
+| :--- | :--- |
+| **Merkle Proof** | Compact proof of inclusion in a set using Merkle trees. |
+| **Allowlist** | Curated list of eligible wallets for restricted phases. |
+| **VRF** | Verifiable Random Function, for auditable randomness. |
+| **Allocation** | Protocol distribution of funds to selected participants based on predefined rules and selection mechanics. |
+| **BaseScan** | The primary block explorer for the Base network, used to inspect transactions, events, and contract state for transparency and audits. |
+| **L2 Security** | Security model whereby the Base network inherits Ethereum's consensus and settlement guarantees while providing higher throughput and lower fees off-layer. |
+| **Chainlink LINK Subscription** | A funded subscription on Chainlink's network that pays for VRF requests and oracles; the protocol relies on this subscription to obtain verifiable randomness on Base. |
+
+**References:** OpenZeppelin Contracts, EIPs (ERC-20/721/1155), Chainlink VRF docs, The Graph.

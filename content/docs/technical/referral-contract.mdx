@@ -1,0 +1,37 @@
+---
+title: Referral Contract
+description: Referral system and revenue split mechanics
+---
+
+# Referral Contract
+
+Processes a fixed deposit (nominally $10) and splits proceeds based on presence of a valid referral, sending 82% to referrer and 18% to admin. Without referral, 100% goes to admin.
+
+## State & Configuration
+
+- `admin` Protocol Distribution address (multi-sig), `treasury` if distinct.
+- `referrerOf[code]` mapping or `isValidReferrer[address]`; optional `code → address` registry.
+- Asset configuration: native vs `ERC-20` token (address, decimals). Fixed price oracle not required since value is nominal and constant; alternatively reference USD-pegged stablecoin.
+
+## External Interfaces
+
+- `payReferral(code)` or `payReferral(referrer)`: validates referral; processes split; records accounting.
+- `withdraw()` (pull-based): referrers and admin withdraw accrued balances to mitigate reentrancy risk.
+
+## Events
+
+- `ReferralPaid(address payer, address referrer, uint256 refAmount, uint256 adminAmount)`, `ReferralMissed(address payer, uint256 amount)`.
+
+## Accounting & Rounding
+
+- Compute `refAmount = floor(amount * 82 / 100)`, `adminAmount = amount - refAmount` to avoid dust loss.
+- Track per-beneficiary accruals in mappings; transfers occur via withdraw to reduce attack surface.
+- **Admin routing**: The 18% admin fee is routed directly to the Admin wallet.
+- **Legal Classification:** Referral splits are technically defined as "Protocol Fee Rebates" or "Commission Splits," not wages or salary. The system generates no 1099/tax forms; users are solely responsible for local tax compliance.
+
+## Security
+
+- Validate referral source (signed code by backend or on-chain registry) to prevent spoofing.
+- Use `nonReentrant` and CEI; never assume `ERC-20` returns `true` without checking.
+- **Program Rule**: The referral program is *linear and single-level*. Only direct referrals count; there is no multi-level/MLM structure.
+- **Participation**: Referral participation is optional and does not require NFT purchase.

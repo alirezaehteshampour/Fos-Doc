@@ -7,6 +7,15 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+import ChartRegistry from '@/components/charts/chart-registry';
+import { UniversalChart } from '@/components/charts/universal-chart';
+
+// Custom MDX components including charts
+const customMdxComponents = {
+    ...defaultMdxComponents,
+    UniversalChart,
+    ChartRegistry,
+};
 
 interface PageProps {
     params: Promise<{ slug?: string[] }>;
@@ -27,7 +36,7 @@ export default async function Page({ params }: PageProps) {
             <DocsTitle>{page.data.title}</DocsTitle>
             <DocsDescription>{page.data.description}</DocsDescription>
             <DocsBody>
-                <MDX components={defaultMdxComponents} />
+                <MDX components={customMdxComponents} />
             </DocsBody>
         </DocsPage>
     );

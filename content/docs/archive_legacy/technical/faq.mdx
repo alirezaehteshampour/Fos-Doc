@@ -1,0 +1,116 @@
+---
+title: FAQ
+description: Frequently asked questions
+---
+
+# FAQ
+
+<details>
+<summary>Why did you choose the Base network?</summary>
+Base offers lower gas fees and high throughput while inheriting Ethereum's security. It improves UX and lets us deliver novel primitives not commonly available elsewhere.
+</details>
+
+<details>
+<summary>Are some collection purchases free?</summary>
+Yes. Specific numbers (10, 100, 200, 300, 400) are free-entry tiers. Users only pay gas; the contracts enforce no fee for these tiers.
+</details>
+
+<details>
+<summary>How is randomness guaranteed?</summary>
+We use Chainlink VRF for provably fair randomness. Results are verifiable on-chain and cannot be influenced by operators or developers.
+</details>
+
+<details>
+<summary>Can the team modify Free Mint or Reward outcomes?</summary>
+No. Both flows are fully governed by smart contracts. Operators cannot re-route funds, select recipients, or change allocations beyond contract-configured parameters (often timelocked and multi-sig protected).
+</details>
+
+<details>
+<summary>How are leaderboard points calculated?</summary>
+Referral: +1 point per valid referral. Collection purchase: $3 → +2, $13 → +4, $25 → +6 points.
+</details>
+
+<details>
+<summary>Is the referral program multi-level?</summary>
+No. It is linear and single-level. Only your direct referrals count; there is no pyramid structure.
+</details>
+
+<details>
+<summary>How do I verify an NFT?</summary>
+Three ways: call the on-chain `isVerified` function, use our verification API endpoint, or check via the dedicated verification web page.
+</details>
+
+<details>
+<summary>Do I need social connections for the whitelist?</summary>
+Yes. The whitelist page enforces connecting your wallet and completing required social verifications (Twitter, Discord, YouTube, Telegram) as configured.
+</details>
+
+<details>
+<summary>Where do prices and transaction data come from?</summary>
+ETH/USD prices are fetched from a reliable price API for display only. Transaction data and receipts are read from BaseScan to enhance transparency.
+</details>
+
+<details>
+<summary>Do free-entry tiers still require gas?</summary>
+Yes. Even for free tiers (10/100/200/300/400), users must pay network gas. Gas is paid to validators and is not collected by us.
+</details>
+
+<details>
+<summary>Which wallets and networks are supported?</summary>
+MetaMask and Coinbase Wallet are supported on the Base network. The app prompts network switching to Base when needed.
+</details>
+
+<details>
+<summary>How are admin funds handled?</summary>
+Admin shares are routed by contract to designated wallets (preferably multi-sig). Sensitive parameter changes can be timelocked as configured.
+</details>
+
+<details>
+<summary>What if Chainlink VRF is delayed or fails?</summary>
+The contract logic re-requests or defers resolution until a valid VRF response arrives. There is no manual override to inject custom randomness.
+</details>
+
+<details>
+<summary>How are NFT metadata and reveal handled?</summary>
+Metadata follows `baseURI` conventions. If a reveal phase exists, it is executed via contract-controlled parameters; final URIs are immutable post-reveal.
+</details>
+
+<details>
+<summary>How are referrals validated and abuse prevented?</summary>
+Referrals are validated via signed codes or an on-chain registry. Rate limits and uniqueness checks mitigate abuse; only direct referrals are counted.
+</details>
+
+<details>
+<summary>How do I receive rewards if I'm selected as a recipient?</summary>
+For the main collections (Body/Samurai/Noble), rewards are sent **automatically** to your wallet when the 500th NFT is minted. No claim action is required. For the Growth Campaign Leaderboard rewards, you must manually claim your allocation using the `claim(milestone)` function (the UI provides a one-click flow). A small gas fee is required for campaign claims.
+</details>
+
+<details>
+<summary>Can I independently verify my purchases and claims?</summary>
+Yes. All purchases and reward claims emit events. You can verify them on BaseScan and cross-check with the contract state.
+</details>
+
+<details>
+<summary>How are leaderboard ties resolved?</summary>
+Ties are broken deterministically according to snapshot rules (e.g., earlier on-chain activity at the snapshot height). Rules are consistent and logged.
+</details>
+
+<details>
+<summary>What happens if I switch wallets?</summary>
+Ownership and points are wallet-based. Switching wallets creates a new account context; previous purchases/referrals do not automatically transfer.
+</details>
+
+<details>
+<summary>Is any part of the system custodial?</summary>
+No. Funds for purchases, rewards, and referrals are routed by smart contracts. Servers do not take custody of user funds.
+</details>
+
+<details>
+<summary>Why might the displayed ETH price differ from my wallet's quote?</summary>
+Displayed prices are informational and may lag or use different sources. Your wallet and on-chain values remain the source of truth at transaction time.
+</details>
+
+---
+
+© 2025 PROJECT NAME — Internal Technical Documentation
+**This is a living document. Update version and sections as the project evolves.**

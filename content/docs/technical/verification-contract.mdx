@@ -1,0 +1,30 @@
+---
+title: Verification Contract
+description: NFT verification registry
+---
+
+# Verification Contract
+
+Canonical registry for verifying project NFTs. Other contracts and off-chain services can query verification status.
+
+## State & Configuration
+
+- `isVerified[tokenContract][tokenId]` → bool.
+- Authorized verifiers: `AccessControl` role `VERIFIER_ROLE`; admin can add/remove verifiers.
+- Optional immutability flag to freeze verification after set, or versioned reasons for audits.
+
+## External Interfaces
+
+- `setVerified(tokenContract, tokenId, status, reason)` (verifier/admin).
+- `isVerified(tokenContract, tokenId)` view function for integration.
+
+## Verification Methods
+
+- **On-chain**: Integrators call `isVerified` directly.
+- **API**: An internal API endpoint returns verification status for UI and services.
+- **Dedicated Page**: A web page lets users paste contract/token IDs and check verification status.
+
+## Events & Security
+
+- `VerificationChanged(tokenContract, tokenId, status, reason, msg.sender)`.
+- Strict role gating; optional timelock for revocations; emit events for full auditability.

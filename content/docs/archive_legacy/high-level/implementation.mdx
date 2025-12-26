@@ -1,0 +1,36 @@
+---
+title: Technical Implementation
+description: Smart contract architecture and algorithmic selection
+---
+
+# 4. Technical Implementation
+
+## 4.1 Smart Contract Architecture
+
+*   **NFT Standard (ERC-721):** The protocol implements the ERC-721 standard on the Base Network to ensure universal compatibility with wallets and marketplaces.
+*   **Immutable Uniqueness:** Each Fos Digital Collectible is cryptographically unique, with metadata permanently stored on decentralized file systems (IPFS/Arweave).
+*   **Incentive Vector (The "Early Adopter" Weighting):** To reward protocol loyalty, the smart contract enforces a Weighted Probability Mechanism:
+    *   **Tier A (Mints 1–100):** These units are assigned a Double Weight Protocol Score (2x), mathematically doubling their allocation probability in the reward algorithm.
+    *   **Tier B (Mints 101–500):** These units carry a Standard Protocol Score (1x).
+*   **Immutable Logging:** This weight is assigned atomically at the moment of minting and is permanently recorded in the contract state.
+
+## 4.2 Algorithmic Recipient Selection
+
+*   **Provenance-Based Eligibility:** Reward rights are derived strictly from the Original Minter's Provenance. The protocol binds eligibility to the initial wallet address and the NFT's unique hash. This ensures that the reward right remains a permanent Loyalty Perk for the original participant, even if the asset is transferred or sold on the secondary market.
+*   **The "Green Eye" Trigger (Automated Execution):** The cycle is designed for autonomy. When the 500th unit (The Green Eye) is minted, the smart contract automatically executes the `distributeRewards()` function in the same transaction block.
+*   **Verifiable Randomness (Chainlink VRF):** To eliminate operator bias, the protocol utilizes Chainlink VRF (Verifiable Random Function) via Subscription on Base.
+    *   **The Process:** The contract requests a cryptographically secure random seed.
+    *   **The Algorithm:** A weighted selection algorithm uses this seed to iterate through the prize tiers (Primary, Secondary, Tertiary).
+    *   **Non-Duplication:** Once a Unit ID is selected for a reward tier, it is programmatically excluded from subsequent tiers in that specific cycle to ensure broad distribution.
+
+## 4.3 Autonomous Capital Flow & Gas Logic
+
+*   **Atomic Revenue Split:** Upon every transaction, the smart contract performs an immediate separation of funds to ensure the Reward Pool is always fully solvent before operation costs are covered.
+    *   FOS Buddy I: $2.00 locked for Rewards.
+    *   FOS Samurai I: $10.00 locked for Rewards.
+    *   FOS Noble I: $20.00 locked for Rewards.
+*   **Gas Responsibility Architecture:**
+    *   **Mints 1–499 (Standard):** The participant pays the standard network gas fee associated with their mint interaction. The remaining margin (after the Reward allocation) is routed to the Operational Sink.
+    *   **Mint 500 (The Green Eye):** The purchaser pays the NFT price PLUS a specific gas stipend. This additional capital covers the execution cost of the 18 atomic transactions required to distribute rewards to all 17 recipients and reset the cycle.
+*   **Surplus Management:** Any unused gas from the stipend is automatically returned to the Operational Sink, ensuring no capital is wasted.
+*   **Auditability:** Every step of this process—from payment splitting to recipient selection—is emitted as an on-chain event, allowing for real-time auditing via block explorers like BaseScan.

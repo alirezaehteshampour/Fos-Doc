@@ -1,0 +1,16 @@
+---
+title: APIs & Data Models
+description: Endpoints and schemas
+---
+
+# APIs & Data Models
+
+## Endpoints
+*   `GET /status`: System health and current phases.
+*   `POST /allowlist/proof`: Returns Merkle proof for a wallet.
+*   `GET /reward/:wallet`: Reward eligibility and claim status.
+
+## Schemas
+*   **User**: wallet, roles, preferences.
+*   **Mint**: tx hash, phase, amount, timestamp.
+*   **Reward**: tier, allocation, claimedAt, tx hash.

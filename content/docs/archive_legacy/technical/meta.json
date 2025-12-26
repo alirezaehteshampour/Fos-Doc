@@ -1,0 +1,17 @@
+{
+    "title": "Technical Documentation",
+    "pages": [
+        "index",
+        "system",
+        "smart-contracts",
+        "landing",
+        "main-app",
+        "infrastructure",
+        "security",
+        "apis",
+        "testing",
+        "roadmap",
+        "glossary",
+        "faq"
+    ]
+}

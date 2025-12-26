@@ -1,0 +1,74 @@
+---
+title: Collection & Mechanics
+description: Minting architecture, revenue allocation, and pool details
+---
+
+# 3. The Collection & Protocol Mechanics
+
+## 3.1 Minting Architecture & User Journey
+
+The user journey is engineered to be a seamless, non-custodial e-commerce experience, grounded in strict on-chain verification.
+
+*   **Protocol Interaction Terms:** Upon connecting, users execute a one-time signature to acknowledge the protocol parameters. This step ensures informed consent regarding the immutable nature of the smart contracts.
+*   **On-Chain Minting (Source of Truth):** Users initiate the `buyAndMint` function to purchase a unique Fos Digital Collectible.
+*   **Cost Structure:** The user pays the fixed NFT price PLUS the standard network gas fee required by the Base network.
+*   **Pricing Oracle:** While the frontend interface displays real-time USD estimates via an API for convenience, the smart contract treats the Native ETH value as the absolute source of truth at the moment of execution.
+*   **Account Abstraction:** The minting logic explicitly uses `msg.sender` rather than `tx.origin`, ensuring full compatibility with ERC-4337 Smart Wallets and future-proofing the protocol.
+*   **Provenance Registration:** Every mint event atomically registers the buyer’s wallet ID and the NFT’s unique attribute hash on-chain. This establishes Immutable Provenance, ensuring that reward rights remain permanently attached to the original minter profile, regardless of secondary market transfers.
+
+## 3.2 Automated Revenue Allocation (The Zero-Sum Logic)
+
+The protocol employs a "Split-Payment" architecture. Upon receipt of funds, the smart contract performs an immediate, atomic division of capital to ensure solvency.
+
+*   **Protocol Rewards (The Community Treasury):** A fixed portion of every mint is programmatically locked into the Reward Contract. This capital is isolated and cannot be accessed by the Admin.
+    *   **FOS Buddy I:** $2.00 allocated per mint.
+    *   **FOS Samurai I:** $10.00 allocated per mint.
+    *   **FOS Noble I:** $20.00 allocated per mint.
+*   **Operational Margin:** The remaining surplus is routed to the Operational Sink. Unlike centralized systems that extract maximum value, this margin is strictly calculated to cover protocol maintenance, security audits, and development costs.
+
+## 3.3 Gas Sustainability Model (User-Funded Execution)
+
+To maintain a perpetual, autonomous cycle without centralized maintenance, the protocol utilizes a tiered gas responsibility model:
+
+*   **Standard Mints (1–499):** Participants pay the standard gas fee associated with their own minting transaction.
+*   **The "Green Eye" Treasury (Mint #500):** The 500th NFT of every generation is designated as a Prestige Collectible with unique system responsibilities.
+    *   **The Mechanic:** The purchaser of the Green Eye pays the NFT price PLUS a specific gas stipend calculated to cover 18 atomic transactions (1 Mint + 17 Reward Distributions).
+    *   **The Trigger:** This transaction automatically executes the `distributeRewards()` function, closing the cycle and delivering value to all recipients in a single block.
+
+## 3.4 The Three Tiers (Pool Architecture)
+
+The ecosystem is segmented into three isolated pools. Each pool operates on a 500-unit cycle, where 5 specific units (#10, #100, #200, #300, #400) are designated as "Gas-Only Entries" to ensure accessibility. This results in 495 Revenue-Generating Mints per cycle.
+
+### FOS Buddy (Entry Tier)
+*   **Unit Price:** ~$3.00 (ETH Equivalent) + Gas
+*   **Paying Volume:** 495 Units (5 Free)
+*   **Protocol Revenue:** $1,485 ($3 \times 495$) | **Allocated Rewards:** $1,000 | **Ops Margin:** $485
+*   **Distribution Structure:**
+    *   Primary Recipient: $500 (50%)
+    *   Secondary Group (x6): $50 each (30%)
+    *   Tertiary Group (x10): $20 each (20%)
+
+### FOS Samurai (Mid Tier)
+*   **Unit Price:** ~$13.00 (ETH Equivalent) + Gas
+*   **Paying Volume:** 495 Units (5 Free)
+*   **Protocol Revenue:** $6,435 ($13 \times 495$) | **Allocated Rewards:** $5,000 | **Ops Margin:** $1,435
+*   **Distribution Structure:**
+    *   Primary Recipient: $2,500 (50%)
+    *   Secondary Group (x6): $250 each (30%)
+    *   Tertiary Group (x10): $100 each (20%)
+
+### FOS Noble (Premium Tier)
+*   **Unit Price:** ~$25.00 (ETH Equivalent) + Gas
+*   **Paying Volume:** 495 Units (5 Free)
+*   **Protocol Revenue:** $12,375 ($25 \times 495$) | **Allocated Rewards:** $10,000 | **Ops Margin:** $2,375
+*   **Distribution Structure:**
+    *   Primary Recipient: $5,000 (50%)
+    *   Secondary Group (x6): $500 each (30%)
+    *   Tertiary Group (x10): $200 each (20%)
+
+## 3.5 The Referral Activation
+
+Users may optionally activate the Affiliate Protocol to participate in the growth economy.
+
+*   **Activation Cost:** A fixed fee of $10.00 (ETH Equivalent) + Gas.
+*   **Revenue Split:** The smart contract automatically routes 82% of generated fees to the referrer and 18% to the protocol treasury.

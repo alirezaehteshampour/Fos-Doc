@@ -1,0 +1,34 @@
+---
+title: Security Architecture
+description: Smart contract engineering and security
+---
+
+# 9. Implementation & Security Architecture
+
+## 9.1 Smart Contract Engineering
+The core logic is deployed on Base (Ethereum L2), utilizing industry-standard libraries to ensure asset safety.
+
+*   **Gas Optimization:** The contract logic is heavily optimized for low-cost execution, utilizing minimal storage operations for the referral mapping.
+*   **Reentrancy Protection:** All financial interactions are guarded by `nonReentrant` modifiers and adhere to the Checks-Effects-Interactions (CEI) pattern to prevent exploit vectors.
+*   **Source of Truth:** While the UI displays USD approximations, the contract treats Native ETH as the absolute unit of account, ensuring the protocol remains trustless and decentralized.
+
+**Governance Security (Multi-Signature Control)**
+To eliminate "Key Person Risk," all high-level protocol controls (such as parameter adjustments or emergency pauses) are protected by Multi-Signature (Multi-Sig) Governance.
+*   **Consensus Requirement:** No single developer or admin key can unilaterally alter the protocol. Critical actions require cryptographic consensus from multiple hardware-secured keys.
+*   **Timelock (Optional):** Sensitive updates may be subject to a forced on-chain delay, giving the community time to audit changes before they go live.
+
+## 9.2 The Decentralized Failover (Public Retry Protocol)
+To guarantee protocol reliability even during periods of extreme network congestion, the smart contract includes a Public Failover Mechanism.
+
+*   **The Scenario:** In the rare event that the 500th mint transaction runs out of gas or reverts due to network volatility, the cycle effectively "pauses" rather than breaking.
+*   **The Solution:** The `retryDraw()` function becomes callable by any public wallet. This allows the community to manually trigger the pending distribution, ensuring that rewards are never stuck and the cycle always completes successfully.
+
+## 9.3 The Non-Custodial Interface
+
+*   **Transparency:** The user dashboard provides real-time visualization of the on-chain ledger, tracking total referrals and unclaimed earnings.
+*   **Self-Sovereignty:** At no point does the platform take custody of user funds. The "Join" transaction routes fees directly to the smart contract, and the "Withdraw" transaction routes earnings directly to the user's wallet.
+
+**The Verification Registry (Anti-Counterfeit Layer)**
+To protect users from secondary market scams and "copycat" collections, Fos deploys a dedicated Verification Smart Contract.
+*   **Canonical Status:** This contract serves as the single source of truth for asset authenticity. It maintains a boolean `isVerified` mapping for every asset ID.
+*   **User Tooling:** The platform provides a dedicated "Check Authenticity" tool where users can paste a contract address or ID. The system queries the on-chain registry directly, providing a mathematical guarantee of the asset's legitimacy before a user purchases on the secondary market.

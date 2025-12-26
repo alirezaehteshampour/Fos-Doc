@@ -1,0 +1,44 @@
+---
+title: Security & Infrastructure
+description: Security measures, compliance, and DevOps
+---
+
+# Security & Infrastructure
+
+## Infrastructure & DevOps
+
+- **Environments**: dev, testnet, production with dedicated RPC endpoints.
+- **CI/CD**: automated lint, test, and deployment pipelines.
+- **Observability**: centralized logs, metrics, uptime and error alerts.
+- **Secrets**: managed via vaults and restricted IAM policies.
+
+## Security & Compliance
+
+- Threat modeling for contract and web attack surfaces.
+- Key management using HSMs or hardware wallets for admin operations.
+- Regular audits, fuzzing, and bug bounty programs.
+- Privacy: PII minimization, data retention policies, and consent tracking.
+
+All high-privilege transactions should be multi-sig protected and/or timelocked.
+
+## Security & Reliability (Application)
+
+- **On-chain safety**: Relies on contract-side guards (CEI, `nonReentrant`, role gating). Client-side enforces wallet connection, network selection, and amount checks before submitting transactions.
+- **API hygiene**: API responses are validated; lists are paginated; UI avoids blocking on transient failures and logs client-side errors.
+- **Rate-Limiting & Access Control**: Endpoints that expose leaderboard data, allocation views, or other potentially sensitive aggregates are protected by strict pagination, IP and key-based rate limiting, and authentication/authorization checks where user-specific data is returned, to mitigate scraping and abuse.
+- **Geoblocking & Access Control:** The application utilizes middleware (e.g., Cloudflare Workers) to enforce strict IP-based blocking for restricted jurisdictions. Access is denied at the edge for requests originating from the United States, Canada, United Kingdom, and the European Economic Area (EEA).
+- **Resilience**: Auto-restore wallet sessions, graceful UI fallbacks, and state refresh after critical actions. Gallery/profile auto-refresh on connect.
+- **Failover (Distribution/Protocol Distribution)**: If the auto-distribution at the 500th mint does not execute, a *public* retry/distribution function can be called to complete the distribution and allocate to selected participants immediately.
+
+## Testing & QA
+
+- **Smart contracts**: unit tests, invariant tests, coverage reports.
+- **Web**: integration and e2e tests across critical journeys.
+- **Testnets**: rehearsals with production-like configurations.
+
+## Observability, Testing & Assurance (Contracts)
+
+- Emit comprehensive events for every critical action; index via subgraph for analytics and audits.
+- Testing: unit tests for each contract module; invariant tests for supply/accounting; fuzz tests for edge cases (e.g., boundary times, rounding, reentrancy).
+- Static analysis: run Slither/Mythril; differential testing for randomness-dependent code where feasible.
+- Deployment: if upgradeable, initialize via `initializer` functions; verify all addresses on explorer; store config in a registry.

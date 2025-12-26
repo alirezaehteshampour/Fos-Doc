@@ -1,0 +1,196 @@
+---
+title: Smart Contracts
+description: Detailed contract specifications
+---
+
+# Smart Contracts
+
+## Contract Suite Overview
+*   **Reward Distribution**: User participation that awards/mints an NFT per purchase and registers purchasers for reward distribution outcomes.
+*   **Referral**: Handles a fixed $10 payment and revenue split (82% referrer, 18% admin) when a valid referral is present; otherwise 100% to admin.
+*   **Verification**: Canonical on-chain registry to verify whether a project NFT is officially verified.
+*   **Free Mint**: Scheduled, allowlisted free mint with a special early-user allocation (configurable) of higher-value NFTs.
+*   **Reward Pool / Leaderboard**: Accrues revenue upon activation threshold and pays out 50/30/20 to top-3 leaderboard at defined milestones.
+
+## Three-Pool Architecture (Single Contract)
+The core protocol implements three distinct pools within a single reward distribution/mint contract. Pools are isolated logically and accounted separately; a `poolType` (e.g., enum) indicates the active pool for each mint and distribution.
+
+*   **Body**: Entry ~$3, Reward $1,000
+*   **Samurai**: Entry ~$12, Reward $5000
+*   **Noble**: Entry ~$25, Reward $10,000
+
+Per-pool state tracks purchasers, dedicated pool balances, and distribution outcomes. Events include the `poolType` to enable precise indexing/analytics.
+
+### Per-Pool Recipients & Distribution
+*   **Recipients per pool**: 17 total — 1 (first), 6 (second tier), 10 (third tier).
+*   **Split**: 50% to first place, 30% split equally among 6 recipients, 20% split equally among 10 recipients.
+*   All accounting is pool-scoped, preventing cross-pool mixing of balances or rewards.
+
+## Common Standards & Interfaces
+*   **Tokens**: **ERC-721** (current deployment). `ERC-1155` remains optional only if multiple classes are needed. Use OpenZeppelin implementations with `Ownable` or `AccessControl`.
+*   **Payments**: `ERC-20` stablecoin or native currency (TBD). All transfers use safe patterns and check return values.
+*   **Access Control**: Admin and Operator roles. Admin is multi-sig where possible; time-locked changes for sensitive parameters.
+*   **Upgradeability**: Transparent/UUPS proxies (if chosen) via audited libraries; otherwise immutable for reduced attack surface.
+
+## Global Assumptions
+*   All external calls are wrapped with checks-effects-interactions and `nonReentrant` guards where value transfer occurs.
+*   Monotonic parameters (e.g., supply caps) never increase after deployment unless governed via timelocked admin process.
+*   Events are emitted for every state change that impacts accounting, access control, minting, verification, and distributions.
+
+## Reward Distribution Contract
+Allows users to purchase Fos Digital Collectibles wherein each eligible purchase results in minting/awarding an NFT and recording the user in the purchaser set for reward distributions.
+
+### State & Configuration
+*   `maxSupply`, `minted`, `baseURI`, optional `reveal` mechanics.
+*   `saleWindow` (start/end), per-wallet cap, per-tx cap.
+*   **Randomness**: production uses **Chainlink VRF** (subscription on Base). Test builds may use deterministic/pseudo randomness and must not be deployed to mainnet.
+
+### Infinite Cycle Reset
+*   Each pool follows a **500-mint cycle**. Upon the **500th mint** and successful payout, the pool's minted counter resets to 0 in the *same transaction*.
+*   `cycleId` increments atomically for that pool. Indexing can rely on `(poolType, cycleId, mintIndex)`.
+*   **Greek Numbering**: user-facing labels use 1–100 blocks; after the 500th mint, labels restart at 1.
+*   **The Cycle Structure:** The protocol consists of **100 Sequential Generations** (e.g., Cycle 1 to Cycle 100).
+*   **Per-Cycle Supply:** Each Generation contains exactly **500 Unique NFTs**.
+*   **The Reset Trigger:** Upon the sale of the **500th NFT** (The Green Eye) in the current cycle:
+    1.  The Atomic Payout executes.
+    2.  The `cycleId` increments (e.g., Buddy I **$\rightarrow$** Buddy II).
+    3.  The `minted` counter resets to 0.
+    4.  The next generation becomes immediately active.
+*   **Clarification:** "1-100" refers to the **Cycle Generations**, not the NFT numbering. Inside any active pool, NFTs are unique from 1 to 500.
+
+### Free Number Tiers
+*   Certain numbers (e.g., **10**, **100**, **200**, **300**, **400**) are designated as free-entry tiers; users pay only network gas.
+*   Eligibility and "free" status are enforced on-chain; contract logic prevents fee collection for these tiers while still requiring gas.
+*   **Scope**: The free-number policy applies uniformly across all three pools (Body, Samurai, Noble).
+*   Note: While labels display 1–100 segments, free tiers 200/300/400 refer to the cycle-wide mint indices (1..500).
+
+### Two-Contract Architecture
+*   **Contract A (Payment & Mint)**: Receives user payment (per selected pool: Body/Samurai/Noble) unless a free-number tier applies, mints the NFT, delivers it to the user, and allocates the admin share as configured.
+*   **Contract B (Reward Distribution)**: Receives the remaining funds earmarked for the selected pool and orchestrates that pool's automated selection and reward distribution.
+*   The flow is non-custodial: funds are programmatically routed; the app server never takes custody.
+
+### Green Eye Gas Treasury (Mint #500)
+*   The **500th mint** includes an additional gas stipend to cover the on-chain costs of executing the batch payout for recipients (up to 18 atomic transfers as designed).
+*   The payer of mint #500 receives a special NFT (the **Green Eye**) and remains eligible to receive rewards like any other participant.
+*   The extra ETH is stored in a dedicated `gasStipend` variable reserved exclusively for the payout transaction(s).
+*   Payouts pay **17 recipients** per pool (1/6/10). If actual gas is less than the stipend, the *leftover* is forwarded to the Admin wallet per policy.
+*   The stipend amount follows a contract-defined policy; parameters are configurable and audited. VRF costs are handled separately via LINK subscription on Base.
+
+### External Interfaces
+*   `buyAndMint()`/`mint()`: mints an NFT for caller if within constraints; records purchaser.
+*   `distributeRewards()` (admin/operator): resolves recipients using VRF callback or deterministic method; awards rewards if applicable.
+
+### Randomness
+*   Recipient selection uses **Chainlink VRF**; random seeds are verifiable on-chain; results cannot be influenced by the team.
+
+### Events
+*   `Mint(address account, uint256 tokenId)`, `DistributionRequested(bytes32 requestId)`, `DistributionResult(uint256 round, address[] recipients)`.
+
+### Invariants & Security
+*   Never exceed `maxSupply`; per-wallet and phase caps enforced on-chain.
+*   Randomness is provided via Chainlink VRF; validate callback origin, manage nonces, and reject stale/duplicate fulfillments.
+*   Use CEI; protect mint functions with `nonReentrant`. Pause mechanism for emergency.
+*   No application-layer override exists to redirect funds or alter recipient results; controls are strictly contract-gated.
+
+## Referral Contract
+Processes a fixed deposit (nominally $10) and splits proceeds based on presence of a valid referral, sending 82% to referrer and 18% to admin. Without referral, 100% goes to admin.
+
+### State & Configuration
+*   `admin` payout address (multi-sig), `treasury` if distinct.
+*   `referrerOf[code]` mapping or `isValidReferrer[address]`; optional `code → address` registry.
+*   Asset configuration: native vs `ERC-20` token (address, decimals). Fixed price oracle not required since value is nominal and constant; alternatively reference USD-pegged stablecoin.
+
+### External Interfaces
+*   `payReferral(code)` or `payReferral(referrer)`: validates referral; processes split; records accounting.
+*   `withdraw()` (pull-based): referrers and admin withdraw accrued balances to mitigate reentrancy risk.
+
+### Events
+*   `ReferralPaid(address payer, address referrer, uint256 refAmount, uint256 adminAmount)`, `ReferralMissed(address payer, uint256 amount)`.
+
+### Accounting & Rounding
+*   Compute `refAmount = floor(amount * 82 / 100)`, `adminAmount = amount - refAmount` to avoid dust loss.
+*   Track per-beneficiary accruals in mappings; transfers occur via withdraw to reduce attack surface.
+*   **Admin routing**: The 18% admin fee is routed directly to the Admin wallet.
+
+### Security
+*   Validate referral source (signed code by backend or on-chain registry) to prevent spoofing.
+*   Use `nonReentrant` and CEI; never assume `ERC-20` returns `true` without checking.
+*   **Program Rule**: The referral program is *linear and single-level*. Only direct referrals count; there is no multi-level/MLM structure.
+
+## Verification Contract
+Canonical registry for verifying project NFTs. Other contracts and off-chain services can query verification status.
+
+### State & Configuration
+*   `isVerified[tokenContract][tokenId]` → bool.
+*   Authorized verifiers: `AccessControl` role `VERIFIER_ROLE`; admin can add/remove verifiers.
+*   Optional immutability flag to freeze verification after set, or versioned reasons for audits.
+
+### External Interfaces
+*   `setVerified(tokenContract, tokenId, status, reason)` (verifier/admin).
+*   `isVerified(tokenContract, tokenId)` view function for integration.
+
+### Verification Methods
+*   **On-chain**: Integrators call `isVerified` directly.
+*   **API**: An internal API endpoint returns verification status for UI and services.
+*   **Dedicated Page**: A web page lets users paste contract/token IDs and check verification status.
+
+### Events & Security
+*   `VerificationChanged(tokenContract, tokenId, status, reason, msg.sender)`.
+*   Strict role gating; optional timelock for revocations; emit events for full auditability.
+
+## Free Mint Contract
+Enables a scheduled, allowlisted free mint. Early eligible wallets receive a special allocation of higher-value NFTs (configurable).
+
+### Whitelist & Schedule
+*   Allowlist via Merkle tree: leaf example `keccak256(abi.encode(wallet, quota, phaseId))`. Root stored on-chain.
+*   Enforce `perWalletQuota`, `perTxLimit`, and `phase` windows (`start`/`end` timestamps).
+*   Anti-bot: cooldowns, optional signature-based gating (`EIP-712`), and same-block mint protections.
+*   Schedule: start time is configured (TBD) via config keys and will be finalized closer to launch.
+
+### Early Allocation
+*   Parameters: `earlyAdoptersCount` (e.g., 10), `rewardPerAdopter` (e.g., 10 NFTs), `rewardTier` (e.g., $100 tier).
+*   Selection: first `N` distinct wallets successfully minting after phase start. Deterministic tie-break by transaction ordering.
+*   Guarantees: ensure rewards do not exceed supply; track `awarded[wallet]` to prevent double-allocation.
+
+### Interfaces & Events
+*   `mintFree(proof, quota, phaseId)`: validates Merkle proof; mints; applies early allocation if eligible.
+*   Events: `FreeMintStarted(phaseId)`, `FreeMinted(wallet, qty, phaseId)`, `EarlyAllocation(wallet, qty, tier)`.
+
+### Security
+*   Merkle root rotation requires admin; proofs validated with exact leaf structure and domain separation by `phaseId`.
+*   Pause and supply guardrails; `nonReentrant` on minting pathways.
+*   **Immutability & Fairness**: Free-mint eligibility and allocation are enforced entirely by the contract; operators cannot "hand-pick" or alter outcomes.
+
+## Campaign (Incentive Layer): Reward Pool / Leaderboard Contract
+Activated when total users reach 5,000. For one month, site revenue is funneled to the pool. Upon hitting milestones ($20k, $50k, $100k, $200k, $500k, $1M, $2M), distribute 50/30/20 to top three accounts on the leaderboard.
+
+### Activation & Funding
+*   Activation condition: `usersCount ≥ 5000` (fed from an oracle or admin-set flag accompanied by evidence).
+*   Funding source: on-chain revenues from the **Referral** contract (admin share of $10 payments) and the **Reward Distribution** contract (admin share of purchases), funneled into the reward pool.
+*   Accrual window: `activationTime` to `activationTime + 30 days`. Post-window, continue accrual toward next milestones as configured.
+
+### Milestones & Distribution
+*   Milestones: 20k, 50k, 100k, 200k, 500k, 1M, 2M (configurable). On crossing each, a distribution is triggered.
+*   Leaderboard source: on-chain accumulation or an oracle feed from the main app. Snapshot height defined and immutable per milestone.
+*   Split: 1st 50%, 2nd 30%, 3rd 20%. Rounding: allocate remainder to admin or largest rank deterministically to prevent dust drifting.
+*   Distribution method: claim-based recommended — write allocations, users call `claim()`; prevents reentrancy and failed transfer halts.
+
+This is a **temporary growth campaign**. The core protocol (Body/Samurai/Noble pools, distributions, and protocol payouts) continues indefinitely regardless of campaign status. The campaign share of each mint is routed **directly** to a dedicated campaign vault and can be turned off without affecting the 500-mint cycles.
+
+### Interfaces & Events
+*   `recordRevenue(amount)`: called by revenue wallet or adapter; updates pool and checks milestones.
+*   `setLeaders(milestone, addresses[3])` (admin/oracle): freezes recipients for that milestone.
+*   `claim(milestone)`: eligible leaders withdraw their allocation; idempotent via claimed flags.
+*   Events: `RevenueAdded(amount)`, `MilestoneReached(milestone, pool)`, `LeadersSet(milestone, first, second, third)`, `Claimed(milestone, account, amount)`.
+
+### Security & Invariants
+*   Multi-sig admin for parameter changes; milestone leader sets logged and immutable after confirmation.
+*   Pool accounting must be conserved: sum(allocations at milestone) ≤ poolAtMilestone; any remainder handled deterministically.
+*   Use `nonReentrant`, CEI; avoid push transfers; support `ERC-20` safe operations.
+*   **Trustless Operation**: Reward accruals, leader snapshots, and claims are executed by contract rules; neither operators nor developers can alter recipients or redirect funds.
+
+## Observability, Testing & Assurance
+*   Emit comprehensive events for every critical action; index via subgraph for analytics and audits.
+*   Testing: unit tests for each contract module; invariant tests for supply/accounting; fuzz tests for edge cases (e.g., boundary times, rounding, reentrancy).
+*   Static analysis: run Slither/Mythril; differential testing for randomness-dependent code where feasible.
+*   Deployment: if upgradeable, initialize via `initializer` functions; verify all addresses on explorer; store config in a registry.

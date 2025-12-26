@@ -1,0 +1,110 @@
+---
+title: Main Application
+description: Web application architecture and components
+---
+
+# Main Application
+
+## Authentication
+
+Wallet-based authentication and gating for on-chain interactions. OAuth is used for social verifications on the Whitelist page (X/Twitter, Discord) and Telegram/YouTube checks. Sessions are minimal; client performs most flows with API verification.
+
+## App Pages
+
+### Whitelist Page
+
+Users connect wallet and complete social steps to qualify. The page reads dynamic requirements from the database and enforces unique social accounts per user as configured.
+
+- **Path**: `/app/whitelist.php`
+- **Requirements (dynamic)**: loaded from table `data`, e.g. `require_twitter`, `require_discord`, `require_youtube`, `require_youtube_subscribe`, `require_telegram_join`, `enforce_unique_socials`, `require_base_transaction`, `base_rpc_url`, `oauth_allowed_origins`.
+- **Settings**: `whitelist_settings` table for capacity and toggle; `whitelist_users` stores registrations.
+- **Social Connections**:
+  - X/Twitter OAuth: popup via `/api/oauth_twitter.php`/`includes/config/oauth.php`; scopes include `users.read`.
+  - Discord OAuth: popup via `/api/oauth_discord.php` callbacks; scope `identify`.
+  - YouTube: OAuth client configured via `data` keys (`youtube_oauth_client_id`, `youtube_channel_id`); subscription check if enabled.
+  - Telegram: Join-and-verify flow using bot token and channel id/username via `/api/telegram_verify.php`.
+- **API**: `/api/whitelist_handler.php` validates inputs against dynamic flags and persists registration; enforces Base transaction requirement if enabled.
+- **Security**: restrict popup message origins via `oauth_allowed_origins`; rate-limit submissions; enforce one wallet per set of socials if `enforce_unique_socials` is true.
+
+### Free Mint Page
+
+Whitelist users see a countdown and can mint when the window opens.
+
+- **Path**: `/app/FreeMint.php`
+- **Config** (`data` table): `freemint_start_unix` or `freemint_start_iso`, `freemint_nft_price_usd`, `freemint_max_per_user`.
+- **Eligibility**: calls `/api/whitelist_handler.php?action=check_wallet&wallet=...` to validate whitelist membership before enabling mint.
+- **Click/Claim Queue**: `/api/freemint_click.php` maintains `free_mint_state(hard_cap, claimed_count)` and `free_mint_clicks` with row locks to prevent race conditions.
+- **UX**: countdown to start time; mint button enabled only if time ≥ start, wallet connected, and whitelist=true.
+- **Security**: server-side locking on claims, anti-duplicate checks; later integrated with on-chain free mint contract for final settlement.
+
+### Allocations Page
+
+Displays current allocation pool, milestones, and selected participants/leaderboard information.
+
+- **Path**: `/app/rewards.php`
+- **Pool Display**: shows current wallet/balance and provides copy/view explorer actions.
+- **Milestones**: renders configured thresholds (e.g., 20k→2M) and status.
+- **Leaderboard** (JS in `core/index.php`):
+  - Totals: `/api/leaderboard_handler.php?action=get_total_users` updates the 5,000-user activation progress.
+  - Leaderboard data: `/api/leaderboard_handler.php?action=get_leaderboard&period=day|week|all&page=...` with pagination.
+  - Selected participants modal: dynamically renders selected participants and allocation amounts when available.
+- **Security**: sanitize API outputs, cache and rate-limit leaderboard endpoints; avoid exposing sensitive admin data.
+
+### Landing Page (App Shell)
+
+- Provides navigation to Whitelist, Free Mint, and Allocations pages with shared header/footer and styles.
+- Hides or reveals CTAs contextually depending on page and user state (e.g., wallet connection).
+
+## Integrations
+
+- Wallet connectors for Base network; RPC URL configurable via `data.base_rpc_url`.
+- OAuth providers for X/Twitter, Discord, YouTube; Telegram Bot API for membership verification.
+- Internal APIs under `/api/` for whitelist, freemint, leaderboard, and telegram verification.
+- **Explorer**: Read transaction data and receipts from `BaseScan` for user-facing confirmations and admin diagnostics.
+- **VRF**: Chainlink VRF is funded via **LINK subscription** on Base. User checks rely on `msg.sender` (not `tx.origin`) for Account Abstraction compatibility.
+
+## Core App (core/index.php)
+
+This is the main single-page application shell. It manages navigation, wallet connections, on-chain NFT minting and purchasing, leaderboard rendering, profile, gallery, and selected participants pages.
+
+### Routing & Navigation
+
+- **Router**: `showPage(pageId)` toggles visibility across sections.
+- **Menu**: sidebar listeners map to pages (Home, Profile, Collection list, Gallery, Leaderboard, Selected Participants, About).
+- **Contextual UI**: CTA elements are shown on the overview and hidden on subpages.
+
+### Wallet Connections
+
+- **MetaMask**: `connectMetaMask()` requests accounts, updates localStorage, then invokes `registerOrLoginUser`, `loadProfileData`, `checkSelectedParticipantStatus`.
+- **Coinbase**: `connectCoinBase()` uses CoinbaseWalletSDK; provider targets Base Sepolia (id 84432).
+- **Auto-restore**: `checkAllWalletConnections()` attempts restoration within 24h.
+
+### NFT Minting & Purchase
+
+- **Entry**: "Mint Now" resolves `selectedCollectionType` then navigates to `mintNftContent`.
+- **On-chain mint**: Using `ethers.js`, calls contract `buyAndMint(collectionType, tokenURI, { value: collectionPrice })`.
+- **Persistence**: Upon confirmation, saves transaction via API, increments sold NFTs and user mint counters, updates UI.
+- **VRF**: Allocation distributions are resolved with Chainlink VRF; randomness is verifiable and tamper-resistant.
+
+### Leaderboard & Selected Participants
+
+- **Leaderboard**: `loadLeaderboardData(period, page)` populates podium and paginated list.
+- **Grand allocation progress**: `updateGrandAllocationProgress()` fetches total users via API.
+- **Points System**:
+
+| Action | Points |
+| :--- | :--- |
+| Valid Referral | +1 |
+| Collection Purchase ($3) | +2 |
+| Collection Purchase ($13) | +4 |
+| Collection Purchase ($25) | +6 |
+
+### Profile & Gallery
+
+- **Profile**: Loads data via API to update username/avatar; tabs include invited friends, transactions, and settings.
+- **Gallery**: Displays user's NFTs; initialized when opening gallery with a connected wallet.
+
+### Performance
+
+- Defer heavy UI until navigation into a page; cache leaderboard pages client-side; minimize re-renders; lazy-load images and modals.
+- Use batched API calls for leaderboard and profile where possible; throttle DOM updates when scrolling lists.
