@@ -1,65 +1,41 @@
 "use client";
 
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    ArcElement,
-    RadialLinearScale,
-    Title,
-    Tooltip,
-    Legend,
-    Filler,
-    ChartData,
-    ChartOptions
-} from "chart.js";
-import { Line, Bar, Doughnut, Pie, Radar, PolarArea } from "react-chartjs-2";
+import 'chart.js/auto';
+import type { ChartData, ChartOptions } from 'chart.js';
+import { Chart } from 'react-chartjs-2';
 
-interface UniversalChartProps {
-    type: "line" | "bar" | "doughnut" | "pie" | "radar" | "polarArea";
-    data: ChartData<any>;
-    options?: ChartOptions<any>;
+type SupportedChart = 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'polarArea';
+
+interface UniversalChartProps<T extends SupportedChart> {
+    type: T;
+    data: ChartData<T>;
+    options?: ChartOptions<T>;
     className?: string;
 }
 
-export function UniversalChart({ type, data, options, className }: UniversalChartProps) {
-    const defaultOptions: ChartOptions<any> = {
+export function UniversalChart<T extends SupportedChart>({ type, data, options, className }: UniversalChartProps<T>) {
+    const defaultOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: "bottom",
-                labels: {
-                    usePointStyle: true,
-                    font: { family: "Inter" },
-                },
+                position: 'bottom',
+                labels: { usePointStyle: true, font: { family: 'Inter' } },
             },
             tooltip: {
-                backgroundColor: "rgba(15, 23, 42, 0.9)",
-                titleFont: { family: "Inter", size: 13 },
-                bodyFont: { family: "Inter", size: 12 },
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                titleFont: { family: 'Inter', size: 13 },
+                bodyFont: { family: 'Inter', size: 12 },
                 padding: 10,
                 cornerRadius: 4,
             },
         },
         ...options,
-    };
-
-    const ChartComponent = {
-        line: Line,
-        bar: Bar,
-        doughnut: Doughnut,
-        pie: Pie,
-        radar: Radar,
-        polarArea: PolarArea,
-    }[type];
+    } as ChartOptions<T>;
 
     return (
-        <div className={className} style={{ width: "100%", height: "100%", minHeight: "300px" }}>
-            <ChartComponent data={data} options={defaultOptions} />
+        <div className={className} style={{ width: '100%', height: '100%', minHeight: '300px' }}>
+            <Chart<T> type={type} data={data} options={defaultOptions} />
         </div>
     );
 }

@@ -1,6 +1,6 @@
 ---
-title: Economics Comparison
-description: Centralized Platforms vs. Autonomous Blockchain Protocols
+title: Collection Economics
+description: Collection-specific fees, funded free positions, and conserved round accounting
 ---
 
 import ChartRegistry from '@/components/charts/chart-registry'
@@ -8,211 +8,54 @@ import { UniversalChart } from '@/components/charts/universal-chart'
 
 <ChartRegistry />
 
-# The Economic Superiority of Automated Collection Mechanisms
+# Collection Economics
 
-## A Comparative Analysis of Centralized Prize Platforms and Autonomous Blockchain Protocols
+The updated product model uses collection-specific admin fees, not a universal 97% community share or a token-burn budget. Network gas and Base VRF/CCIP costs are separate and are not assumed to be zero.
 
-This report demonstrates that Autonomous Blockchain Protocols fundamentally dismantle the economic justification for the "rent-seeking wedge" found in traditional prize platforms.
+## Per-ticket split
 
----
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-## 1. The Economics of Centralized Intermediaries
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-To understand value leakage, we must dissect the "Take Rate"—the percentage of revenue retained by the platform.
-
-### Value Leakage by Platform Type
-
-<div className="my-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border">
-<UniversalChart
-    type="bar"
-    data={{
-        labels: ['State Lottery', 'Charity Sweepstakes', 'Sweepstakes Casino', 'FOS Protocol'],
-        datasets: [
-            {
-                label: 'Value to Community (%)',
-                data: [65, 17, 85, 97],
-                backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                borderColor: 'rgb(34, 197, 94)',
-                borderWidth: 1,
-            },
-            {
-                label: 'Value Leakage (%)',
-                data: [35, 83, 15, 3],
-                backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                borderColor: 'rgb(239, 68, 68)',
-                borderWidth: 1,
-            },
-        ],
-    }}
-    options={{
-        plugins: {
-            title: {
-                display: true,
-                text: 'Value Distribution: Community vs. Leakage',
-                font: { size: 16, weight: 'bold' }
-            },
-            legend: { position: 'bottom' }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 100,
-                title: { display: true, text: 'Percentage' }
-            }
-        }
-    }}
-/>
+<div className="my-8 p-4 border rounded-xl">
+<UniversalChart type="bar" data={{
+    labels: ['Buddy', 'Samurai', 'Noble'],
+    datasets: [
+        { label: 'Pool contribution (%)', data: [95, 97, 98], backgroundColor: '#34d399' },
+        { label: 'Admin fee (%)', data: [5, 3, 2], backgroundColor: '#fb7185' },
+    ],
+}} options={{ scales: { y: { beginAtZero: true, max: 100 } } }} />
 </div>
 
-| Platform Model | Value to Community | Operational Friction | Operator Profit | Total Leakage |
-| :--- | :--- | :--- | :--- | :--- |
-| **State Lottery** | 65% | 11% | 24% | **35%** |
-| **Charity Sweeps** | 15-17% | 65-70% | 15-20% | **~83-85%** |
-| **Sweeps Casino** | 85% (RTP) | 5-10% | 10-15% | **~15-25%** |
-| **FOS Protocol** | **97%** | ~3% | 0% | **~3%** |
+## A funded round
 
----
+Five positions are free to the buyer, but all 500 contribute to the pool. FOSNFT funds the five free-position contributions from retained fees/reserves.
 
-## 2. The Burden of Compliance
+| Collection | 495 buyer payments | Paid-position admin fees | Five free contributions | Remaining admin funds | Full round pool |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Buddy | $1,485 | $74.25 | $14.25 | $60 | $1,425 |
+| Samurai | $6,435 | $193.05 | $63.05 | $130 | $6,305 |
+| Noble | $12,375 | $247.50 | $122.50 | $125 | $12,250 |
 
-The centralized model is "Trust-Based," requiring expensive infrastructure to enforce trust.
+For each collection, **round pool + remaining admin funds = buyer purchase payments**. This assumes nominal product prices, matching round contribution settings, and sufficient FOSNFT reserves. Actual accounting uses ETH and integer rounding. The remaining admin amount is before operational and oracle/bridge costs; it is not a profit forecast.
 
-### Compliance Costs Breakdown
+## Independent referral accounting
 
-<div className="my-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border">
-<UniversalChart
-    type="doughnut"
-    data={{
-        labels: ['Surety Bonds (1-15%)', 'Legal Opinion Letters ($15-50k)', 'Third-Party Audits ($8-100k)', 'Compliance Staff'],
-        datasets: [
-            {
-                data: [15, 25, 35, 25],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(139, 92, 246, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(236, 72, 153, 0.8)',
-                ],
-                borderWidth: 2,
-            },
-        ],
-    }}
-    options={{
-        plugins: {
-            title: {
-                display: true,
-                text: 'Centralized Platform Compliance Costs',
-                font: { size: 16, weight: 'bold' }
-            },
-            legend: { position: 'bottom' }
-        }
-    }}
-/>
-</div>
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
 
----
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-## 3. Protocol Efficiency: Zero Marginal Cost
+Referral receipts are separate from mint pools. They do not fund an individual's draw eligibility or alter ticket weights. Any growth-campaign funding must use available admin balances after user liabilities and free-position reserves.
 
-Autonomous protocols use smart contracts to automate collection and distribution.
+## Comparison limits
 
-### Efficiency Comparison
-
-<div className="my-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border">
-<UniversalChart
-    type="bar"
-    data={{
-        labels: ['Processing Speed', 'Error Rate', 'Cost Reduction', 'Value Returned'],
-        datasets: [
-            {
-                label: 'Centralized (%)',
-                data: [10, 4, 0, 50],
-                backgroundColor: 'rgba(148, 163, 184, 0.8)',
-                borderWidth: 1,
-            },
-            {
-                label: 'Blockchain (%)',
-                data: [100, 0.1, 80, 97],
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                borderWidth: 1,
-            },
-        ],
-    }}
-    options={{
-        indexAxis: 'y',
-        plugins: {
-            title: {
-                display: true,
-                text: 'Operational Efficiency Comparison',
-                font: { size: 16, weight: 'bold' }
-            },
-            legend: { position: 'bottom' }
-        },
-        scales: {
-            x: {
-                beginAtZero: true,
-                max: 100,
-                title: { display: true, text: 'Score (Higher is Better)' }
-            }
-        }
-    }}
-/>
-</div>
-
-| Feature | Centralized (Trust-Based) | Autonomous (Trustless) |
-| :--- | :--- | :--- |
-| **Winner Selection** | Manual/RNG | Chainlink VRF |
-| **Asset Custody** | Bank Account | Smart Contract |
-| **Payout Speed** | Days/Weeks | Seconds |
-| **Regulation** | Bonds & Licenses | Code Audits (One-Time) |
-
----
-
-## 4. Quantitative Conclusion
-
-### Scenario: $1,000,000 Prize Event
-
-<div className="my-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border">
-<UniversalChart
-    type="bar"
-    data={{
-        labels: ['Centralized Model', 'FOS Protocol'],
-        datasets: [
-            {
-                label: 'Value to Community ($)',
-                data: [150000, 969500],
-                backgroundColor: [
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(34, 197, 94, 0.8)',
-                ],
-                borderWidth: 1,
-            },
-        ],
-    }}
-    options={{
-        plugins: {
-            title: {
-                display: true,
-                text: '$1M Prize Event: Community Value Comparison',
-                font: { size: 16, weight: 'bold' }
-            },
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: { display: true, text: 'USD' }
-            }
-        }
-    }}
-/>
-</div>
-
-*   **Centralized Model**: ~$150,000 value to community (15% efficiency).
-*   **Protocol Model**: ~$969,500 value to community (**~97% efficiency**).
-
----
-
-## The Bottom Line
-
-Autonomous mechanisms return **90%+ of value** to the community by eliminating the rent-seeking wedge of trust and administration.
+The previous economics report mixed illustrative centralized-platform percentages with unsupported FOS-wide return claims. The current tables and chart show the supplied contract arithmetic only. Automated accounting does not eliminate legal requirements, audit costs, chain risks, or delivery delays.

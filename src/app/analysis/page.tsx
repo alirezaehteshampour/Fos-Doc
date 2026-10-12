@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/glass-card";
-import { ArrowRight, TrendingUp, ShieldAlert, Coins } from "lucide-react";
+import { ArrowRight, TrendingUp, ShieldAlert, Coins, type LucideIcon } from "lucide-react";
 
 export default function AnalysisLandingPage() {
     return (
@@ -8,7 +8,7 @@ export default function AnalysisLandingPage() {
             <div className="grid md:grid-cols-3 gap-6">
                 <ReportCard
                     title="The 2025 Outlook"
-                    description="Web3 Market Size, NFT Utility, and Base L2 Growth Projections."
+                    description="Historical market projections and Base context; not Robinhood adoption data."
                     icon={TrendingUp}
                     href="/analysis/market-2025"
                     color="text-blue-500"
@@ -35,11 +35,11 @@ export default function AnalysisLandingPage() {
                     <div className="space-y-4 text-slate-300">
                         <p>
                             The digital collectibles market is projected to grow from <strong>$21B to $211B</strong> by 2030, driven by a shift from speculation to utility.
-                            Brands are increasingly adopting "Automated Reward Ecosystems" to replace legacy loyalty programs.
+                            Brands are increasingly adopting automated reward ecosystems to replace legacy loyalty programs.
                         </p>
                         <p>
-                            <strong>FOS Protocol</strong> addresses the critical "Transparency Gap" in the $37B affiliate and sweepstakes market by leveraging
-                            <strong> Base L2</strong> infrastructure to deliver a verifiable, low-cost, and autonomous solution that returns &gt;95% of value to the community.
+                            <strong>FOS Protocol</strong> addresses the transparency gap in the $37B affiliate and sweepstakes market by leveraging
+                            <strong> Robinhood Chain</strong> for user transactions and the specified Base VRF/CCIP flow for randomness. Pool contribution fractions are collection-specific: 95%, 97%, and 98%; they are not individual returns.
                         </p>
                     </div>
                     <div className="mt-6">
@@ -53,7 +53,7 @@ export default function AnalysisLandingPage() {
     );
 }
 
-function ReportCard({ title, description, icon: Icon, href, color }: any) {
+function ReportCard({ title, description, icon: Icon, href, color }: { title: string; description: string; icon: LucideIcon; href: string; color: string }) {
     return (
         <Link href={href} className="block group">
             <GlassCard className="h-full hover:border-blue-500/30">

@@ -1,419 +1,568 @@
-1. Project Overview
+<!-- Generated from current content/docs by scripts/generate-doc-artifacts.py. -->
 
-Project Name: FOS
+# FOS Protocol Overview
 
-Brand Slogan: "Mint. Share. Win!"
+FOS is a digital collectibles project whose NFT minting, referral plans, and authenticity certificates are on **Robinhood Chain**. Base remains the randomness-service chain in the supplied architecture: Chainlink VRF produces the random result there, and Chainlink CCIP carries requests and responses between Base and Robinhood.
 
-Platform: A tiered NFT giveaway platform deployed on Ethereum Base with Layer 2 support.
+## Independent components
 
-Three distinct reward pools corresponding to three NFT price tiers (FOS Buddy I, FOS Samurai I, FOS Noble I).
+| Component | Responsibility |
+| :--- | :--- |
+| FOSNFT | Mint the collectible, receive payment, retain admin fees, and fund free positions |
+| Processor | Register tickets, manage collection rounds, select recipients, and process allocations |
+| Referral | Register one account per wallet, maintain direct referrals, sell plans, and handle upgrades |
+| Verify | Issue a separate ERC-721 authenticity certificate and expose its current status |
 
-Users purchase uniquely generated Fos Digital Collectibles. This purchase automatically activates the protocol's trustless Reward Program, which applies a 'Weighted Incentive' to recognize and reward early buyers.
+Referral registration is independent of NFT minting and draws. Verify integrations are optional and require explicit authorization.
 
-The system identifies recipients based on the Original Minter's Provenance (Initial Wallet ID + Unique Hash). This unique architecture ensures that reward eligibility is a permanent Loyalty Perk for the original buyer, remaining valid even if the NFT is later sold.
+## Collection economics
+
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
+
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+
+Each collection has independent 500-ticket rounds. Positions 10, 100, 200, 300, and 400 are gas-only for the buyer, with their pool contributions funded from FOSNFT. Tickets 1–100 carry double selection weight; tickets 101–500 carry ordinary weight.
+
+## Allocation rules
+
+Seventeen **tickets**, not necessarily seventeen wallets, are selected without replacement. One receives 50% of the round pool; six split 30%; ten split 20%. A wallet with several tickets can receive more than one allocation. Integer-rounding residue goes to the first recipient. Transfers are attempted directly; unsuccessful transfers become claimable through `pendingWithdrawals` and `claim()`.
+
+## Referral plans
+
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
+
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
+
+Allowed upgrades are 2→5, 2→10, and 5→10. The payment is the difference between configured prices at upgrade time, and the original direct referrer stays fixed.
+
+## Read more
+
+- [Platform and networks](/docs/protocol/platform)
+- [Collection mechanics](/docs/protocol/mechanics)
+- [Referral program](/docs/referral)
+- [Contract reference](/docs/technical/smart-contracts)
+- [Community and planned campaigns](/docs/protocol/community)
+- [Roadmap](/docs/roadmap)
+- [Legal and risk disclosures](/docs/protocol/legal)
+
+## Documentation status
+
+This revision follows the supplied project contract specification. Product rules and reported deployments are distinct from independently verified on-chain behavior. Older claims about globally immutable parameters, same-transaction draws, a fixed 18× gas charge, and an implemented 365-day liquidation function are not established by the new specification. See [security and validation](/docs/technical/security).
+
+# Platform Infrastructure
+
+## Networks
+
+User-facing FOSNFT, Processor, Referral, and Verify interactions belong on **Robinhood Chain**, not Base. Base serves the specified VRF randomness integration, with CCIP transporting round requests and results.
+
+| Network | Chain ID | Native currency | Role |
+| :--- | ---: | :--- | :--- |
+| Robinhood Chain | 4663 | ETH | User-facing project network |
+| Robinhood Chain Testnet | 46630 | Test ETH | Separate testing network |
+| Base | Environment-specific | ETH | VRF service side of the specified cross-chain design |
+
+The Robinhood IDs, currency, and URLs below are corroborated by the public [ethereum-lists network registry](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-4663.json), with a [separate testnet entry](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-46630.json). This corroborates network metadata; it does not verify FOS deployments or CCIP support.
+
+- Mainnet RPC listed in the registry: `https://rpc.mainnet.chain.robinhood.com`
+- Mainnet explorer listed in the registry: [Robinhood Chain Blockscout](https://robinhoodchain.blockscout.com)
+- Testnet RPC: `https://rpc.testnet.chain.robinhood.com/rpc`
+- Testnet explorer: [Robinhood testnet explorer](https://explorer.testnet.chain.robinhood.com)
+- Official documentation linked by the registry: [Robinhood Chain documentation](https://docs.robinhood.com/chain)
+
+Verify the selected environment and live RPC chain ID before signing. Never reuse Base or Base Sepolia addresses for a Robinhood transaction. The Base environment used by the VRF integration must be confirmed separately.
+
+## ETH pricing and gas
+
+The displayed dollar values are nominal product labels. On-chain ETH prices and round settings are the transaction source of truth. Ordinary mints require the exact configured price; free positions require zero purchase value. Network gas still applies. ETH remains volatile, and neither fixed gas costs nor USD-equivalent awards are guaranteed.
+
+## Wallet access
+
+Use an EVM wallet configured for the correct Robinhood network. MetaMask and Coinbase Wallet are documented integration targets; connector behavior must be verified in the deployed main application. This Next.js repository hosts documentation and an AI assistant, not the minting application itself.
+
+The interface does not need a user's private key. Contracts nevertheless hold round funds, reserved free-position contributions, and deferred payments according to their rules. An interface described as non-custodial does not mean that funds never enter a contract.
+
+## Cross-chain visibility
+
+Show Robinhood round status and transaction receipts separately from Base VRF and CCIP delivery status. A successful last-mint receipt is not evidence that the remote random result has arrived or that the allocation transaction has completed.
+
+# Collection & Protocol Mechanics
+
+## Minting
+
+Call `buyAndMint(lotteryType, tokenURI)` on FOSNFT on Robinhood Chain. The documented type IDs are 3 (Buddy), 13 (Samurai), and 25 (Noble). A successful transaction mints an NFT, registers a ticket with Processor, and sends the round's configured pool contribution to Processor. Only FOSNFT may register tickets there. If Verify is connected and FOSNFT is approved, a separate authenticity certificate is also issued.
+
+## Prices and accounting
+
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
+
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+
+For each paid ticket:
+
+```text
+adminCut = price * adminBps / 10000
+prizeShare = price - adminCut
+```
+
+The admin share remains in FOSNFT. There is no additional admin deduction from recipients' allocations. The amount sent to Processor must equal the contribution stored for that round.
+
+## Five gas-only positions
+
+Positions **10, 100, 200, 300, and 400** are free in every round of every collection. The buyer pays network gas but sends zero purchase value. FOSNFT supplies the full pool contribution for each free ticket. Admin withdrawals must preserve the reserve for remaining free positions.
+
+For a full round there are 495 paid positions and 5 funded free positions. In nominal dollars:
+
+| Collection | Buyer purchase inflow | Gross admin share from 495 paid positions | Free-position funding | Remaining admin amount | Round pool |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Buddy | $1,485 | $74.25 | $14.25 | $60.00 | $1,425 |
+| Samurai | $6,435 | $193.05 | $63.05 | $130.00 | $6,305 |
+| Noble | $12,375 | $247.50 | $122.50 | $125.00 | $12,250 |
+
+These calculations exclude gas, oracle/bridge costs, and any other operating costs. The pool plus remaining admin amount equals the 495 buyers' total purchase payments.
+
+## Weights and uniqueness
+
+Tickets 1–100 have two entries each in the selection pool; 101–500 have one. Positions 10 and 100 are both free and double-weighted. The initial full-round selection pool contains 600 entries.
+
+After a ticket is selected, all of its entries are removed. It cannot be selected again in that round. A wallet holding multiple tickets may be selected more than once through different tickets. Double weight is a relative draw weight, not a guarantee of an award or a claim that every final inclusion probability is exactly doubled.
+
+## Green Eye and asynchronous draw
+
+The 500th collectible closes the round and is known as the Green Eye.
+
+1. FOSNFT registers ticket 500 with Processor on Robinhood Chain. That round closes to further tickets.
+2. A round-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
+3. Chainlink VRF on Base produces verifiable randomness.
+4. CCIP returns the result to the Robinhood-side integration.
+5. Processor uses the returned randomness and ticket weights to select 17 distinct winning tickets and process allocations.
+6. After the draw completes, the next round of that collection starts automatically.
+
+The last mint starts this asynchronous sequence. Selection, transfers, and the next round do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
+
+Do not assume a fixed 18× gas charge or an automatic fee reimbursement. Each transaction has its own gas cost, and oracle/CCIP fees depend on the final integration.
+
+## Distribution and claims
+
+| Group | Selected tickets | Share of pool | Per-ticket share |
+| :--- | ---: | ---: | ---: |
+| Primary | 1 | 50% | 50% plus integer-rounding residue |
+| Secondary | 6 | 30% | 5% |
+| Tertiary | 10 | 20% | 2% |
+
+Processor attempts direct payment. A rejected payment is recorded in `pendingWithdrawals` for a later `claim()` rather than described as reverting every recipient's payment.
+
+## Round settings
+
+Capacity, contribution per ticket, group counts/splits, and the number of double-weighted positions are recorded at round start. Changes apply to subsequent rounds; an empty active round may be updated where the contract permits. The target capacity is 500; old 20-ticket settings were tests.
+
+The new specification does not establish the previously described 365-day `liquidatePool()` mechanism. Do not rely on that recovery path unless it is confirmed in the final deployed contract.
+
+# Referral Program
+
+Referral is independent of NFT purchases and round allocations. Each wallet registers once with a plan and, optionally, an existing registered direct referrer.
+
+## Plans and payment splits
+
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
+
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
+
+## Register and share
+
+Call `register(address referrer, uint256 tier)` with tier **2**, **5**, or **10** and exact configured payment. The referrer must already be registered and cannot be the registering wallet. Use the zero address to register without a referrer. The wallet address identifies the referral link; `referredBy` records the direct referrer permanently. A registration with a referrer increases that referrer's `referralCount` by one.
+
+## Upgrade by paying the difference
+
+Registered users may call `upgrade(uint256 newTier)` to move 2→5, 2→10, or 5→10. Downgrades and registering the same wallet again are prohibited.
+
+```text
+cost = tierPrice[newTier] - tierPrice[oldTier]
+```
+
+Read `getUpgradeCost` and the current prices before submitting. Nominal differences are $3, $8, and $5 respectively; actual payment uses the current configured ETH difference. The upgrade is split with the **same original direct referrer**. Without one, the full upgrade payment goes to the admin.
+
+## Example
+
+1. A has the $2 plan. B registers through A with the $2 plan. A receives 50% of that payment, nominally $1.
+2. A upgrades to the $10 plan.
+3. B later upgrades from $2 to $5 and pays the nominal $3 difference.
+4. A now receives 82% of that difference, nominally $2.46; the admin receives $0.54.
+
+If A had stayed on the $2 plan, even a $10 registration by B would use A's 50% rate. A's upgrade changes only subsequent payments; previous payments are never recalculated.
+
+## Single-level accounting
+
+If A refers B and B refers C, A can receive a share of B's registration and upgrades. C's registration and upgrades can pay B, not A. Plan levels are price/commission plans, not additional generations of referral compensation.
+
+## Direct payment and deferred claims
+
+The contract attempts direct ETH payment to the referrer. If that transfer fails, it records the amount in `pendingWithdrawals`; the referrer uses `claim()` to collect it. `withdraw()` is for the admin's available balance, not the referrer's claim function.
+
+## Configuration and risk
+
+The owner can change plan prices, commission basis points, the admin wallet, and the Verify connection. Price ordering must remain `price(2) < price(5) < price(10)`. Initial documented rates are 5000, 6000, and 8200 basis points out of 10000. Read current settings rather than assuming those values are globally immutable.
+
+Reported test prices of 0.0000002, 0.0000005, and 0.000001 ETH are test settings, not production USD conversion rates. Referral participation and any tax obligations remain the user's responsibility. Payments depend on actual direct-referral activity and do not guarantee income.
+
+See [Referral Contract](/docs/technical/referral-contract) and [Verify](/docs/technical/verification-contract).
+
+# Community & Growth
+
+## Recognition points
+
+| Action | Retained product score |
+| :--- | ---: |
+| Valid direct referral registration | +1 |
+| Buddy purchase | +2 |
+| Samurai purchase | +4 |
+| Noble purchase | +6 |
+
+Referral `referralCount` records direct registrations; `purchaseCount[user][type]` records collection activity. The final app/indexer must define the ranking period, free-position treatment, and tie-breaking. Referral upgrades change the plan and commission rate, not the number of direct registrations; no new upgrade-points rule is supplied.
+
+Points are recognition metrics and are distinct from ticket selection weight and referral commissions. Changing a referral plan does not change the 1–100 double-weight rule in a draw.
+
+## Genesis access
+
+The retained roadmap proposes social verification through X, Discord, YouTube, and Telegram, followed by a gas-only Genesis campaign for eligible wallets. Actual launch dates, quotas, proof format, and early-adopter benefits require campaign configuration. Genesis eligibility must not be confused with the five ordinary round positions that are free for the buyer.
+
+## Growth campaign
+
+The planned separate campaign targets 5,000 users and a 30-day window, with milestones and a top-three 50/30/20 split. Activation, funds, deployment, and snapshots are not verified in the new contract summary. Any funding must use available admin receipts after free-position reserves and deferred user liabilities, never Processor's round pool.
+
+See [Leaderboard](/docs/leaderboard), [Campaigns](/docs/campaigns), [campaign design](/docs/technical/campaign-contract), and the [16-phase roadmap](/docs/roadmap).
+
+# Leaderboard
+
+The retained FOS product scoring design recognizes valid direct referral registrations (+1), Buddy purchases (+2), Samurai purchases (+4), and Noble purchases (+6).
+
+| Action | Points |
+| :--- | ---: |
+| Valid direct referral registration | +1 |
+| Buddy purchase (nominal $3) | +2 |
+| Samurai purchase (nominal $13) | +4 |
+| Noble purchase (nominal $25) | +6 |
+
+The current contract summary describes `referralCount` and `purchaseCount[user][type]`. It does not establish the final leaderboard indexer, daily/weekly ranking API, tie-breaking implementation, points for upgrades, or the scoring treatment of free positions. Check the final application policy rather than inferring those rules from the counters.
+
+## Separate mechanisms
+
+- Referral plan level determines the share of future payments from direct referrals.
+- Ticket position determines 2× or 1× selection weight in a collection round.
+- Leaderboard points measure activity for recognition and any separately configured campaign.
+
+None of these substitutes for another. A wallet may hold several round tickets and receive multiple allocations through distinct tickets; the leaderboard does not choose those recipients.
+
+## Planned growth campaign
+
+The roadmap describes top-three campaign allocations at funded milestones with a 50/30/20 split. The campaign remains a separate design whose deployment and funding are not confirmed by the supplied update. See [Growth Campaign](/docs/campaigns/growth) for targets and [technical constraints](/docs/technical/campaign-contract).
+
+# Public Roadmap
+
+This is a development roadmap, not evidence that every feature has launched. The current core specification places user-facing contracts on Robinhood Chain, uses Base VRF through CCIP, and provides three referral plans. Genesis/campaign contracts, launch status, and future features need separate deployment confirmation.
+
+## Phase 1 — Community Introduction & Whitelist Access Program
+
+This phase focuses on onboarding the first members of the ecosystem and establishing a foundation of verified early supporters.
+
+- Launch of the official website and ecosystem overview
+- Introduction of the FOS Protocol across the community channels
+- Opening of the Whitelist Access Program for early adopters
+- Participation-based tasks designed to help users learn about the platform and engage with the community
+- Whitelisted users receive priority access to the next participation stage
+
+The Whitelist is a contribution-based access layer, not a financial feature. It is designed to recognize genuine community participation rather than speculation.
+
+## Phase 2 — Genesis Free-Mint Access (Whitelisted Users Only)
+
+Following the whitelist period, a dedicated Free-Mint Campaign is opened exclusively to verified members.
+
+- Whitelisted users may mint selected FOS Digital Collectibles
+- Participation requires network gas only (no protocol fee during this window)
+- Genesis assets and any Processor round eligibility must follow the separately published campaign configuration
+- The objective of this phase is to reward early contributors and establish the first active user base
+
+This phase reinforces our principle of accessibility and loyalty recognition, while remaining fully aligned with the protocol's product-first architecture.
+
+## Phase 3 — Limited-Access Application Release (Stability Validation Stage)
+
+Before enabling full public access, the platform enters a restricted availability period.
+
+- The application is opened to a limited number of users
+- System performance, UX behavior, and contract execution are monitored
+- Feedback from real-world usage is incorporated
+- Technical and operational stability are validated
+
+Only after the protocol demonstrates reliability in this controlled environment does the platform proceed to full availability.
+
+## Phase 4 — Public Launch & Open Access
+
+After stability validation, the protocol becomes publicly accessible.
+
+- Full public access to the application
+- Ongoing onboarding of new participants
+- Continued growth through community-driven initiatives
+- Expansion of ecosystem transparency and engagement tools
+
+Rounds follow their stored settings and asynchronous randomness lifecycle. Authorized owner controls and oracle/bridge operations remain part of the documented architecture.
+
+## Phase 5 — Growth Campaign (Activated at 5,000 Users)
+
+Once the ecosystem reaches 5,000 verified participants, the protocol activates a time-limited Growth Campaign Layer as defined in the technical and economic documentation.
+
+- The campaign operates for a predefined time window
+- A separately configured campaign may receive available admin funds after free-position reserves and deferred-user liabilities
+- Distributions occur based on milestone thresholds
+- Allocation follows a published structure and is tied to leaderboard performance and contribution ranking
+
+Participation in the campaign is optional, does not affect product purchase consideration, and remains strictly promotional in nature.
+
+## Phase 6 — FOS Lab: Innovation Playground
+
+FOS Lab is where new ideas are born, tested, and refined together with the community.
+
+This is a controlled experimental environment where we introduce and test new participation mechanics, new pool structures, and new interaction models — without affecting the stability of the live system.
+
+**What users get:**
+- Early access to experimental features
+- A safe testing space separate from the main platform
+- Opportunities to share feedback and influence feature development
+- A community-driven innovation loop
+
+FOS Lab is where ideas evolve into real features.
+
+## Phase 7 — Desktop Experience Upgrade
+
+FOS expands beyond mobile with a fully-optimized desktop experience designed for active users and long session interaction.
+
+**What users get:**
+- A redesigned interface for large screens
+- Enhanced navigation and workspace layout
+- Better visibility of cycles, history, and activity
+- A smoother, more efficient user workflow
+
+Whether you're on mobile or desktop, FOS delivers a consistent, high-quality experience.
+
+## Phase 8 — Expanded Wallet Support
+
+FOS becomes even more accessible by supporting a wider range of Web3 wallets.
+
+**What users get:**
+- Support for more browser and mobile wallets
+- WalletConnect integration for universal access
+- Smoother onboarding for new users
+- Future-ready design for smart-wallet standards
+
+Our goal is simple: use the wallet you like — and connect instantly.
+
+## Phase 9 — Multi-Chain Expansion
+
+FOS expands to compatible EVM networks through a security-first rollout strategy.
+
+**What users get:**
+- Access to FOS across multiple chains
+- Faster transaction options depending on network
+- Broader ecosystem participation
+- Seamless experience across supported networks
+
+Expansion follows a careful, audit-guided deployment path to ensure stability and trust.
+
+## Phase 10 — Dashboard V2: Transparency Reinvented
+
+Dashboard V2 introduces a new level of clarity, insight, and system visibility.
+
+**What users get:**
+- Deeper participation and engagement analytics
+- Clear contribution and cycle activity views
+- Historical timeline of ecosystem behavior
+- Real-time system and transaction insights
+
+Dashboard V2 strengthens our commitment to openness, fairness, and transparency.
+
+## Phase 11 — Advanced User Profile
+
+Built on the foundation of Dashboard V2, the Advanced User Profile transforms the wallet into a living participation identity.
+
+**What users get:**
+- Profile identity with optional avatar
+- Personal activity timeline
+- Participation footprint and engagement history
+- Non-financial reputation indicators
+
+Profiles reflect how users grow inside the ecosystem, not just what they hold.
+
+## Phase 12 — Priority Access Mode
+
+Active and committed users gain access to exclusive early-entry opportunities in selected cycles.
+
+**What users get:**
+- Early participation windows for top contributors
+- Access opportunities based on engagement and consistency
+- Recognition through participation effort — not entitlement
+- Occasional access to special pools and events
+
+This feature celebrates loyal members who help grow and support the ecosystem.
+
+## Phase 13 — Loyalty Framework
+
+A structured loyalty layer that acknowledges long-term participation and positive ecosystem behavior.
+
+**What users get:**
+- Progression based on engagement consistency
+- Recognition for holding collectibles
+- Participation-based milestones
+- Community-value alignment
+
+The loyalty framework is built on trust, contribution, and continuity.
+
+## Phase 14 — Time-Based Digital Collectibles
+
+Collectibles that evolve over time through progressive engagement and responsible holding behavior.
+
+**What users get:**
+- Unlockable attributes over time
+- Holding-based collectible progression
+- Optional transformation mechanics
+- A visual reflection of participation history
+
+Time becomes part of the collectible's story and identity.
+
+## Phase 15 — Missions & Group Participation Quests
+
+Participation becomes collaborative and goal-driven through personal and group missions.
+
+**Individual Missions:**
+- Engage across cycles
+- Complete activity milestones
+- Unlock progression achievements
+
+**Group (Squad) Missions:**
+- Team-based participation journeys
+- Shared targets and milestones
+- Cooperative progress experiences
+
+This transforms ecosystem participation into an interactive community adventure.
+
+## Phase 16 — Community Voting & Participation Governance
+
+A gradual introduction of responsible user-driven decision participation.
+
+**What users get:**
+- Voting on selected feature proposals
+- Participation-aligned voting conditions
+- Optional gated voting groups
+- Feedback-guided evolution of the ecosystem
+
+Governance is introduced thoughtfully — step-by-step, with stability first.
+
+# Strategic Framework & Legal Identity
+
+The project’s existing policy language is retained below. Product terminology does not establish legal classification, and the supplied technical specification is not a legal opinion. Read the current mechanics and seek qualified jurisdiction-specific advice. Claims about deployed access enforcement or audits require separate operational evidence.
+
+## Brand Identity
+
+**Visual Identity:** The Fos Brand Symbol serves as the visual ambassador, symbolizing adaptability and regeneration within the Web3 ecosystem.
+
+**Target Demographic:** The platform is engineered for Web3 natives, Digital Collectors, and Decentralized Finance (DeFi) participants seeking a trustless reward protocol.
+
+## Product-First Disclaimer
+
+The Fos Digital Collectible is sold as a standalone digital product. Any promotional distribution is ancillary, optional, non-guaranteed, and not consideration for purchase.
+
+## Strategic Nomenclature (Safe Harbor Terminology)
+
+To accurately reflect the protocol's legal status as a Product-Sale with Incentives (and not a gambling platform), the following terminology is strictly enforced across all documentation and interfaces:
+
+- "Reward Distribution" (Not "Prize Pool" or "Lottery").
+- "Fos Digital Collectible" (Not "Ticket").
+- "Recipient" (Not "Winner").
+- "Protocol Activation" (Not "Bet" or "Wager").
+- "Automated Selection" (Not "Game of Chance").
+
+## Regulatory Compliance & Consumer Protection
+
+**Data Privacy:** The platform architecture is designed for data minimization. No personal identifiers (Names, Emails, IPs) are stored on-chain; only public wallet addresses are utilized, aligning with GDPR and CCPA principles regarding pseudonymity.
+
+**Risk Disclosure:** Users are presented with a comprehensive Risk Disclaimer regarding the nature of cryptocurrency assets and the immutability of blockchain transactions prior to interaction.
+
+**Legal Basis:** The Fos Protocol operates as a peer-to-peer distribution mechanism. It is not a "House" that users play against; it is an automated software utility that routes value between participants based on configured contract rules; independent audit status must be verified separately.
+
+**Geographic Availability Notice:** The existing project access policy restricts users located in or residents of the United States, Canada, the United Kingdom, the European Economic Area, China, and sanctioned jurisdictions. Access from these jurisdictions is unauthorized.
+
+**Technical Enforcement:** The protocol utilizes Edge Middleware (e.g., Cloudflare) to enforce IP-based blocking. Access is strictly denied for requests originating from the United States, Canada, United Kingdom, and the European Economic Area (EEA).
 
 ---
 
-2. Platform Infrastructure & Access Layer
-2.1 Blockchain Architecture (Base L2) The Fos Protocol is deployed on the Base Network, an Ethereum Layer-2 solution. This infrastructure choice is strategic, ensuring the system inherits Ethereum’s robust security while providing the high throughput and sub-cent transaction fees necessary for a high-frequency reward ecosystem.
+# Official Protocol Disclaimer
 
-2.2 Protocol Economy (Native ETH) To ensure stability and liquidity, the ecosystem operates strictly on Native ETH (Base).
+## No Financial Advice or Investment
 
-Source of Truth: While the frontend utilizes an integrated API to display real-time USD equivalents for user convenience, the smart contract logic relies exclusively on the on-chain ETH value at the moment of the transaction.
+Fos Digital Collectibles are sold strictly as consumer goods for artistic and social utility. No information on this platform constitutes financial advice, investment advice, or a recommendation to buy. You agree that you are purchasing an NFT with **no expectation of profit**, dividends, or capital appreciation.
 
-No Volatility Risk: By avoiding proprietary tokens for payments, we protect users from volatility and speculative dumping.
+## Non-Gambling (Promotional Nature)
 
-2.3 Non-Custodial Wallet Integration Fos employs a strictly non-custodial connection model, ensuring users retain full control of their assets until the moment of interaction.
+The Protocol's "Reward Distribution" is an automated, ancillary **loyalty mechanism** designed to reward community participation. It is **not** a lottery, sweepstakes, wager, or game of chance. Participation is incidental to the purchase of the NFT product.
 
-Supported Providers: The platform features native integration for MetaMask and Coinbase Wallet, covering the vast majority of the Web3 user base.
+## The "Green Eye" Gas Risk (Critical Warning)
 
-Smart Wallet Compatibility: The protocol is engineered to be compatible with Account Abstraction (ERC-4337) by explicitly avoiding tx.origin checks, ensuring future-proof access for smart contract wallets.
+You acknowledge that gas fees on Robinhood Chain fluctuate. The 500th mint closes the round and starts the specified Base VRF/CCIP process. Selection and payments happen later; no fixed gas multiplier is established by the supplied specification. Gas fees are paid to network validators, are non-refundable, and are outside the Fos Team's control.
 
-2.4 Cross-Device Accessibility
+## Restricted Jurisdictions
 
-Mobile-First Design (Deep-Linking): For mobile users, the platform supports automated deep-linking. Visiting the Fos domain on a mobile device automatically triggers the wallet’s in-app browser (e.g., MetaMask Mobile), ensuring a seamless "Connect & Mint" experience without switching apps.
+This Protocol is **NOT** offered to persons or entities resident in the **United States, Canada, the United Kingdom, or the European Economic Area (EEA)**. Accessing the Protocol from these jurisdictions is a violation of our Terms and is strictly prohibited.
 
-Desktop Experience: Users on desktop environments (Chrome, Brave, Edge) interact via standard browser extensions, enabling one-click transaction signing and management.
+## Smart Contract Autonomy
+
+Allocation rules are stored for each round. Authorized owners can change supported settings, generally for later rounds, and referral prices and rates are configurable. Verify certificates can be revoked by its owner. Completed blockchain transactions cannot be reversed by the interface. You acknowledge that blockchain software is experimental and carries inherent risks, including code vulnerabilities or network failure.
+
+## Limitation of Liability
+
+By interacting with the app, you agree to hold the Fos Team, developers, and affiliates harmless for any losses, including failed transactions, high gas fees, or smart contract exploits. **Use at your own risk.**
 
 ---
 
-3. The Collection & Protocol Mechanics
+# Refund & Claim Policy
 
-3.1 Minting Architecture & User Journey
+## No Refunds (Digital Content Waiver)
 
-The user journey is engineered to be a seamless, non-custodial e-commerce experience, grounded in strict on-chain verification.
+**ALL SALES ARE FINAL.** Due to the immutable nature of blockchain transactions, payments cannot be reversed once processed.
 
-Protocol Interaction Terms: Upon connecting, users execute a one-time signature to acknowledge the protocol parameters. This step ensures informed consent regarding the immutable nature of the smart contracts.
+**Waiver of Withdrawal Rights:** You expressly acknowledge that by initiating the Mint transaction, the **performance of the digital service begins immediately**. You hereby **waive your right of withdrawal** (cooling-off period) under applicable consumer protection laws (including EU Directive 2011/83/EU). You lose the right to cancel the contract once the minting starts.
 
-On-Chain Minting (Source of Truth): Users initiate the buyAndMint function to purchase a unique Fos Digital Collectible.
+## Gas Fees & The "Green Eye" Risk
 
-Cost Structure: The user pays the fixed NFT price PLUS the standard network gas fee required by the Base network.
+Users are solely responsible for all network gas fees ("Transaction Costs").
 
-Pricing Oracle: While the frontend interface displays real-time USD estimates via an API for convenience, the smart contract treats the Native ETH value as the absolute source of truth at the moment of execution.
+**Non-Refundable:** Gas fees are paid to network validators, not to the Protocol. They are **never refundable**, even if a transaction fails or is reverted.
 
-Account Abstraction: The minting logic explicitly uses msg.sender rather than tx.origin, ensuring full compatibility with ERC-4337 Smart Wallets and future-proofing the protocol.
+**Network and delivery costs:** The last mint initiates asynchronous processing. Consult the actual gas estimate and final oracle/CCIP fee policy; no 18× multiplier or guaranteed response time is stated.
 
-Provenance Registration: Every mint event atomically registers the buyer’s wallet ID and the NFT’s unique attribute hash on-chain. This establishes Immutable Provenance, ensuring that reward rights remain permanently attached to the original minter profile, regardless of secondary market transfers.
+## Allocation Claims
 
-3.2 Automated Revenue Allocation (The Zero-Sum Logic)
+- **Cycle allocations:** Direct payment is attempted after draw processing. If it fails, the recorded deferred amount can be collected with `claim()`.
+- **Campaigns:** Claim terms depend on the separately verified campaign implementation. The Protocol is not liable for rewards left unclaimed due to user negligence, lost private keys, or wallet disconnection.
 
-The protocol employs a "Split-Payment" architecture. Upon receipt of funds, the smart contract performs an immediate, atomic division of capital to ensure solvency.
+## Technical Failures
 
-Protocol Rewards (The Community Treasury): A fixed portion of every mint is programmatically locked into the Reward Contract. This capital is isolated and cannot be accessed by the Admin.
+The Protocol is not liable for transactions that fail due to:
 
-FOS Buddy I: $2.00 allocated per mint.
+- **User Error:** (e.g., setting gas limit too low, "Out of Gas" errors).
+- **Network Issues:** (e.g., Robinhood/Base network congestion or CCIP/VRF delivery delays).
+- **Slippage:** (e.g., someone else minting the last item before you).
 
-FOS Samurai I: $10.00 allocated per mint.
-
-FOS Noble I: $20.00 allocated per mint.
-
-Operational Margin: The remaining surplus is routed to the Operational Sink. Unlike centralized systems that extract maximum value, this margin is strictly calculated to cover protocol maintenance, security audits, and development costs.
-
-3.3 Gas Sustainability Model (User-Funded Execution)
-
-To maintain a perpetual, autonomous cycle without centralized maintenance, the protocol utilizes a tiered gas responsibility model:
-
-Standard Mints (1–499): Participants pay the standard gas fee associated with their own minting transaction.
-
-The "Green Eye" Treasury (Mint #500): The 500th NFT of every generation is designated as a Prestige Collectible with unique system responsibilities.
-
-The Mechanic: The purchaser of the Green Eye pays the NFT price PLUS a specific gas stipend calculated to cover 18 atomic transactions (1 Mint + 17 Reward Distributions).
-
-The Trigger: This transaction automatically executes the distributeRewards() function, closing the cycle and delivering value to all recipients in a single block.
-
-3.4 The Three Tiers (Pool Architecture)
-
-The ecosystem is segmented into three isolated pools. Each pool operates on a 500-unit cycle, where 5 specific units (#10, #100, #200, #300, #400) are designated as "Gas-Only Entries" to ensure accessibility. This results in 495 Revenue-Generating Mints per cycle.
-
-FOS Buddy (Entry Tier)
-
-Unit Price: ~$3.00 (ETH Equivalent) + Gas
-
-Paying Volume: 495 Units (5 Free)
-
-Protocol Revenue: $1,485 ($3 \times 495$) | Allocated Rewards: $1,000 | Ops Margin: $485
-
-Distribution Structure:
-
-Primary Recipient: $500 (50%)
-
-Secondary Group (x6): $50 each (30%)
-
-Tertiary Group (x10): $20 each (20%)
-
-FOS Samurai (Mid Tier)
-
-Unit Price: ~$13.00 (ETH Equivalent) + Gas
-
-Paying Volume: 495 Units (5 Free)
-
-Protocol Revenue: $6,435 ($13 \times 495$) | Allocated Rewards: $5,000 | Ops Margin: $1,435
-
-Distribution Structure:
-
-Primary Recipient: $2,500 (50%)
-
-Secondary Group (x6): $250 each (30%)
-
-Tertiary Group (x10): $100 each (20%)
-
-FOS Noble (Premium Tier)
-
-Unit Price: ~$25.00 (ETH Equivalent) + Gas
-
-Paying Volume: 495 Units (5 Free)
-
-Protocol Revenue: $12,375 ($25 \times 495$) | Allocated Rewards: $10,000 | Ops Margin: $2,375
-
-Distribution Structure:
-
-Primary Recipient: $5,000 (50%)
-
-Secondary Group (x6): $500 each (30%)
-
-Tertiary Group (x10): $200 each (20%)
-
-3.5 The Referral Activation
-
-Users may optionally activate the Affiliate Protocol to participate in the growth economy.
-
-Activation Cost: A fixed fee of $10.00 (ETH Equivalent) + Gas.
-
-Revenue Split: The smart contract automatically routes 82% of generated fees to the referrer and 18% to the protocol treasury.
----
-
-4. Technical Implementation
-4.1 Smart Contract Architecture
-
-NFT Standard (ERC-721): The protocol implements the ERC-721 standard on the Base Network to ensure universal compatibility with wallets and marketplaces.
-
-Immutable Uniqueness: Each Fos Digital Collectible is cryptographically unique, with metadata permanently stored on decentralized file systems (IPFS/Arweave).
-
-Incentive Vector (The "Early Adopter" Weighting): To reward protocol loyalty, the smart contract enforces a Weighted Probability Mechanism:
-
-Tier A (Mints 1–100): These units are assigned a Double Weight Protocol Score (2x), mathematically doubling their allocation probability in the reward algorithm.
-
-Tier B (Mints 101–500): These units carry a Standard Protocol Score (1x).
-
-Immutable Logging: This weight is assigned atomically at the moment of minting and is permanently recorded in the contract state.
-
-4.2 Algorithmic Recipient Selection
-
-Provenance-Based Eligibility: Reward rights are derived strictly from the Original Minter's Provenance. The protocol binds eligibility to the initial wallet address and the NFT's unique hash. This ensures that the reward right remains a permanent Loyalty Perk for the original participant, even if the asset is transferred or sold on the secondary market.
-
-The "Green Eye" Trigger (Automated Execution): The cycle is designed for autonomy. When the 500th unit (The Green Eye) is minted, the smart contract automatically executes the distributeRewards() function in the same transaction block.
-
-Verifiable Randomness (Chainlink VRF): To eliminate operator bias, the protocol utilizes Chainlink VRF (Verifiable Random Function) via Subscription on Base.
-
-The Process: The contract requests a cryptographically secure random seed.
-
-The Algorithm: A weighted selection algorithm uses this seed to iterate through the prize tiers (Primary, Secondary, Tertiary).
-
-Non-Duplication: Once a Unit ID is selected for a reward tier, it is programmatically excluded from subsequent tiers in that specific cycle to ensure broad distribution.
-
-4.3 Autonomous Capital Flow & Gas Logic
-
-Atomic Revenue Split: Upon every transaction, the smart contract performs an immediate separation of funds to ensure the Reward Pool is always fully solvent before operation costs are covered.
-
-FOS Buddy I: $2.00 locked for Rewards.
-
-FOS Samurai I: $10.00 locked for Rewards.
-
-FOS Noble I: $20.00 locked for Rewards.
-
-Gas Responsibility Architecture:
-
-Mints 1–499 (Standard): The participant pays the standard network gas fee associated with their mint interaction. The remaining margin (after the Reward allocation) is routed to the Operational Sink.
-
-Mint 500 (The Green Eye): The purchaser pays the NFT price PLUS a specific gas stipend. This additional capital covers the execution cost of the 18 atomic transactions required to distribute rewards to all 17 recipients and reset the cycle.
-
-Surplus Management: Any unused gas from the stipend is automatically returned to the Operational Sink, ensuring no capital is wasted.
-
-Auditability: Every step of this process—from payment splitting to recipient selection—is emitted as an on-chain event, allowing for real-time auditing via block explorers like BaseScan.
-
----
-
-5. Detailed Process Flow Overview
-5.1 User Journey & Protocol Interaction
-
-Pre-Mint Visualization: Prior to execution, the interface renders a preview of the specific NFT attributes (Tier/Collection) to ensure transparency.
-
-Immutable Consent: The user executes a one-time signature to acknowledge the protocol terms. This step serves as the on-chain acceptance of the "Product-First" mechanics, distinguishing the interaction from speculative gaming.
-
-Atomic Settlement: Upon confirmation, the user transmits the NFT price (Native ETH). The smart contract atomically mints the asset and registers the buyer’s Immutable Provenance (Wallet ID + Unique Hash) in the same transaction block.
-
-5.2 Special Access: The Gas-Only Protocol To democratize access and maintain standardized cycle progression, specific sequence identifiers are designated as "Gas-Only Entries."
-
-The Designated Tiers: Mints #10, #100, #200, #300, and #400 of every cycle are exempt from the protocol fee.
-
-The Mechanic: For these specific transactions, the smart contract logic bypasses the pricing requirement. The user is required to pay only the Base Network Gas Fee to execute the mint. These units retain full utility and identical reward eligibility to paid units.
-
-5.3 Provenance Registration & Scoring
-
-Minting Event: The contract generates a unique tokenId and cryptographically binds it to the minter's address.
-
-Incentive Scoring: The protocol automatically assigns the Participation Weight:
-
-Mints 1–100: Assigned a 2x Priority Score (Early Adopter Bonus).
-
-Mints 101–500: Assigned a 1x Standard Score.
-
-Registry Logging: These parameters are permanently written to the Distribution Registry, ensuring the user's eligibility is secured regardless of future wallet activity.
-
-5.4 The Autonomous Distribution Cycle
-
-The "Green Eye" Trigger: The cycle is strictly capped at 500 units. The purchase of the 500th NFT (The Green Eye) acts as the Atomic Trigger, initiating the distribution logic immediately within the purchase transaction.
-
-Verifiable Selection: The contract invokes Chainlink VRF to secure a tamper-proof random seed. This seed drives the weighted selection algorithm to identify recipients for the Primary, Secondary, and Tertiary tiers.
-
-Push-Based Settlement: For the Reward Pool, the smart contract executes Direct Push Transfers, sending ETH automatically to the winning wallet addresses without requiring a claim action.
-
-Cycle Reset: Post-distribution, the cycle ID increments, and the pool resets to 0, ensuring the system runs perpetually without manual intervention.
-
-6. The Affiliate Protocol (Referral System)
-6.1 Architecture Overview The Fos Affiliate Protocol is a decentralized growth engine designed to reward community expansion. Unlike traditional multi-level marketing (MLM) schemes, this system is Single-Level and Linear, ensuring sustainability and preventing pyramid structures.
-
-6.2 Activation Pathways Users participate in the growth economy via two distinct on-chain methods:
-
-Method A: The Partner Route (Via Referral Link)
-
-Mechanism: A new user activates their account using an existing member's code.
-
-Cost: $10.00 (ETH Equivalent) + Gas.
-
-Smart Contract Split: The protocol automatically divides the fee:
-
-82% ($8.20): Allocated to the Referrer.
-
-18% ($1.80): Allocated to the Protocol Treasury.
-
-Method B: The Direct Route (No Referral)
-
-Mechanism: A user joins the platform independently without an invite code.
-
-Cost: $10.00 (ETH Equivalent) + Gas.
-
-Smart Contract Split:
-
-100% ($10.00): Allocated to the Protocol Treasury (as no referrer exists to compensate).
-
-6.3 Commission Distribution (Pull Pattern) To optimize gas efficiency and security for high-volume referrers, the protocol utilizes a "Claim-Based" (Pull) architecture for commissions.
-
-Instant Allocation: Commissions are calculated and added to the referrer's on-chain balance immediately upon the invitee's transaction.
-
-User-Controlled Withdrawal: Referrers may withdraw their accrued earnings at any time via the withdraw() function. This prevents "Dust Attacks" and reentrancy vulnerabilities associated with automatic push payments for frequent earners.
-
-No Human Intermediary: The entire ledger is managed by the smart contract; the Admin cannot freeze, delay, or manually adjust earned commissions.
-
-7. Community Recognition & Growth Architecture
-7.1 The Unified Ranking Protocol To foster active participation, the platform implements a transparent, on-chain Activity Score for every user. Unlike simple counters, the ranking algorithm aggregates both growth contributions and protocol interaction.
-
-The Scoring Logic (Points System): The smart contract assigns immutable points for verifiable actions:
-
-Growth Factor: +1 Point per valid Referral.
-
-Participation Factor (Buddy Tier): +2 Points per Entry ($3).
-
-Participation Factor (Samurai Tier): +4 Points per Entry ($13).
-
-Participation Factor (Noble Tier): +6 Points per Entry ($25).
-
-7.2 The Global Leaderboard
-
-Real-Time Visibility: The application features a public, real-time leaderboard that indexes all active participants. This ensures transparent competition and allows the community to verify the "Top Contributors" independently.
-
-Status & Recognition: In its standard state, the leaderboard serves as a Reputation Protocol. It provides social proof and status within the ecosystem, recognizing top performers without altering the core economic distribution of the pools.
-
-7.3 The "Campaign" Overlay (Conditional Incentives) While the core leaderboard is designed for status, the protocol includes a Conditional Incentive Layer to accelerate network effects.
-
-Activation Threshold: When the ecosystem reaches 5,000 Active Users, the "Growth Campaign" logic is automatically triggered.
-
-Milestone Rewards: During active campaigns, the protocol redirects the Treasury's revenue share into a dedicated Prize Pool. Upon hitting defined revenue milestones (e.g., $20k, $50k), this pool is distributed to the Top 3 Leaders (50% / 30% / 20%) as a performance bonus.
-
-8. The Economic Growth Engine (Affiliate Math)
-8.1 The "Fair-Share" Architecture The Fos Affiliate Protocol eliminates the complexity of opaque, multi-level marketing schemes. It relies on a transparent, Single-Level Protocol Economy where rewards are mathematically fixed and verifiable.
-
-Universal Activation: Participation requires a standardized activation fee of $10.00 (ETH Base).
-
-The 82/18 Immutable Split: The smart contract enforces a hard-coded revenue division for every referral event:
-
-Referrer Share (82%): $8.20 is allocated directly to the inviter.
-
-Protocol Share (18%): $1.80 is allocated to the Operational Treasury.
-
-8.2 Scalability & Yield Logic The system places no cap on the number of active connections a user can maintain ("Unlimited Width"), allowing for exponential individual growth within a linear system.
-
-Unit Economics:
-
-1 Activation = $8.20 Net Yield.
-
-10 Activations = $82.00 Net Yield.
-
-100 Activations = $820.00 Net Yield.
-
-1,000 Activations = $8,200.00 Net Yield.
-
-8.3 Real-Time Settlement Layer Unlike traditional affiliate platforms that rely on monthly "Net-30" batch processing, the Fos Protocol operates on Block-Time Settlement.
-
-Instant Allocation: Earnings are recorded on the internal ledger immediately upon the successful confirmation of the invitee's transaction.
-
-Claim-Based Efficiency: To minimize gas costs for power users and prevent reentrancy attacks, the system utilizes a "Pull" Withdrawal Pattern. Users may aggregate earnings and withdraw to their wallet in a single transaction at their discretion.
-
-9. Implementation & Security Architecture
-9.1 Smart Contract Engineering The core logic is deployed on Base (Ethereum L2), utilizing industry-standard libraries to ensure asset safety.
-
-Gas Optimization: The contract logic is heavily optimized for low-cost execution, utilizing minimal storage operations for the referral mapping.
-
-Reentrancy Protection: All financial interactions are guarded by nonReentrant modifiers and adhere to the Checks-Effects-Interactions (CEI) pattern to prevent exploit vectors.
-
-Source of Truth: While the UI displays USD approximations, the contract treats Native ETH as the absolute unit of account, ensuring the protocol remains trustless and decentralized.
-
-Governance Security (Multi-Signature Control) To eliminate "Key Person Risk," all high-level protocol controls (such as parameter adjustments or emergency pauses) are protected by Multi-Signature (Multi-Sig) Governance.
-
-Consensus Requirement: No single developer or admin key can unilaterally alter the protocol. Critical actions require cryptographic consensus from multiple hardware-secured keys.
-
-Timelock (Optional): Sensitive updates may be subject to a forced on-chain delay, giving the community time to audit changes before they go live.
-
-9.2 The Decentralized Failover (Public Retry Protocol) To guarantee protocol reliability even during periods of extreme network congestion, the smart contract includes a Public Failover Mechanism.
-
-The Scenario: In the rare event that the 500th mint transaction runs out of gas or reverts due to network volatility, the cycle effectively "pauses" rather than breaking.
-
-The Solution: The retryDraw() function becomes callable by any public wallet. This allows the community to manually trigger the pending distribution, ensuring that rewards are never stuck and the cycle always completes successfully.
-
-9.3 The Non-Custodial Interface
-
-Transparency: The user dashboard provides real-time visualization of the on-chain ledger, tracking total referrals and unclaimed earnings.
-
-Self-Sovereignty: At no point does the platform take custody of user funds. The "Join" transaction routes fees directly to the smart contract, and the "Withdraw" transaction routes earnings directly to the user's wallet.
-
-The Verification Registry (Anti-Counterfeit Layer) To protect users from secondary market scams and "copycat" collections, Fos deploys a dedicated Verification Smart Contract.
-
-Canonical Status: This contract serves as the single source of truth for asset authenticity. It maintains a boolean isVerified mapping for every asset ID.
-
-User Tooling: The platform provides a dedicated "Check Authenticity" tool where users can paste a contract address or ID. The system queries the on-chain registry directly, providing a mathematical guarantee of the asset's legitimacy before a user purchases on the secondary market.
-
-10. Strategic Framework & Legal Identity
-10.1 Brand Identity
-
-Platform Slogan: "Mint. Share. Win!"
-
-Visual Identity: The "Fos" serves as the visual ambassador, symbolizing adaptability and regeneration within the Web3 ecosystem.
-
-Target Demographic: The platform is engineered for Web3 natives, Digital Collectors, and Decentralized Finance (DeFi) participants seeking a trustless reward protocol.
-
-10.2 Strategic Nomenclature (Safe Harbor Terminology) To accurately reflect the protocol's legal status as a Product-Sale with Incentives (and not a gambling platform), the following terminology is strictly enforced across all documentation and interfaces:
-
-"Reward Distribution" (Not "Prize Pool" or "Lottery").
-
-"Fos Digital Collectible" (Not "Ticket").
-
-"Recipient" (Not "Winner").
-
-"Protocol Activation" (Not "Bet" or "Wager").
-
-"Automated Selection" (Not "Game of Chance").
-
-10.3 Regulatory Compliance & Consumer Protection
-
-Data Privacy: The platform architecture is designed for data minimization. No personal identifiers (Names, Emails, IPs) are stored on-chain; only public wallet addresses are utilized, aligning with GDPR and CCPA principles regarding pseudonymity.
-
-Risk Disclosure: Users are presented with a comprehensive Risk Disclaimer regarding the nature of cryptocurrency assets and the immutability of blockchain transactions prior to interaction.
-
-Legal Basis: The Fos Protocol operates as a peer-to-peer distribution mechanism. It is not a "House" that users play against; it is an automated software utility that routes value between participants based on pre-defined, audited rules.
-
-Here is the improved and expanded explanation for Section 11.1.
-
-I have rewritten it to emphasize that this is a "Gratitude Program" for your earliest supporters. It clearly lists the social requirements (YouTube, X, Discord, Telegram) and explains that this effort earns them the Discord Role and the right to the Free Mint.
-
-11. Launch Strategy & Growth Incentives
-11.1 The Access Protocol (Genesis Whitelist) To honor the founding members who help build the foundation of the ecosystem, the protocol enforces a "Proof of Contribution" whitelist. This is not just a list; it is a gratitude mechanism designed to identify and reward true community builders.
-
-Eligibility Requirements (Social Validation): To qualify as a Founding Member, users must demonstrate active engagement across the official communication channels. The smart contract and API verify subscription and contribution on:
-
-X (Twitter): Following and engaging with protocol updates.
-
-Discord: Joining the server and contributing to community discussions.
-
-YouTube: Subscribing to the official channel for educational content.
-
-Telegram: Joining the announcement and chat groups.
-
-The "Founding Member" Status: Upon successful verification of these social actions, users are granted a specific Verified Role within the Discord server. This role serves as a badge of honor, distinguishing early contributors from the general public.
-
-The Reward (Exclusive Access): Possessing this status is the only key to unlocking the Free Mint Phase. It ensures that the "Gas-Only" mints are reserved exclusively for the real people who helped grow the community, rather than bots or random speculators.
-
-11.2 The Genesis Allocation (Free Mint) The "Free Mint" is a designated protocol phase engineered to reward early network validators.
-
-Gas-Only Participation: During this specific window, whitelisted participants may mint Fos Digital Collectibles by paying only the network gas fee. The standard protocol revenue requirement is waived.
-
-Early Adopter Bonus: The contract includes a deterministic "First-Mover" mechanism. The first set of unique wallets (e.g., the first 10 confirmed transactions) are programmatically upgraded to receive a special allocation of higher-tier units (e.g., Tier 3 "Noble" assets), locking in long-term value for the earliest supporters.
-
-11.3 The Hyper-Growth Campaign (Conditional Layer) While the core protocol operates perpetually, a Conditional Incentive Layer is embedded in the smart contract to accelerate network effects post-launch.
-
-Activation Trigger: This layer remains dormant until the ecosystem reaches a critical mass of 5,000 Active Users. Once this on-chain threshold is met, the campaign automatically activates.
-
-The "Revenue-Share" Mechanism: Upon activation, the protocol enters a 30-Day Growth Phase. During this period, the "Protocol Share" of revenue is redirected into a dedicated Community Reward Pool.
-
-Milestone Distribution: As the pool accumulates value, payouts are triggered at pre-defined milestones (e.g., $20k, $50k, $100k).
-
-Performance Allocation: These funds are distributed to the Top 3 Community Leaders based on the real-time leaderboard, following a strict 50% / 30% / 20% split.
+In these cases, no refunds will be issued for gas spent or opportunities lost.

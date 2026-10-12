@@ -5,9 +5,11 @@ description: Terms and Conditions of Use for the FOS Protocol
 
 # Terms and Conditions of Use
 
-**Last Updated:** December 15, 2025 | **Version:** 2.0 – License-Free NFT Seller Framework
+**Last Updated:** October 12, 2026 | **Version:** 3.0 – Robinhood Contract Documentation Revision
 
 > **IMPORTANT NOTICE:** These Terms govern the use of a digital collectibles platform operating as an NFT seller with optional promotional giveaways. The Protocol does not offer gambling, lotteries, betting, investment products, or financial services of any kind.
+
+The project policy statements below do not constitute an independent legal determination. The mechanics include paid mints, weighted random selection, and allocations; applicable classification must be reviewed for each jurisdiction. Contract owners have the configuration permissions described in the technical reference.
 
 BY CONNECTING A WALLET OR INTERACTING WITH THE SMART CONTRACTS, YOU CONFIRM THAT YOU HAVE READ, UNDERSTOOD, AND AGREED TO THESE TERMS.
 
@@ -17,7 +19,7 @@ BY CONNECTING A WALLET OR INTERACTING WITH THE SMART CONTRACTS, YOU CONFIRM THAT
 
 | Term | Definition |
 | :--- | :--- |
-| **"Protocol"** | The decentralized, non-custodial smart contract system known as FOS, deployed on the Base Layer-2 blockchain. |
+| **"Protocol"** | The decentralized, non-custodial smart contract system known as FOS, with user-facing contracts on Robinhood Chain and the specified Base VRF/CCIP randomness integration. |
 | **"Fos Digital Collectible" or "NFT"** | A unique ERC-721 digital collectible representing digital art and associated utility. |
 | **"User"** | Any person who accesses the Protocol or interacts with its smart contracts. |
 | **"Fos Team"** | The original developers and maintainers of the Protocol interface. |
@@ -63,14 +65,15 @@ The purchase price is paid solely for the NFT.
 *   **Blockchain Finality:** Transactions are irreversible. All NFT sales are final. No refunds are possible.
 *   **Gas Fees:** Users are solely responsible for all blockchain gas fees.
 
-> ⚠️ **Green Eye Warning:** The 500th transaction of any cycle triggers complex contract execution, resulting in **~18x standard gas costs**. By transacting, you voluntarily accept this risk.
+> **Draw timing and fees:** The 500th mint closes a round and initiates a cross-chain randomness request. Draw completion occurs later, after VRF and CCIP processing. Gas, bridge, and oracle fees vary; no fixed 18× multiplier or completion-time guarantee is stated.
 
 ---
 
 ## 7. Affiliate / Referral Program
 
 *   Participation is **optional**.
-*   Referral benefits are **promotional incentives**, not income or employment.
+*   Plans are nominally $2/$5/$10, payable at configured ETH prices. The direct referrer’s current plan sets a 50%/60%/82% share of registration and upgrade payments. Upgrades pay the configured price difference and keep the original referrer. Direct payments are attempted; deferred balances use `claim()`.
+*   Referral payments do not establish an employment relationship or guarantee income.
 *   Users are solely responsible for any applicable tax obligations.
 
 ---
@@ -118,8 +121,8 @@ To the maximum extent permitted by law, the Fos Team's total liability shall not
 
 *   **Waiver of Withdrawal Rights:** By initiating a Mint transaction, you waive your right of withdrawal under applicable consumer protection laws.
 *   **Gas Fees:** Non-refundable, even if transactions fail.
-*   **Cycle Rewards:** Pushed automatically.
-*   **Campaign Rewards:** Must be claimed manually.
+*   **Cycle Allocations:** Direct transfer is attempted after draw processing. Rejected transfers become `pendingWithdrawals` and can be collected with `claim()`.
+*   **Campaign Allocations:** Follow separately published campaign terms and verified funding/deployment; the new core specification does not establish an active campaign.
 
 ---
 

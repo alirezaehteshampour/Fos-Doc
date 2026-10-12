@@ -1,37 +1,61 @@
 ---
 title: Referral Contract
-description: Referral system and revenue split mechanics
+description: Registration, upgrades, basis-point splits, and deferred ETH claims
 ---
 
 # Referral Contract
 
-Processes a fixed deposit (nominally $10) and splits proceeds based on presence of a valid referral, sending 82% to referrer and 18% to admin. Without referral, 100% goes to admin.
+Referral manages registered wallets and independent paid plans on Robinhood Chain. It does not mint FOSNFT tickets, select draw recipients, or calculate their allocations.
 
-## State & Configuration
+## Initial rates
 
-- `admin` Protocol Distribution address (multi-sig), `treasury` if distinct.
-- `referrerOf[code]` mapping or `isValidReferrer[address]`; optional `code → address` registry.
-- Asset configuration: native vs `ERC-20` token (address, decimals). Fixed price oracle not required since value is nominal and constant; alternatively reference USD-pegged stablecoin.
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
 
-## External Interfaces
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-- `payReferral(code)` or `payReferral(referrer)`: validates referral; processes split; records accounting.
-- `withdraw()` (pull-based): referrers and admin withdraw accrued balances to mitigate reentrancy risk.
+## Specified write interfaces
 
-## Events
+| Function | Behavior |
+| :--- | :--- |
+| `register(address referrer, uint256 tier)` | Register once with tier 2/5/10 and exact configured ETH payment |
+| `upgrade(uint256 newTier)` | Upgrade 2→5, 2→10, or 5→10 for the current price difference |
+| `claim()` | Withdraw a referrer's deferred transfer balance |
+| `withdraw()` | Withdraw available admin funds without taking deferred user liabilities |
 
-- `ReferralPaid(address payer, address referrer, uint256 refAmount, uint256 adminAmount)`, `ReferralMissed(address payer, uint256 amount)`.
+The direct referrer must be registered, cannot be self, and cannot be changed after registration. Zero address means no referrer. A referred registration increments `referralCount`; the specification does not describe upgrades as new referral registrations.
 
-## Accounting & Rounding
+## State and reads
 
-- Compute `refAmount = floor(amount * 82 / 100)`, `adminAmount = amount - refAmount` to avoid dust loss.
-- Track per-beneficiary accruals in mappings; transfers occur via withdraw to reduce attack surface.
-- **Admin routing**: The 18% admin fee is routed directly to the Admin wallet.
-- **Legal Classification:** Referral splits are technically defined as "Protocol Fee Rebates" or "Commission Splits," not wages or salary. The system generates no 1099/tax forms; users are solely responsible for local tax compliance.
+| State | Meaning |
+| :--- | :--- |
+| `isRegistered` | Wallet registration status |
+| `userTier` | Wallet's current plan |
+| `referredBy` | Fixed direct referrer |
+| `referralCount` | Direct registrations referred |
+| `totalEarned` | Recorded referral earnings |
+| `pendingWithdrawals` | Deferred ETH owed to the wallet |
+| `tierPrice` | Configured ETH price for each plan |
+| `tierReferrerBps` | Plan's commission rate in basis points |
+| `adminWallet` | Admin beneficiary |
 
-## Security
+Useful reads are `getUpgradeCost`, `getUserInfo`, `getReferralLink`, and `adminWithdrawable`. The supplied summary does not provide their complete ABI types, so use the verified ABI rather than inventing return tuple layouts. Main specified events are `Registered`, `Upgraded`, and `PaymentDeferred`; event argument signatures are not supplied.
 
-- Validate referral source (signed code by backend or on-chain registry) to prevent spoofing.
-- Use `nonReentrant` and CEI; never assume `ERC-20` returns `true` without checking.
-- **Program Rule**: The referral program is *linear and single-level*. Only direct referrals count; there is no multi-level/MLM structure.
-- **Participation**: Referral participation is optional and does not require NFT purchase.
+## Accounting
+
+```text
+cost = tierPrice[newTier] - tierPrice[oldTier]
+refAmount = floor(payment * tierReferrerBps[userTier[directReferrer]] / 10000)
+adminAmount = payment - refAmount
+```
+
+Without a direct referrer, `refAmount = 0`. The referrer's active plan at payment time applies to registration and upgrade payments. Later plan changes never recalculate already processed payments. Admin funds must exclude `pendingWithdrawals` liabilities.
+
+## Authority and Verify integration
+
+Owner controls include prices, percentages, admin wallet, and Verify connection. Prices must remain strictly ordered 2 < 5 < 10. When Verify is connected and Referral is an approved minter, initial registration issues a certificate with origin type 5, origin ID 0, and empty URI. Upgrade certificate issuance is not defined.
+
+See [public referral examples](/docs/referral). Test ETH prices reported in the specification are not production prices. Validate exact amount enforcement, unauthorized reconfiguration, rejected receiver claims, and reentrancy before deployment.

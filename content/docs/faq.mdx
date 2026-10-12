@@ -1,245 +1,111 @@
 ---
 title: FAQ
-description: Frequently Asked Questions about the FOS Protocol
+description: Robinhood networks, referral plans, round draws, deferred claims, and certificates
 ---
 
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 # FOS Help Center & FAQ
 
-Find answers to common questions about the FOS Protocol. Click on any question to expand the answer.
-
----
-
-## General & Basics
+## Networks and access
 
 <Accordions>
 <Accordion title="What is FOS?">
-FOS is a decentralized digital art protocol on the Base (Ethereum L2) network. We offer unique **Fos Digital Collectibles** (NFTs). The protocol features an automated, trustless **Reward Distribution** mechanism that acts as a loyalty perk for our community of collectors.
+FOS is a digital collectibles project with independent referral plans and authenticity certificates. User-facing contracts are on Robinhood Chain. The specified randomness architecture uses Chainlink VRF on Base and CCIP messaging between the networks.
 </Accordion>
-
-<Accordion title="Is FOS a lottery or gambling site?">
-**No.** FOS is a digital collectibles marketplace. You are purchasing a piece of digital art (an NFT). The "Promotional Distributions" are incidental loyalty rewards, similar to store reward points. You do not "bet" or "wager" funds.
+<Accordion title="Which network do I use?">
+Use Robinhood Chain for NFT, referral, and Verify transactions. Mainnet is chain ID 4663; Robinhood testnet is 46630. Base is the randomness-service side, not the user minting network. See the [network reference](/docs/protocol/platform) before connecting.
 </Accordion>
-
-<Accordion title="What blockchain does FOS use?">
-FOS operates on the **Base Network**, an Ethereum Layer-2 solution. We chose Base for low gas fees, high security, and fast transactions. You will need ETH on Base to participate.
-</Accordion>
-
-<Accordion title="Is FOS safe?">
-Yes. FOS is **non-custodial**. We never hold your funds. All transactions are executed automatically via immutable smart contracts. Code is publicly auditable, and no one can modify the rules or steal assets locked in the protocol.
-</Accordion>
-</Accordions>
-
----
-
-## Eligibility & Access
-
-<Accordions>
-<Accordion title="Who can participate?">
-You must be **18 years or older** to participate in the FOS Protocol.
-</Accordion>
-
-<Accordion title="Which countries are restricted?">
-Residents of the following jurisdictions **cannot participate**:
-
-- United States
-- Canada
-- United Kingdom
-- European Economic Area (EU, Norway, Iceland, Liechtenstein)
-- China and sanctioned countries (North Korea, Iran, Russia, etc.)
-</Accordion>
-
-<Accordion title="Can I use a VPN to bypass restrictions?">
-**No.** Using a VPN to circumvent geoblocking is a violation of our Terms of Service and considered fraud.
-</Accordion>
-</Accordions>
-
----
-
-## Minting & Collectibles
-
-<Accordions>
-<Accordion title="What are Fos Digital Collectibles?">
-Unique ERC-721 tokens (NFTs) featuring on-chain artwork. Ownership is permanently recorded on the blockchain.
-</Accordion>
-
-<Accordion title="What are the three tiers?">
-| Tier | Price (ETH Equiv.) | Description |
-| :--- | :--- | :--- |
-| **FOS Buddy** | ~$3 USD | Entry Tier |
-| **FOS Samurai** | ~$13 USD | Mid Tier |
-| **FOS Noble** | ~$25 USD | Premium Tier |
-
-*ETH prices fluctuate with market rates.*
-</Accordion>
-
-<Accordion title="What are Free Gas-Only Mints?">
-Specific mint numbers (#10, #100, #200, #300, #400) are **free NFT mints**, where users pay **only the network gas fee**.
-</Accordion>
-
-<Accordion title="How do I mint an NFT?">
-1. Connect your wallet (MetaMask or Coinbase Wallet)
-2. Select your preferred tier (Buddy, Samurai, or Noble)
-3. Confirm the transaction in your wallet
-4. Your NFT will be minted and sent to your wallet automatically
-</Accordion>
-</Accordions>
-
----
-
-## The "Green Eye" & Gas Fees
-
-<Accordions>
-<Accordion title="What is the 'Green Eye'?">
-The **500th NFT** in every cycle is a special collectible called the **Green Eye**. This unique NFT triggers the reward distribution for all participants in that cycle.
-</Accordion>
-
-<Accordion title="Why is gas so high for the 500th mint?">
-The 500th transaction triggers the **Reward Distribution Protocol** for all participants of that cycle, which requires complex computations.
-
-- **Cost:** Gas approximately 18x normal cost
-- **Trade-off:** By minting, you voluntarily accept this cost
-- **Note:** Fees go to the network validators and are **non-refundable**
-</Accordion>
-
-<Accordion title="What happens if the 500th mint fails?">
-If the transaction fails due to insufficient gas, the cycle remains open. A public `retryDistribution()` function can be called by anyone to complete the pending distribution.
-</Accordion>
-</Accordions>
-
----
-
-## Reward Protocol & Allocations
-
-<Accordions>
-<Accordion title="How are recipients selected?">
-Via **Chainlink VRF**, a provably fair and tamper-proof random number generator. Results are verifiable on-chain and cannot be influenced by the team.
-</Accordion>
-
-<Accordion title="Do I need to claim my rewards?">
-- **Cycle Rewards (Buddy/Samurai/Noble):** Automatic push to your wallet at cycle close (500th mint)
-- **Growth Campaign Leaderboard Rewards:** Manual claim via `claim(milestone)` in the UI. Gas fees apply.
-</Accordion>
-
-<Accordion title="Does buying more NFTs guarantee rewards?">
-**No.** Rewards are randomly selected. Purchasing an NFT only guarantees ownership of the digital collectible. However, early minters (1-100) receive a 2x weight in the selection algorithm.
-</Accordion>
-
-<Accordion title="What is the distribution split?">
-Each cycle distributes rewards to 17 selected participants:
-
-- **Primary Recipient (1):** 50% of the pool
-- **Secondary Group (6):** 30% split equally
-- **Tertiary Group (10):** 20% split equally
-</Accordion>
-
-<Accordion title="What is the 365-day failsafe?">
-If a cycle doesn't complete within 365 days, a public `liquidatePool()` function becomes callable. This ensures funds are never indefinitely locked and distributes rewards to current participants.
-</Accordion>
-</Accordions>
-
----
-
-## Referral Program
-
-<Accordions>
-<Accordion title="How does the Affiliate Program work?">
-Pay a one-time $10 USD activation fee (in ETH) to get a referral link.
-
-- **Earnings:** 82% of the activation fee from direct referrals ($8.20)
-- **Protocol Share:** 18% for maintenance ($1.80)
-</Accordion>
-
-<Accordion title="Is this MLM or multi-level marketing?">
-**No.** The FOS Affiliate Protocol is single-level and linear. Only direct referrals earn rewards. There is no passive income from downstream activity or multi-tier compensation.
-</Accordion>
-
-<Accordion title="How do I withdraw my referral earnings?">
-Referral commissions accumulate in your on-chain balance. You can withdraw at any time via the `withdraw()` function in the UI. This pull-based system prevents dust attacks and reentrancy vulnerabilities.
-</Accordion>
-
-<Accordion title="Do I need to buy an NFT to participate in referrals?">
-**No.** Referral participation is optional and independent of NFT ownership.
-</Accordion>
-</Accordions>
-
----
-
-## Leaderboard & Points
-
-<Accordions>
-<Accordion title="How does the points system work?">
-| Action | Points |
-| :--- | :--- |
-| Valid Referral | +1 |
-| Buddy Purchase ($3) | +2 |
-| Samurai Purchase ($13) | +4 |
-| Noble Purchase ($25) | +6 |
-</Accordion>
-
-<Accordion title="What is the Growth Campaign?">
-When the ecosystem reaches 5,000 active users, a 30-day Growth Campaign activates. During this period, protocol revenue is redirected to a Community Reward Pool distributed at milestones ($20k, $50k, $100k, etc.) to the top 3 leaderboard participants.
-</Accordion>
-
-<Accordion title="Can I transfer my points to another wallet?">
-**No.** Points are tied to your wallet address. Switching wallets creates a new account; previous points do not transfer.
-</Accordion>
-</Accordions>
-
----
-
-## Technical & Troubleshooting
-
-<Accordions>
-<Accordion title="What if my transaction fails?">
-Gas fees are **non-refundable**, even if transactions fail due to network congestion, slippage, or user error. Always ensure adequate gas before confirming transactions.
-</Accordion>
-
 <Accordion title="Which wallets are supported?">
-The platform supports:
-
-- **MetaMask** (browser extension and mobile)
-- **Coinbase Wallet**
-- Future support for WalletConnect and additional wallets is planned.
+MetaMask and Coinbase Wallet are documented integration targets for the main application. Configure the correct Robinhood network and verify compatibility in that app. This documentation site does not mint NFTs or connect a wallet for transactions.
 </Accordion>
-
-<Accordion title="Do you store my social account data for whitelist?">
-No. Only minimal verification (OAuth) is used to prevent bots. Passwords and private data are never stored.
+<Accordion title="Who can participate?">
+The existing project terms require age 18 or older and restrict the United States, Canada, the United Kingdom, the EEA, China, and sanctioned jurisdictions. Read the [terms](/docs/terms); do not bypass access restrictions using a VPN.
 </Accordion>
-
-<Accordion title="Can I disconnect my wallet?">
-Yes. Disconnect via your wallet provider (e.g., MetaMask settings). FOS does not maintain persistent user accounts.
-</Accordion>
-
-<Accordion title="Who controls FOS?">
-Currently maintained by founding developers. Governance may transition to DAO or Foundation in the future via a phased approach as outlined in Phase 16 of the roadmap.
-</Accordion>
-
-<Accordion title="Is the code audited?">
-Smart contracts undergo security audits, static analysis (Slither/Mythril), and fuzzing tests. Bug bounty programs are planned for additional security assurance.
+<Accordion title="Is there a legal classification guarantee?">
+No. A product description or the choice of promotional terminology is not a legal determination. The mechanics include paid NFT mints, weighted random ticket selection, and allocations. Applicable law depends on jurisdiction; obtain qualified advice where needed.
 </Accordion>
 </Accordions>
 
----
+## Collectibles and rounds
 
-## Quick Reference
+<Accordions>
+<Accordion title="What are the collection prices and fees?">
+Buddy (type 3) has a nominal $3 price and 5% admin fee; Samurai (type 13) is $13 with 3%; Noble (type 25) is $25 with 2%. Actual payments use configured ETH prices. Read [collection economics](/docs/protocol/mechanics) for pool contributions and reserves.
+</Accordion>
+<Accordion title="Which mint positions are free?">
+Positions 10, 100, 200, 300, and 400 in each collection round require zero purchase payment from the user. Network gas still applies. FOSNFT funds their full pool contributions from its reserved balance. This is separate from the planned Genesis whitelist campaign.
+</Accordion>
+<Accordion title="What does double weight mean?">
+Tickets 1–100 have two selection entries; 101–500 have one. All entries for a selected ticket are removed, so the ticket cannot receive another allocation in that round. Positions 10 and 100 are both free and double-weighted. Weight is not a guaranteed award.
+</Accordion>
+<Accordion title="What happens at the Green Eye, ticket 500?">
+The collection round closes and starts a CCIP request to the Base VRF integration. Randomness is produced on Base and returned through CCIP to Robinhood. Processor then selects tickets, processes allocations, and starts the next round. This is asynchronous, not a single last-mint transaction.
+</Accordion>
+<Accordion title="Does the last mint always cost 18 times ordinary gas?">
+No fixed 18× multiplier or stipend policy is established by the new specification. Check the wallet estimate and final oracle/CCIP funding policy. Gas and response time vary with the networks and integration.
+</Accordion>
+<Accordion title="How are allocations divided?">
+One ticket receives 50% of the pool, six receive 5% each, and ten receive 2% each. Integer-rounding residue goes to the primary recipient. There are 17 distinct selected tickets; a wallet with multiple tickets may receive more than one allocation.
+</Accordion>
+<Accordion title="How large is a full round pool?">
+At nominal product prices, including funding for the five free positions: Buddy $1,425; Samurai $6,305; Noble $12,250. These are model calculations, not fixed USD balances or individual award guarantees. Actual contract accounting uses ETH.
+</Accordion>
+<Accordion title="Do I need to claim an allocation?">
+Processor attempts direct ETH transfer after draw processing. If a transfer fails, the amount becomes a deferred balance in `pendingWithdrawals`, collectible through `claim()`. A successful last mint alone does not mean the draw or payment has completed.
+</Accordion>
+<Accordion title="Is there a confirmed 365-day liquidation or public retry function?">
+The old whitepaper described those features. The new contract specification does not establish their final implementation or ABI. Do not rely on those recovery paths without checking the deployed contract.
+</Accordion>
+</Accordions>
 
-| Question | Answer |
-| :--- | :--- |
-| **Network** | Base (Ethereum L2) |
-| **Randomness** | Chainlink VRF, verifiable on-chain |
-| **Free Mints** | #10, 100, 200, 300, 400 |
-| **Custody** | Non-custodial |
-| **Points** | Referral +1; $3→+2, $13→+4, $25→+6 |
-| **ETH Display** | Informational; actual uses real-time rate |
+## Referral plans
 
----
+<Accordions>
+<Accordion title="How do the three referral plans work?">
+Choose a nominal $2, $5, or $10 plan and register once per wallet. The direct referrer’s own active plan sets their share of your payment: 50%, 60%, or 82% respectively. Your selected plan sets the payment amount. Without a referrer, the admin receives 100%.
+</Accordion>
+<Accordion title="Can I upgrade or change my referrer?">
+Upgrades 2→5, 2→10, and 5→10 pay only the difference between current configured ETH prices. Your original direct referrer remains fixed. Downgrades and registering the same wallet again are not permitted.
+</Accordion>
+<Accordion title="Does an upgrade change previous payments?">
+No. A referrer’s upgrade changes their rate for subsequent direct-referral registration and upgrade payments. Previously processed payments are not recalculated.
+</Accordion>
+<Accordion title="Is referral compensation multi-level?">
+No. If A refers B and B refers C, B’s registration/upgrades can pay A, while C’s payments can pay B. A receives no share of C’s payments. Price plans do not add downstream compensation levels.
+</Accordion>
+<Accordion title="How do I claim referral payments?">
+Direct ETH payment is attempted. If it fails, the deferred amount is stored in `pendingWithdrawals` and the referrer calls `claim()`. The separate `withdraw()` operation is for the admin’s available funds.
+</Accordion>
+<Accordion title="Do I need an NFT to register for referrals?">
+No. Referral is independent of NFT minting and draws. Commission requires real direct-referral payments and does not guarantee income.
+</Accordion>
+</Accordions>
 
-## Still Have Questions?
+## Authenticity, configuration, and roadmap
 
-If you couldn't find the answer you're looking for, please check:
+<Accordions>
+<Accordion title="How do I check an authenticity certificate?">
+Verify issues a separate ERC-721 certificate. Use `getStatus`: 0 means not registered, 1 active, and 2 revoked. `isOfficial` only checks that a record exists, so it can be true for a revoked certificate. Revocation preserves the token and history.
+</Accordion>
+<Accordion title="Do NFT mints and referral upgrades always issue certificates?">
+FOSNFT mints can issue origin type 2 certificates when Verify is connected and approved. Initial Referral registration can issue origin type 5, origin ID 0, with empty URI. The specification does not define a new certificate on upgrade. These integrations are optional.
+</Accordion>
+<Accordion title="Can all project settings be changed?">
+Supported owner controls include referral prices/rates and Verify issuer/status configuration. Round rules are stored for each round; changes normally apply to future rounds, with supported empty-round updates. The documentation does not claim every parameter is globally immutable.
+</Accordion>
+<Accordion title="Is the code independently audited and deployed?">
+This repository contains documentation, not the final Solidity source or independent audit reports. The supplied specification describes behavior and reported deployment information. Verify the final code, full addresses, roles, bridge lane, and audit evidence before use.
+</Accordion>
+<Accordion title="What are the leaderboard and campaign rules?">
+Retained scoring is direct referral +1, Buddy +2, Samurai +4, Noble +6. The separate growth campaign targets 5,000 users and a 30-day window; deployment, funding, tie-breaks, and snapshots require confirmation. Referral upgrades are not described as new registrations or new referral points.
+</Accordion>
+<Accordion title="What if a transaction fails?">
+Check the receipt on the correct chain. A reverted transaction does not complete the action, but spent network gas is not refunded. Refresh prices and the next ticket position before retrying. Cross-chain delivery failures are distinct from failed mint transactions.
+</Accordion>
+<Accordion title="Is the AI assistant active?">
+The documentation site has a Gemini 2.5 Flash integration and current FOS knowledge. Real answers require `GEMINI_API_KEY` in the deployment environment and API network access. The assistant is informational and cannot verify or execute transactions.
+</Accordion>
+</Accordions>
 
-- [FOS Protocol Documentation](/docs/protocol) for detailed protocol information
-- [Technical Documentation](/docs/technical) for developer resources
-- [Terms of Service](/docs/terms) for legal information
+See [protocol rules](/docs/protocol), [technical reference](/docs/technical), [roadmap](/docs/roadmap), and [terms](/docs/terms).

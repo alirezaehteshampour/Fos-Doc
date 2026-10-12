@@ -1,30 +1,57 @@
 ---
-title: Verification Contract
-description: NFT verification registry
+title: Verify Authenticity Certificates
+description: ERC-721 origin certificates, current validity, and revocation
 ---
 
-# Verification Contract
+# Verify Contract
 
-Canonical registry for verifying project NFTs. Other contracts and off-chain services can query verification status.
+Verify issues a separate ERC-721 certificate for supported official events. It does not hold draw pools, run referrals, pay allocations, or perform recipient selection.
 
-## State & Configuration
+## Origins
 
-- `isVerified[tokenContract][tokenId]` → bool.
-- Authorized verifiers: `AccessControl` role `VERIFIER_ROLE`; admin can add/remove verifiers.
-- Optional immutability flag to freeze verification after set, or versioned reasons for audits.
+| ID | Constant | Use |
+| ---: | :--- | :--- |
+| 1 | `ORIGIN_FREE_MINT` | Free mint/campaign |
+| 2 | `ORIGIN_LOTTERY` | Official FOSNFT round mint |
+| 3 | `ORIGIN_STORY` | Story/content |
+| 4 | `ORIGIN_ADMIN` | Manual admin issuance |
+| 5 | `ORIGIN_REFERRAL` | Initial referral registration |
 
-## External Interfaces
+Owner may define or enable/disable origin types using `setOriginType`.
 
-- `setVerified(tokenContract, tokenId, status, reason)` (verifier/admin).
-- `isVerified(tokenContract, tokenId)` view function for integration.
+## Issuance and authorization
 
-## Verification Methods
+- `adminMint(to, originTypeId, originId, uri)` is limited to owner or `adminWallet`.
+- `mintFromContract(to, originTypeId, originId, uri)` requires `approvedMinters[msg.sender] == true`.
+- Owner authorizes a source with `setApprovedMinter`; the source sets its Verify connection with `setVerifyContract` under its own access controls.
+- Ordinary wallets cannot directly mint certificates.
 
-- **On-chain**: Integrators call `isVerified` directly.
-- **API**: An internal API endpoint returns verification status for UI and services.
-- **Dedicated Page**: A web page lets users paste contract/token IDs and check verification status.
+FOSNFT's connected mint path issues origin type 2, `originId = fosTokenId`, and the supplied URI. Referral's connected registration path issues origin type 5, origin ID 0, and empty URI. The specification does not issue a new certificate on referral upgrade. Processor has no direct Verify integration in the supplied design.
 
-## Events & Security
+## Records
 
-- `VerificationChanged(tokenContract, tokenId, status, reason, msg.sender)`.
-- Strict role gating; optional timelock for revocations; emit events for full auditability.
+Token IDs begin at 1 and increase. `getNftInfo` exposes the record; `totalMinted` gives the issuance count.
+
+| Field | Meaning |
+| :--- | :--- |
+| `exists` | Record is registered |
+| `active` | Current validity flag |
+| `originType` | Origin category |
+| `originContract` | Source contract or issuing caller |
+| `originId` | Source event/asset identifier |
+| `minter` | Initial recipient of the Verify NFT |
+| `createdAt` | Issuance timestamp |
+
+`minter` is historical provenance, not current ownership. Read ERC-721 ownership for the current holder. A certificate and its linked FOSNFT are separate tokens.
+
+## Check current status
+
+| Code | Status | Meaning |
+| ---: | :--- | :--- |
+| 0 | `NOT_REGISTERED` | No record |
+| 1 | `OFFICIAL_ACTIVE` | Official and currently active |
+| 2 | `OFFICIAL_REVOKED` | Officially issued but revoked |
+
+**`isOfficial(tokenId)` checks existence only. It may return true for a revoked token.** Interfaces must use `getStatus` to display current validity.
+
+Only owner may `revoke(tokenId, reasonCode)`. Revocation sets `active = false`; it does not burn the NFT, transfer ownership, or erase the record/history. Owner also manages approved minters, origins, admin wallet, and URI configuration. `adminWallet` can issue manual certificates but is not described as having owner-only revocation authority.

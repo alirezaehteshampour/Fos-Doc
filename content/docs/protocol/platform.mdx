@@ -1,32 +1,40 @@
 ---
 title: Platform Infrastructure
-description: Blockchain architecture and wallet integration
+description: Robinhood user transactions and Base randomness integration
 ---
 
-# Platform Infrastructure & Access Layer
+# Platform Infrastructure
 
-## Blockchain Architecture (Base L2)
+## Networks
 
-The Fos Protocol is deployed on the Base Network, an Ethereum Layer-2 solution. This infrastructure choice is strategic, ensuring the system inherits Ethereum's robust security while providing the high throughput and sub-cent transaction fees necessary for a high-frequency reward ecosystem.
+User-facing FOSNFT, Processor, Referral, and Verify interactions belong on **Robinhood Chain**, not Base. Base serves the specified VRF randomness integration, with CCIP transporting round requests and results.
 
-## Protocol Economy (Native ETH)
+| Network | Chain ID | Native currency | Role |
+| :--- | ---: | :--- | :--- |
+| Robinhood Chain | 4663 | ETH | User-facing project network |
+| Robinhood Chain Testnet | 46630 | Test ETH | Separate testing network |
+| Base | Environment-specific | ETH | VRF service side of the specified cross-chain design |
 
-To ensure stability and liquidity, the ecosystem operates strictly on Native ETH (Base).
+The Robinhood IDs, currency, and URLs below are corroborated by the public [ethereum-lists network registry](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-4663.json), with a [separate testnet entry](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-46630.json). This corroborates network metadata; it does not verify FOS deployments or CCIP support.
 
-**Source of Truth:** While the frontend utilizes an integrated API to display real-time USD equivalents for user convenience, the smart contract logic relies exclusively on the on-chain ETH value at the moment of the transaction.
+- Mainnet RPC listed in the registry: `https://rpc.mainnet.chain.robinhood.com`
+- Mainnet explorer listed in the registry: [Robinhood Chain Blockscout](https://robinhoodchain.blockscout.com)
+- Testnet RPC: `https://rpc.testnet.chain.robinhood.com/rpc`
+- Testnet explorer: [Robinhood testnet explorer](https://explorer.testnet.chain.robinhood.com)
+- Official documentation linked by the registry: [Robinhood Chain documentation](https://docs.robinhood.com/chain)
 
-**No Volatility Risk:** By avoiding proprietary tokens for payments, we protect users from volatility and speculative dumping.
+Verify the selected environment and live RPC chain ID before signing. Never reuse Base or Base Sepolia addresses for a Robinhood transaction. The Base environment used by the VRF integration must be confirmed separately.
 
-## Non-Custodial Wallet Integration
+## ETH pricing and gas
 
-Fos employs a strictly non-custodial connection model, ensuring users retain full control of their assets until the moment of interaction.
+The displayed dollar values are nominal product labels. On-chain ETH prices and round settings are the transaction source of truth. Ordinary mints require the exact configured price; free positions require zero purchase value. Network gas still applies. ETH remains volatile, and neither fixed gas costs nor USD-equivalent awards are guaranteed.
 
-**Supported Providers:** The platform features native integration for MetaMask and Coinbase Wallet, covering the vast majority of the Web3 user base.
+## Wallet access
 
-**Smart Wallet Compatibility:** The protocol is engineered to be compatible with Account Abstraction (ERC-4337) by explicitly avoiding tx.origin checks, ensuring future-proof access for smart contract wallets.
+Use an EVM wallet configured for the correct Robinhood network. MetaMask and Coinbase Wallet are documented integration targets; connector behavior must be verified in the deployed main application. This Next.js repository hosts documentation and an AI assistant, not the minting application itself.
 
-## Cross-Device Accessibility
+The interface does not need a user's private key. Contracts nevertheless hold round funds, reserved free-position contributions, and deferred payments according to their rules. An interface described as non-custodial does not mean that funds never enter a contract.
 
-**Mobile-First Design (Deep-Linking):** For mobile users, the platform supports automated deep-linking. Visiting the Fos domain on a mobile device automatically triggers the wallet's in-app browser (e.g., MetaMask Mobile), ensuring a seamless "Connect & Mint" experience without switching apps.
+## Cross-chain visibility
 
-**Desktop Experience:** Users on desktop environments (Chrome, Brave, Edge) interact via standard browser extensions, enabling one-click transaction signing and management.
+Show Robinhood round status and transaction receipts separately from Base VRF and CCIP delivery status. A successful last-mint receipt is not evidence that the remote random result has arrived or that the allocation transaction has completed.

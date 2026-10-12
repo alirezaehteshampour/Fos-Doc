@@ -1,89 +1,37 @@
 ---
 title: Technical Overview
-description: FOS technical architecture and implementation overview
+description: Robinhood contracts, Base VRF, CCIP, and integration boundaries
 ---
 
 # Technical Documentation
 
-**Version:** v0.1 (Draft)  
-**Audience:** Engineering, Product, Security  
-**Scope:** Architecture, Contracts, Web App, Ops
+**Revision:** Robinhood / three-plan referral specification, October 2026.
 
-## Executive Summary
+## Repository boundary
 
-This document provides a comprehensive, technical overview of **FOS**, covering smart contracts, the public landing website, and the main application. It is intended to be sufficiently detailed to form the basis of the project's whitepaper and related external documentation.
+This repository is the Next.js/Fumadocs documentation website. It implements documentation pages, a static search index, and a Gemini-powered chat route. It does not contain the project Solidity contracts, PHP main application, a verified ABI bundle, or deployment manifests for the described cross-chain integration.
 
-### Objectives
+The contract reference follows the supplied project specification. It distinguishes stated behavior from integration requirements and features carried forward as plans. Public contract addresses are omitted until their complete values and deployment versions are verified; do not use shortened addresses as configuration.
 
-- Define the end-to-end architecture and component responsibilities.
-- Describe minting, whitelisting, and allocation distribution mechanics.
-- Explain security posture, operational processes, and testing strategy.
+## System
 
-### Non-Goals
+FOSNFT, Processor, Referral, and Verify are user-facing components on Robinhood Chain. The specified randomness design requests Chainlink VRF on Base using CCIP messaging. Authentication of cross-chain responses, supported lanes, fee funding, and deployed callback interfaces require verification against the final code.
 
-- Legal or tokenomics advisory beyond technical mechanisms.
-- Marketing materials or visual brand guidelines.
+## References
 
----
-
-## System Overview
-
-### Architecture
-
-The system comprises on-chain smart contracts, a public-facing landing site, and an authenticated main application. Off-chain services provide indexing, allowlist generation, and analytics. The architecture is modular to enable independent deployment and upgrades.
-
-### Components
-
-- **Smart Contracts**: Core token/NFT logic, whitelist verification, free-mint enforcement, and allocation settlement.
-- **Landing**: Public marketing and interaction entry point with whitelist, free mint initiation, and allocation discovery.
-- **Main App**: User dashboard, claims, admin controls, and operational tooling.
-- **Off-chain Services**: Allowlist generation (e.g., Merkle trees), notifications, data indexing, and analytics.
-
-### Network Choice: Base
-
-- **Why Base?** Lower gas fees, high throughput, and robust L2 security inherit from Ethereum while providing a smoother UX.
-- **Innovation**: We introduce a novel allocation distribution/referral construct on Base with no direct analogue among existing projects at time of writing.
-- **Exploration & Analytics**: We read and verify transactions/events from `BaseScan` for user receipts, allocation tracking, and diagnostics.
-
----
-
-## Documentation Sections
-
-Navigate to specific technical documentation:
-
-| Section | Description |
+| Section | Scope |
 | :--- | :--- |
-| [Smart Contracts Overview](/docs/technical/smart-contracts) | Contract suite, three-pool architecture, standards |
-| [Allocation Distribution Contract](/docs/technical/allocation-contract) | Main NFT minting and distribution mechanics |
-| [Referral Contract](/docs/technical/referral-contract) | Referral system and 82/18 split |
-| [Verification Contract](/docs/technical/verification-contract) | NFT verification registry |
-| [Free Mint Contract](/docs/technical/free-mint-contract) | Allowlisted free mint mechanics |
-| [Campaign & Leaderboard](/docs/technical/campaign-contract) | Growth campaign and milestone distribution |
-| [Main Application](/docs/technical/application) | Web app architecture and pages |
-| [Security & Infrastructure](/docs/technical/security) | Security, compliance, and DevOps |
-| [APIs & Data Models](/docs/technical/apis) | Endpoints and schemas |
+| [Smart Contracts](/docs/technical/smart-contracts) | Component boundaries and target parameters |
+| [FOSNFT & Processor](/docs/technical/allocation-contract) | Mint, reserve, round, weighting, and payment rules |
+| [Referral](/docs/technical/referral-contract) | Actual specified function names and plan math |
+| [Verify](/docs/technical/verification-contract) | Certificate issuance, roles, and revocation |
+| [Free Mint](/docs/technical/free-mint-contract) | Confirmed round freebies versus planned Genesis campaign |
+| [Campaign](/docs/technical/campaign-contract) | Carried-forward campaign design and funding constraints |
+| [Application](/docs/technical/application) | Wallet and state integration requirements |
+| [Security](/docs/technical/security) | Risks and required implementation checks |
+| [APIs](/docs/technical/apis) | Implemented docs routes and main-app integration models |
+| [Network information](/docs/protocol/platform) | Mainnet/testnet IDs and registry references |
 
----
+## Documentation-site workflow
 
-## Landing Website
-
-### Purpose & Structure
-
-The landing site introduces the product, previews key application modules (Whitelist, Free Mint, Allocations), and routes users into the app.
-
-### Tech Stack
-
-- Server-rendered PHP templates with shared styles and components.
-- Client-side JS enhances interactivity and integrates wallet connectors where needed.
-- Calls internal APIs for dynamic counters and previews.
-
-### Performance & SEO
-
-- Static content where possible; defer non-critical scripts; cache API previews.
-- Structured metadata, social cards, and Core Web Vitals monitoring.
-
----
-
-© 2025 FOS — Technical Documentation
-
-*This is a living document. Update version and sections as the project evolves.*
+Use Node.js >=20.9 and the committed lockfile: `npm ci`, `npx fumadocs-mdx`, `npm run dev`. Validate with `npx tsc --noEmit` and `npm run build`. Inter is vendored with its license, so the production build needs no Google Fonts download. `GEMINI_API_KEY` enables real AI responses; without it, chat returns an explicit configuration error. Set credentials securely in the cloud/deployment environment, never in source control.

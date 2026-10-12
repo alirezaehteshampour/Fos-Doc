@@ -1,32 +1,20 @@
 ---
-title: Free Mint Contract
-description: Allowlisted free mint mechanics
+title: Free Mint Architecture
+description: Per-round free positions and separate Genesis campaign plans
 ---
 
-# Free Mint Contract
+# Free Mint Architecture
 
-Enables a scheduled, allowlisted free mint. Early eligible wallets receive a special allocation of higher-value NFTs (configurable).
+## Specified per-round free positions
 
-## Whitelist & Schedule
+FOSNFT makes positions 10, 100, 200, 300, and 400 free in each Buddy/Samurai/Noble round. The user sends zero purchase value and pays network gas. FOSNFT funds each ticket's configured pool contribution from its own balance; admin withdrawals preserve the reserve for remaining free positions. Tickets 10 and 100 also have double selection weight.
 
-- Allowlist via Merkle tree: leaf example `keccak256(abi.encode(wallet, quota, phaseId))`. Root stored on-chain.
-- Enforce `perWalletQuota`, `perTxLimit`, and `phase` windows (`start`/`end` timestamps).
-- Anti-bot: cooldowns, optional signature-based gating (`EIP-712`), and same-block mint protections.
-- Schedule: start time is configured (TBD) via config keys and will be finalized closer to launch.
+These positions use the ordinary `buyAndMint(lotteryType, tokenURI)` path. They are not restricted to a Genesis allowlist in the supplied summary.
 
-## Early Allocation
+## Separate Genesis campaign
 
-- Parameters: `earlyAdoptersCount` (e.g., 10), `allocationPerAdopter` (e.g., 10 NFTs), `allocationTier` (e.g., $100 tier).
-- Selection: first `N` distinct wallets successfully minting after phase start. Deterministic tie-break by transaction ordering.
-- Guarantees: ensure allocations do not exceed supply; track `awarded[wallet]` to prevent double-allocation.
+The older roadmap describes a social whitelist and gas-only Genesis mint window, potentially using Merkle proofs and limited per-wallet allocations. The updated four-contract specification does not define that campaign's deployed contract, proof layout, quotas, dates, early-adopter bonus, or inclusion in paid collection rounds.
 
-## Interfaces & Events
+Treat those details as planned campaign configuration until published. A Verify origin category for free mint (type 1) enables certificate classification; it does not by itself implement an allowlist campaign. Do not promise that a Genesis asset automatically includes a Processor ticket or higher-tier allocation.
 
-- `mintFree(proof, quota, phaseId)`: validates Merkle proof; mints; applies early allocation if eligible.
-- Events: `FreeMintStarted(phaseId)`, `FreeMinted(wallet, qty, phaseId)`, `EarlyAllocation(wallet, qty, tier)`.
-
-## Security
-
-- Merkle root rotation requires admin; proofs validated with exact leaf structure and domain separation by `phaseId`.
-- Pause and supply guardrails; `nonReentrant` on minting pathways.
-- **Immutability & Fairness**: Free-mint eligibility and allocation are enforced entirely by the contract; operators cannot "hand-pick" or alter outcomes.
+See [Free Mint Campaign](/docs/campaigns/free-mint) and [FOSNFT & Processor](/docs/technical/allocation-contract).

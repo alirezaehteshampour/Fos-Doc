@@ -1,609 +1,380 @@
-
-📘 Tech Doc
-
-Project: **PROJECT NAME**
-Version: v0.1 (Draft)
-
-Toggle ThemeExpand All
-
-#### Contents
-
-[Executive Summary](https://fos.ooo/internal_docs/full_document.php#executive-summary)[Objectives](https://fos.ooo/internal_docs/full_document.php#objectives)[Non-Goals](https://fos.ooo/internal_docs/full_document.php#non-goals)[System Overview](https://fos.ooo/internal_docs/full_document.php#system-overview)[Architecture](https://fos.ooo/internal_docs/full_document.php#architecture)[Components](https://fos.ooo/internal_docs/full_document.php#components)[Network Choice: Base](https://fos.ooo/internal_docs/full_document.php#network-choice-base)[Smart Contracts](https://fos.ooo/internal_docs/full_document.php#smart-contracts)[Contract Suite Overview](https://fos.ooo/internal_docs/full_document.php#contract-suite-overview)[Three-Pool Architecture (Single Contract)](https://fos.ooo/internal_docs/full_document.php#three-pool-architecture-single-contract)[Common Standards &amp; Interfaces](https://fos.ooo/internal_docs/full_document.php#common-standards-interfaces)[Global Assumptions](https://fos.ooo/internal_docs/full_document.php#global-assumptions)[Reward Distribution Contract](https://fos.ooo/internal_docs/full_document.php#reward-distribution-contract)[Referral Contract](https://fos.ooo/internal_docs/full_document.php#referral-contract)[Verification Contract](https://fos.ooo/internal_docs/full_document.php#verification-contract)[Free Mint Contract](https://fos.ooo/internal_docs/full_document.php#free-mint-contract)[Campaign (Incentive Layer): Reward Pool / Leaderboard Contract](https://fos.ooo/internal_docs/full_document.php#campaign-incentive-layer-reward-pool-leaderboard-contract)[Observability, Testing &amp; Assurance](https://fos.ooo/internal_docs/full_document.php#observability-testing-assurance)[Landing Website](https://fos.ooo/internal_docs/full_document.php#landing-website)[Purpose &amp; Structure](https://fos.ooo/internal_docs/full_document.php#purpose-structure)[Tech Stack](https://fos.ooo/internal_docs/full_document.php#tech-stack)[Previews and CTAs](https://fos.ooo/internal_docs/full_document.php#previews-and-ctas)[Performance &amp; SEO](https://fos.ooo/internal_docs/full_document.php#performance-seo)[Main Application](https://fos.ooo/internal_docs/full_document.php#main-application)[Authentication](https://fos.ooo/internal_docs/full_document.php#authentication)[App Pages](https://fos.ooo/internal_docs/full_document.php#app-pages)[Integrations](https://fos.ooo/internal_docs/full_document.php#integrations)[Core App (core/index.php)](https://fos.ooo/internal_docs/full_document.php#core-app-core-index-php)[Infrastructure &amp; DevOps](https://fos.ooo/internal_docs/full_document.php#infrastructure-devops)[Security &amp; Compliance](https://fos.ooo/internal_docs/full_document.php#security-compliance)[APIs &amp; Data Models](https://fos.ooo/internal_docs/full_document.php#apis-data-models)[Endpoints](https://fos.ooo/internal_docs/full_document.php#endpoints)[Schemas](https://fos.ooo/internal_docs/full_document.php#schemas)[Testing &amp; QA](https://fos.ooo/internal_docs/full_document.php#testing-qa)[Roadmap](https://fos.ooo/internal_docs/full_document.php#roadmap)[Glossary &amp; References](https://fos.ooo/internal_docs/full_document.php#glossary-references)[FAQ](https://fos.ooo/internal_docs/full_document.php#faq)
+<!-- Generated from current content/docs by scripts/generate-doc-artifacts.py. -->
 
 # Technical Documentation
 
-v0.1 (Draft)Audience: Engineering, Product, SecurityScope: Architecture, Contracts, Web App, Ops
+**Revision:** Robinhood / three-plan referral specification, October 2026.
 
-## Executive Summary
+## Repository boundary
 
-This document provides a comprehensive, technical overview of  **PROJECT NAME** , covering smart contracts, the public landing website, and the main application. It is intended to be sufficiently detailed to form the basis of the project's whitepaper and related external documentation.
+This repository is the Next.js/Fumadocs documentation website. It implements documentation pages, a static search index, and a Gemini-powered chat route. It does not contain the project Solidity contracts, PHP main application, a verified ABI bundle, or deployment manifests for the described cross-chain integration.
 
-### Objectives
+The contract reference follows the supplied project specification. It distinguishes stated behavior from integration requirements and features carried forward as plans. Public contract addresses are omitted until their complete values and deployment versions are verified; do not use shortened addresses as configuration.
 
-* Define the end-to-end architecture and component responsibilities.
-* Describe minting, whitelisting, and reward distribution mechanics.
-* Explain security posture, operational processes, and testing strategy.
+## System
 
-### Non-Goals
+FOSNFT, Processor, Referral, and Verify are user-facing components on Robinhood Chain. The specified randomness design requests Chainlink VRF on Base using CCIP messaging. Authentication of cross-chain responses, supported lanes, fee funding, and deployed callback interfaces require verification against the final code.
 
-* Legal or tokenomics advisory beyond technical mechanisms.
-* Marketing materials or visual brand guidelines.
+## References
 
-## System Overview
+| Section | Scope |
+| :--- | :--- |
+| [Smart Contracts](/docs/technical/smart-contracts) | Component boundaries and target parameters |
+| [FOSNFT & Processor](/docs/technical/allocation-contract) | Mint, reserve, round, weighting, and payment rules |
+| [Referral](/docs/technical/referral-contract) | Actual specified function names and plan math |
+| [Verify](/docs/technical/verification-contract) | Certificate issuance, roles, and revocation |
+| [Free Mint](/docs/technical/free-mint-contract) | Confirmed round freebies versus planned Genesis campaign |
+| [Campaign](/docs/technical/campaign-contract) | Carried-forward campaign design and funding constraints |
+| [Application](/docs/technical/application) | Wallet and state integration requirements |
+| [Security](/docs/technical/security) | Risks and required implementation checks |
+| [APIs](/docs/technical/apis) | Implemented docs routes and main-app integration models |
+| [Network information](/docs/protocol/platform) | Mainnet/testnet IDs and registry references |
 
-### Architecture
+## Documentation-site workflow
 
-The system comprises on-chain smart contracts, a public-facing landing site, and an authenticated main application. Off-chain services provide indexing, allowlist generation, and analytics. The architecture is modular to enable independent deployment and upgrades.
+Use Node.js >=20.9 and the committed lockfile: `npm ci`, `npx fumadocs-mdx`, `npm run dev`. Validate with `npx tsc --noEmit` and `npm run build`. Inter is vendored with its license, so the production build needs no Google Fonts download. `GEMINI_API_KEY` enables real AI responses; without it, chat returns an explicit configuration error. Set credentials securely in the cloud/deployment environment, never in source control.
 
-### Components
+# Smart Contracts
 
-* **Smart Contracts** : Core token/NFT logic, whitelist verification, free-mint enforcement, and reward settlement.
-* **Landing** : Public marketing and interaction entry point with whitelist, free mint initiation, and reward discovery.
-* **Main App** : User dashboard, claims, admin controls, and operational tooling.
-* **Off-chain Services** : Allowlist generation (e.g., Merkle trees), notifications, data indexing, and analytics.
+## Contract suite
 
-### Network Choice: Base
+| Contract | Responsibility | Specified network |
+| :--- | :--- | :--- |
+| `FOSNFT` | NFT mint, purchase payment, admin balance, free-ticket reserve | Robinhood |
+| `Processor` | Authorized ticket registration, round state, draw, allocations | Robinhood |
+| `Referral` | Registration, plans, upgrades, and direct-referral payments | Robinhood |
+| `Verify` | Separate ERC-721 certificates, origin registry, validity status | Robinhood |
+| VRF/CCIP integration | Carry round requests to Base and return VRF results | Robinhood and Base |
 
-* **Why Base?** Lower gas fees, high throughput, and robust L2 security inherit from Ethereum while providing a smoother UX.
-* **Innovation** : We introduce a novel reward distribution/referral construct on Base with no direct analogue among existing projects at time of writing.
-* **Exploration & Analytics** : We read and verify transactions/events from `BaseScan` for user receipts, reward tracking, and diagnostics.
+Only FOSNFT may register tickets in Processor. Referral is independent of both contracts. Verify is optional and may be connected to FOSNFT and Referral; Processor has no direct Verify connection in the supplied structure.
 
-## Smart Contracts
+## Three independent collection types
 
-### Contract Suite Overview
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-* **Reward Distribution** : User participation that awards/mints an NFT per purchase and registers purchasers for reward distribution outcomes.
-* **Referral** : Handles a fixed $10 payment and revenue split (82% referrer, 18% admin) when a valid referral is present; otherwise 100% to admin.
-* **Verification** : Canonical on-chain registry to verify whether a project NFT is officially verified.
-* **Free Mint** : Scheduled, allowlisted free mint with a special early-user allocation (configurable) of higher-value NFTs.
-* **Reward Pool / Leaderboard** : Accrues revenue upon activation threshold and pays out 50/30/20 to top-3 leaderboard at defined milestones.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-### Three-Pool Architecture (Single Contract)
+All three target 500 tickets, with 17 selected tickets and 50/30/20 group allocation. There is no specified 100-round lifetime cap. Only the initial weights and price labels are described here; per-round stored settings and current on-chain prices control execution.
 
-The core protocol implements three distinct pools within a single reward distribution/mint contract. Pools are isolated logically and accounted separately; a `poolType` (e.g., enum) indicates the active pool for each mint and distribution.
+## Standards and authority
 
-* **Body** : Entry ~$3, Reward $1,000
-* **Samurai** : Entry ~$12, Reward $5000
-* **Noble** : Entry ~$25, Reward $10,000
+NFT/certificate documentation uses ERC-721. Do not infer ERC-721A, ERC-1155, UUPS upgradeability, timelocks, or audit status from older drafts. Referral owner controls include prices, split basis points, admin wallet, and Verify connection. Verify owner controls include approved minters, origin types, URI configuration, admin wallet, and revocation.
 
-Per-pool state tracks purchasers, dedicated pool balances, and distribution outcomes. Events include the `poolType` to enable precise indexing/analytics.
+## Deployment status
 
-#### Per-Pool Recipients & Distribution
+Robinhood Chain ID **4663** is reported by the supplied specification and corroborated by the public network registry. The specification provides incomplete addresses for some components and does not supply the final Base-side bridge deployment. Accordingly this reference does not publish operational FOS contract addresses, ABIs, RPC credentials, or callback selectors. The named functions in individual pages are specification references, not a replacement for a verified ABI.
 
-* **Recipients per pool** : 17 total — 1 (first), 6 (second tier), 10 (third tier).
-* **Split** : 50% to first place, 30% split equally among 6 recipients, 20% split equally among 10 recipients.
-* All accounting is pool-scoped, preventing cross-pool mixing of balances or rewards.
+Genesis allowlist and growth campaign contracts remain design material in the [roadmap](/docs/roadmap), not confirmed members of this deployed four-contract suite.
 
-### Common Standards & Interfaces
+# FOSNFT & Processor
 
-* Tokens: **ERC-721** (current deployment). `ERC-1155` remains optional only if multiple classes are needed. Use OpenZeppelin implementations with `Ownable` or `AccessControl`.
-* Payments: `ERC-20` stablecoin or native currency (TBD). All transfers use safe patterns and check return values.
-* Access Control: Admin and Operator roles. Admin is multi-sig where possible; time-locked changes for sensitive parameters.
-* Upgradeability: Transparent/UUPS proxies (if chosen) via audited libraries; otherwise immutable for reduced attack surface.
+## Mint entry point
 
-### Global Assumptions
+`buyAndMint(lotteryType, tokenURI)` is called on FOSNFT with type 3, 13, or 25. It checks the next position. Ordinary positions require exact configured ETH price; positions 10, 100, 200, 300, and 400 require zero purchase value. Successful execution mints the NFT, registers the ticket through the authorized FOSNFT→Processor path, transfers the matching round contribution, and optionally issues a Verify certificate.
 
-* All external calls are wrapped with checks-effects-interactions and `nonReentrant` guards where value transfer occurs.
-* Monotonic parameters (e.g., supply caps) never increase after deployment unless governed via timelocked admin process.
-* Events are emitted for every state change that impacts accounting, access control, minting, verification, and distributions.
+## Payment split
 
-### Reward Distribution Contract
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Allows users to purchase Fos Digital Collectibles wherein each eligible purchase results in minting/awarding an NFT and recording the user in the purchaser set for reward distributions.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-#### State & Configuration
+```text
+adminCut = price * adminBps / 10000
+prizeShare = price - adminCut
+```
 
-* `maxSupply`, `minted`, `baseURI`, optional `reveal` mechanics.
-* `saleWindow` (start/end), per-wallet cap, per-tx cap.
-* Randomness: production uses **Chainlink VRF** (subscription on Base). Test builds may use deterministic/pseudo randomness and must not be deployed to mainnet.
+The admin amount is retained in FOSNFT. Free-position pool contributions are paid from its balance. Admin withdrawal must leave sufficient reserves for free positions still to come. Processor must reject a contribution that differs from the round's stored contribution. No fee is deducted again when recipient allocations are calculated.
 
-#### Infinite Cycle Reset
+## Round state
 
-* Each pool follows a  **500-mint cycle** . Upon the **500th mint** and successful payout, the pool's minted counter resets to 0 in the  *same transaction* .
-* `cycleId` increments atomically for that pool. Indexing can rely on `(poolType, cycleId, mintIndex)`.
-* **Greek Numbering** : user-facing labels use 1–100 blocks; after the 500th mint, labels restart at 1.
-* **The Cycle Structure:** The protocol consists of **100 Sequential Generations** (e.g., Cycle 1 to Cycle 100).
-* **Per-Cycle Supply:** Each Generation contains exactly  **500 Unique NFTs** .
-* **The Reset Trigger:** Upon the sale of the **500th NFT** (The Green Eye) in the current cycle:
+Each collection has separate consecutive rounds. Ticket registration increments the round ticket count and `purchaseCount[user][type]`. At round start the capacity, per-ticket pool contribution, recipient group counts/percentages, and double-weighted ticket count are stored for that round. Changed settings affect future rounds, except updates permitted for an empty active round.
 
-  1. The Atomic Payout executes.
-  2. The `cycleId` increments (e.g., Buddy I **$\rightarrow$** Buddy II).
-  3. The `minted` counter resets to 0.
-  4. The next generation becomes immediately active.
-* **Clarification:** "1-100" refers to the  **Cycle Generations** , not the NFT numbering. Inside any active pool, NFTs are unique from 1 to 500.
+Target capacity is 500; old 20-ticket examples are historical tests. The specification does not supply the full round-state ABI or the final bridging callback names, so conceptual lifecycle labels must not be treated as callable methods.
 
-#### Free Number Tiers
+## Selection pool
 
-* Certain numbers (e.g.,  **10** ,  **100** ,  **200** ,  **300** ,  **400** ) are designated as free-entry tiers; users pay only network gas.
-* Eligibility and "free" status are enforced on-chain; contract logic prevents fee collection for these tiers while still requiring gas.
-* **Scope** : The free-number policy applies uniformly across all three pools (Body, Samurai, Noble).
-* Note: While labels display 1–100 segments, free tiers 200/300/400 refer to the cycle-wide mint indices (1..500).
+Tickets 1–100 contribute two weighted entries; tickets 101–500 one. After selecting a ticket, remove all entries for that ticket before drawing again. Distinct-ticket selection allows the same wallet to be selected via multiple tickets. Positions 10 and 100 combine zero purchase payment with double weight.
 
-#### Two-Contract Architecture
+## Randomness lifecycle
 
-* **Contract A (Payment & Mint)** : Receives user payment (per selected pool: Body/Samurai/Noble) unless a free-number tier applies, mints the NFT, delivers it to the user, and allocates the admin share as configured.
-* **Contract B (Reward Distribution)** : Receives the remaining funds earmarked for the selected pool and orchestrates that pool's automated selection and reward distribution.
-* The flow is non-custodial: funds are programmatically routed; the app server never takes custody.
+1. FOSNFT registers ticket 500 with Processor on Robinhood Chain. That round closes to further tickets.
+2. A round-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
+3. Chainlink VRF on Base produces verifiable randomness.
+4. CCIP returns the result to the Robinhood-side integration.
+5. Processor uses the returned randomness and ticket weights to select 17 distinct winning tickets and process allocations.
+6. After the draw completes, the next round of that collection starts automatically.
 
-#### Green Eye Gas Treasury (Mint #500)
+The last mint starts this asynchronous sequence. Selection, transfers, and the next round do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
 
-* The **500th mint** includes an additional gas stipend to cover the on-chain costs of executing the batch payout for recipients (up to 18 atomic transfers as designed).
-* The payer of mint #500 receives a special NFT (the  **Green Eye** ) and remains eligible to receive rewards like any other participant.
-* The extra ETH is stored in a dedicated `gasStipend` variable reserved exclusively for the payout transaction(s).
-* Payouts pay **17 recipients** per pool (1/6/10). If actual gas is less than the stipend, the *leftover* is forwarded to the Admin wallet per policy.
-* The stipend amount follows a contract-defined policy; parameters are configurable and audited. VRF costs are handled separately via LINK subscription on Base.
+Implementation validation must verify request/round binding, allowed CCIP sender/source chain, VRF callback authority, replay protection, stale responses, and exactly-once finalization. Those requirements are not claims that an unaudited deployment already implements them.
 
-#### External Interfaces
+## Allocation and deferred payment
 
-* `buyAndMint()`/`mint()`: mints an NFT for caller if within constraints; records purchaser.
-* `distributeRewards()` (admin/operator): resolves recipients using VRF callback or deterministic method; awards rewards if applicable.
+| Group | Count | Group share | Each ticket |
+| :--- | ---: | ---: | ---: |
+| Primary | 1 | 50% | 50% plus residue |
+| Secondary | 6 | 30% | 5% |
+| Tertiary | 10 | 20% | 2% |
 
-#### Randomness
+All integer-rounding residue goes to the primary recipient. Direct ETH transfer is attempted; failed transfers are booked in `pendingWithdrawals` and collected with `claim()`. A rejected recipient must not be documented as forcing the entire draw to revert.
 
-* Recipient selection uses  **Chainlink VRF** ; random seeds are verifiable on-chain; results cannot be influenced by the team.
+## Unsupported historical assumptions
 
-#### Events
+The supplied update does not establish `liquidatePool()`, a permissionless draw retry ABI, an 18-transfer gas stipend, fee reimbursement, a metadata-retirement guarantee, or a fixed 100-generation limit. Validate those separately if required. Never replace the specified VRF/CCIP flow with production `timestamp`/`prevrandao` selection.
 
-* `Mint(address account, uint256 tokenId)`, `DistributionRequested(bytes32 requestId)`, `DistributionResult(uint256 round, address[] recipients)`.
+# Referral Contract
 
-#### Invariants & Security
+Referral manages registered wallets and independent paid plans on Robinhood Chain. It does not mint FOSNFT tickets, select draw recipients, or calculate their allocations.
 
-* Never exceed `maxSupply`; per-wallet and phase caps enforced on-chain.
-* Randomness is provided via Chainlink VRF; validate callback origin, manage nonces, and reject stale/duplicate fulfillments.
-* Use CEI; protect mint functions with `nonReentrant`. Pause mechanism for emergency.
-* No application-layer override exists to redirect funds or alter recipient results; controls are strictly contract-gated.
+## Initial rates
 
-### Referral Contract
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
 
-Processes a fixed deposit (nominally $10) and splits proceeds based on presence of a valid referral, sending 82% to referrer and 18% to admin. Without referral, 100% goes to admin.
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-#### State & Configuration
+## Specified write interfaces
 
-* `admin` payout address (multi-sig), `treasury` if distinct.
-* `referrerOf[code]` mapping or `isValidReferrer[address]`; optional `code → address` registry.
-* Asset configuration: native vs `ERC-20` token (address, decimals). Fixed price oracle not required since value is nominal and constant; alternatively reference USD-pegged stablecoin.
+| Function | Behavior |
+| :--- | :--- |
+| `register(address referrer, uint256 tier)` | Register once with tier 2/5/10 and exact configured ETH payment |
+| `upgrade(uint256 newTier)` | Upgrade 2→5, 2→10, or 5→10 for the current price difference |
+| `claim()` | Withdraw a referrer's deferred transfer balance |
+| `withdraw()` | Withdraw available admin funds without taking deferred user liabilities |
 
-#### External Interfaces
+The direct referrer must be registered, cannot be self, and cannot be changed after registration. Zero address means no referrer. A referred registration increments `referralCount`; the specification does not describe upgrades as new referral registrations.
 
-* `payReferral(code)` or `payReferral(referrer)`: validates referral; processes split; records accounting.
-* `withdraw()` (pull-based): referrers and admin withdraw accrued balances to mitigate reentrancy risk.
+## State and reads
 
-#### Events
+| State | Meaning |
+| :--- | :--- |
+| `isRegistered` | Wallet registration status |
+| `userTier` | Wallet's current plan |
+| `referredBy` | Fixed direct referrer |
+| `referralCount` | Direct registrations referred |
+| `totalEarned` | Recorded referral earnings |
+| `pendingWithdrawals` | Deferred ETH owed to the wallet |
+| `tierPrice` | Configured ETH price for each plan |
+| `tierReferrerBps` | Plan's commission rate in basis points |
+| `adminWallet` | Admin beneficiary |
 
-* `ReferralPaid(address payer, address referrer, uint256 refAmount, uint256 adminAmount)`, `ReferralMissed(address payer, uint256 amount)`.
+Useful reads are `getUpgradeCost`, `getUserInfo`, `getReferralLink`, and `adminWithdrawable`. The supplied summary does not provide their complete ABI types, so use the verified ABI rather than inventing return tuple layouts. Main specified events are `Registered`, `Upgraded`, and `PaymentDeferred`; event argument signatures are not supplied.
 
-#### Accounting & Rounding
+## Accounting
 
-* Compute `refAmount = floor(amount * 82 / 100)`, `adminAmount = amount - refAmount` to avoid dust loss.
-* Track per-beneficiary accruals in mappings; transfers occur via withdraw to reduce attack surface.
-* **Admin routing** : The 18% admin fee is routed directly to the Admin wallet.
+```text
+cost = tierPrice[newTier] - tierPrice[oldTier]
+refAmount = floor(payment * tierReferrerBps[userTier[directReferrer]] / 10000)
+adminAmount = payment - refAmount
+```
 
-#### Security
+Without a direct referrer, `refAmount = 0`. The referrer's active plan at payment time applies to registration and upgrade payments. Later plan changes never recalculate already processed payments. Admin funds must exclude `pendingWithdrawals` liabilities.
 
-* Validate referral source (signed code by backend or on-chain registry) to prevent spoofing.
-* Use `nonReentrant` and CEI; never assume `ERC-20` returns `true` without checking.
-* **Program Rule** : The referral program is  *linear and single-level* . Only direct referrals count; there is no multi-level/MLM structure.
+## Authority and Verify integration
 
-### Verification Contract
+Owner controls include prices, percentages, admin wallet, and Verify connection. Prices must remain strictly ordered 2 < 5 < 10. When Verify is connected and Referral is an approved minter, initial registration issues a certificate with origin type 5, origin ID 0, and empty URI. Upgrade certificate issuance is not defined.
 
-Canonical registry for verifying project NFTs. Other contracts and off-chain services can query verification status.
+See [public referral examples](/docs/referral). Test ETH prices reported in the specification are not production prices. Validate exact amount enforcement, unauthorized reconfiguration, rejected receiver claims, and reentrancy before deployment.
 
-#### State & Configuration
+# Verify Contract
 
-* `isVerified[tokenContract][tokenId]` → bool.
-* Authorized verifiers: `AccessControl` role `VERIFIER_ROLE`; admin can add/remove verifiers.
-* Optional immutability flag to freeze verification after set, or versioned reasons for audits.
+Verify issues a separate ERC-721 certificate for supported official events. It does not hold draw pools, run referrals, pay allocations, or perform recipient selection.
 
-#### External Interfaces
+## Origins
 
-* `setVerified(tokenContract, tokenId, status, reason)` (verifier/admin).
-* `isVerified(tokenContract, tokenId)` view function for integration.
+| ID | Constant | Use |
+| ---: | :--- | :--- |
+| 1 | `ORIGIN_FREE_MINT` | Free mint/campaign |
+| 2 | `ORIGIN_LOTTERY` | Official FOSNFT round mint |
+| 3 | `ORIGIN_STORY` | Story/content |
+| 4 | `ORIGIN_ADMIN` | Manual admin issuance |
+| 5 | `ORIGIN_REFERRAL` | Initial referral registration |
 
-#### Verification Methods
+Owner may define or enable/disable origin types using `setOriginType`.
 
-* **On-chain** : Integrators call `isVerified` directly.
-* **API** : An internal API endpoint returns verification status for UI and services.
-* **Dedicated Page** : A web page lets users paste contract/token IDs and check verification status.
+## Issuance and authorization
 
-#### Events & Security
+- `adminMint(to, originTypeId, originId, uri)` is limited to owner or `adminWallet`.
+- `mintFromContract(to, originTypeId, originId, uri)` requires `approvedMinters[msg.sender] == true`.
+- Owner authorizes a source with `setApprovedMinter`; the source sets its Verify connection with `setVerifyContract` under its own access controls.
+- Ordinary wallets cannot directly mint certificates.
 
-* `VerificationChanged(tokenContract, tokenId, status, reason, msg.sender)`.
-* Strict role gating; optional timelock for revocations; emit events for full auditability.
+FOSNFT's connected mint path issues origin type 2, `originId = fosTokenId`, and the supplied URI. Referral's connected registration path issues origin type 5, origin ID 0, and empty URI. The specification does not issue a new certificate on referral upgrade. Processor has no direct Verify integration in the supplied design.
 
-### Free Mint Contract
+## Records
 
-Enables a scheduled, allowlisted free mint. Early eligible wallets receive a special allocation of higher-value NFTs (configurable).
+Token IDs begin at 1 and increase. `getNftInfo` exposes the record; `totalMinted` gives the issuance count.
 
-#### Whitelist & Schedule
+| Field | Meaning |
+| :--- | :--- |
+| `exists` | Record is registered |
+| `active` | Current validity flag |
+| `originType` | Origin category |
+| `originContract` | Source contract or issuing caller |
+| `originId` | Source event/asset identifier |
+| `minter` | Initial recipient of the Verify NFT |
+| `createdAt` | Issuance timestamp |
 
-* Allowlist via Merkle tree: leaf example `keccak256(abi.encode(wallet, quota, phaseId))`. Root stored on-chain.
-* Enforce `perWalletQuota`, `perTxLimit`, and `phase` windows (`start`/`end` timestamps).
-* Anti-bot: cooldowns, optional signature-based gating (`EIP-712`), and same-block mint protections.
-* Schedule: start time is configured (TBD) via config keys and will be finalized closer to launch.
+`minter` is historical provenance, not current ownership. Read ERC-721 ownership for the current holder. A certificate and its linked FOSNFT are separate tokens.
 
-#### Early Allocation
+## Check current status
 
-* Parameters: `earlyAdoptersCount` (e.g., 10), `rewardPerAdopter` (e.g., 10 NFTs), `rewardTier` (e.g., $100 tier).
-* Selection: first `N` distinct wallets successfully minting after phase start. Deterministic tie-break by transaction ordering.
-* Guarantees: ensure rewards do not exceed supply; track `awarded[wallet]` to prevent double-allocation.
+| Code | Status | Meaning |
+| ---: | :--- | :--- |
+| 0 | `NOT_REGISTERED` | No record |
+| 1 | `OFFICIAL_ACTIVE` | Official and currently active |
+| 2 | `OFFICIAL_REVOKED` | Officially issued but revoked |
 
-#### Interfaces & Events
+**`isOfficial(tokenId)` checks existence only. It may return true for a revoked token.** Interfaces must use `getStatus` to display current validity.
 
-* `mintFree(proof, quota, phaseId)`: validates Merkle proof; mints; applies early allocation if eligible.
-* Events: `FreeMintStarted(phaseId)`, `FreeMinted(wallet, qty, phaseId)`, `EarlyAllocation(wallet, qty, tier)`.
+Only owner may `revoke(tokenId, reasonCode)`. Revocation sets `active = false`; it does not burn the NFT, transfer ownership, or erase the record/history. Owner also manages approved minters, origins, admin wallet, and URI configuration. `adminWallet` can issue manual certificates but is not described as having owner-only revocation authority.
 
-#### Security
+# Free Mint Architecture
 
-* Merkle root rotation requires admin; proofs validated with exact leaf structure and domain separation by `phaseId`.
-* Pause and supply guardrails; `nonReentrant` on minting pathways.
-* **Immutability & Fairness** : Free-mint eligibility and allocation are enforced entirely by the contract; operators cannot "hand-pick" or alter outcomes.
+## Specified per-round free positions
 
-### Campaign (Incentive Layer): Reward Pool / Leaderboard Contract
+FOSNFT makes positions 10, 100, 200, 300, and 400 free in each Buddy/Samurai/Noble round. The user sends zero purchase value and pays network gas. FOSNFT funds each ticket's configured pool contribution from its own balance; admin withdrawals preserve the reserve for remaining free positions. Tickets 10 and 100 also have double selection weight.
 
-Activated when total users reach 5,000. For one month, site revenue is funneled to the pool. Upon hitting milestones ($20k, $50k, $100k, $200k, $500k, $1M, $2M), distribute 50/30/20 to top three accounts on the leaderboard.
+These positions use the ordinary `buyAndMint(lotteryType, tokenURI)` path. They are not restricted to a Genesis allowlist in the supplied summary.
 
-#### Activation & Funding
+## Separate Genesis campaign
 
-* Activation condition: `usersCount ≥ 5000` (fed from an oracle or admin-set flag accompanied by evidence).
-* Funding source: on-chain revenues from the **Referral** contract (admin share of $10 payments) and the **Reward Distribution** contract (admin share of purchases), funneled into the reward pool.
-* Accrual window: `activationTime` to `activationTime + 30 days`. Post-window, continue accrual toward next milestones as configured.
+The older roadmap describes a social whitelist and gas-only Genesis mint window, potentially using Merkle proofs and limited per-wallet allocations. The updated four-contract specification does not define that campaign's deployed contract, proof layout, quotas, dates, early-adopter bonus, or inclusion in paid collection rounds.
 
-#### Milestones & Distribution
+Treat those details as planned campaign configuration until published. A Verify origin category for free mint (type 1) enables certificate classification; it does not by itself implement an allowlist campaign. Do not promise that a Genesis asset automatically includes a Processor ticket or higher-tier allocation.
 
-* Milestones: 20k, 50k, 100k, 200k, 500k, 1M, 2M (configurable). On crossing each, a distribution is triggered.
-* Leaderboard source: on-chain accumulation or an oracle feed from the main app. Snapshot height defined and immutable per milestone.
-* Split: 1st 50%, 2nd 30%, 3rd 20%. Rounding: allocate remainder to admin or largest rank deterministically to prevent dust drifting.
-* Distribution method: claim-based recommended — write allocations, users call `claim()`; prevents reentrancy and failed transfer halts.
+See [Free Mint Campaign](/docs/campaigns/free-mint) and [FOSNFT & Processor](/docs/technical/allocation-contract).
 
-This is a  **temporary growth campaign** . The core protocol (Body/Samurai/Noble pools, distributions, and protocol payouts) continues indefinitely regardless of campaign status. The campaign share of each mint is routed **directly** to a dedicated campaign vault and can be turned off without affecting the 500-mint cycles.
+# Campaign & Leaderboard Design
 
-#### Interfaces & Events
+The existing roadmap describes a separate growth campaign targeting 5,000 users, a 30-day window, milestones $20k/$50k/$100k/$200k/$500k/$1M/$2M, and 50/30/20 allocations to the top three leaderboard accounts. The new contract specification does not supply a campaign ABI, deployment, automatic activation proof, or funded milestone state. Those remain design targets rather than live guarantees.
 
-* `recordRevenue(amount)`: called by revenue wallet or adapter; updates pool and checks milestones.
-* `setLeaders(milestone, addresses[3])` (admin/oracle): freezes recipients for that milestone.
-* `claim(milestone)`: eligible leaders withdraw their allocation; idempotent via claimed flags.
-* Events: `RevenueAdded(amount)`, `MilestoneReached(milestone, pool)`, `LeadersSet(milestone, first, second, third)`, `Claimed(milestone, account, amount)`.
+## Funding boundary
 
-#### Security & Invariants
+Only available admin funds may be committed to a campaign. Referral admin receipts vary with the direct referrer's current $2/$5/$10 plan (50%/40%/18%), or 100% without a referrer. FOSNFT retains collection-specific admin fees (5%/3%/2%) but must reserve funding for remaining free positions. Neither Processor pools nor deferred user payments may be redirected as campaign revenue.
 
-* Multi-sig admin for parameter changes; milestone leader sets logged and immutable after confirmation.
-* Pool accounting must be conserved: sum(allocations at milestone) ≤ poolAtMilestone; any remainder handled deterministically.
-* Use `nonReentrant`, CEI; avoid push transfers; support `ERC-20` safe operations.
-* **Trustless Operation** : Reward accruals, leader snapshots, and claims are executed by contract rules; neither operators nor developers can alter recipients or redirect funds.
+The new summary does not establish automatic routing to a campaign vault. Publish that adapter/funding implementation before treating it as active.
 
-### Observability, Testing & Assurance
+## Required campaign specification
 
-* Emit comprehensive events for every critical action; index via subgraph for analytics and audits.
-* Testing: unit tests for each contract module; invariant tests for supply/accounting; fuzz tests for edge cases (e.g., boundary times, rounding, reentrancy).
-* Static analysis: run Slither/Mythril; differential testing for randomness-dependent code where feasible.
-* Deployment: if upgradeable, initialize via `initializer` functions; verify all addresses on explorer; store config in a registry.
+Confirm the user-count source, activation authority/date, funding window, incremental versus cumulative milestone funding, unique snapshots, tie-break rules, rounding, claim eligibility, and recovery behavior. A dollar milestone table is arithmetic, not evidence that funds exist. Do not allocate the same funded balance again at multiple milestones.
 
-## Landing Website
+## Leaderboard
 
-### Purpose & Structure
+Retained product scoring is direct referral +1, Buddy purchase +2, Samurai +4, Noble +6. The supplied summary provides `referralCount` and `purchaseCount`; it does not establish an on-chain global ranking or new points for referral upgrades. Verify the app/indexer scoring and snapshots before making payout claims.
 
-The landing site introduces the product, previews key application modules (Whitelist, Free Mint, Rewards), and routes users into the app. It includes sections such as feature highlights, whitelist teaser, and reward/milestones preview with CTAs to the corresponding app pages.
+The campaign is separate from the 500-ticket round's 17-recipient draw. Its planned three-account 50/30/20 split must not be confused with the round's 1/6/10 ticket groups. See [Growth Campaign](/docs/campaigns/growth).
 
-### Tech Stack
+# Main Application Integration
 
-* Server-rendered PHP templates with shared styles and components.
-* Client-side JS enhances interactivity and integrates wallet connectors where needed.
-* Calls internal APIs for dynamic counters and previews.
+This Next.js repository is the documentation website. Older PHP paths and wallet functions described in previous drafts are main-application design references; their implementation is not present here. The supplied contract update defines the following integration requirements.
 
-### Previews and CTAs
+## Wallet and network
 
-* Whitelist preview linking to `/app/whitelist.php` with requirement highlights.
-* Free Mint preview linking to `/app/FreeMint.php` with countdown teaser.
-* Rewards preview linking to `/app/rewards.php` showing pool/milestones overview.
+Use Robinhood Chain for user transactions. Confirm `eth_chainId` matches the selected environment: mainnet 4663, testnet 46630. A Base wallet balance or Base Sepolia chain ID is not a substitute. Obtain RPC/explorer settings from the [network reference](/docs/protocol/platform), keeping environments separate.
 
-### Performance & SEO
+## Mint interface
 
-* Static content where possible; defer non-critical scripts; cache API previews.
-* Structured metadata, social cards, and Core Web Vitals monitoring.
+1. Read collection type, round state, next ticket position, and exact configured ETH price.
+2. Show nominal dollar labels separately from the required ETH transaction value.
+3. For positions 10, 100, 200, 300, and 400, send zero purchase value and show the wallet's network gas estimate.
+4. Submit `buyAndMint(lotteryType, tokenURI)` using the verified FOSNFT ABI and address.
+5. Wait for a successful receipt, then refresh NFT/ticket data. Handle next-position races by refreshing and asking the user to sign a new transaction.
+6. After ticket 500, display pending randomness/delivery until the cross-chain result and draw finalization are confirmed. Do not show a receipt as a completed payout.
 
-## Main Application
+## Referral interface
 
-### Authentication
+Display current plan prices and commission rates from the contract. Registration selects 2/5/10 and a valid direct referrer or zero address. Upgrade options are only higher plans. Read `getUpgradeCost` immediately before signing. Explain that the referrer's current plan sets the split, and upgrades retain the original `referredBy`.
 
-Wallet-based authentication and gating for on-chain interactions. OAuth is used for social verifications on the Whitelist page (X/Twitter, Discord) and Telegram/YouTube checks. Sessions are minimal; client performs most flows with API verification.
+Show direct payments separately from `pendingWithdrawals`. Referrers claim deferred ETH with `claim()`; admin `withdraw()` is a different permissioned operation. Refresh balances and plan status after confirmed receipts.
 
-### App Pages
+## Certificate interface
 
-#### Whitelist Page
+Use Verify `getStatus` for current validity, `getNftInfo` for origin details, and ERC-721 ownership for the current holder. Do not call a revoked certificate active just because `isOfficial` is true. Show original recipient separately from current owner.
 
-Users connect wallet and complete social steps to qualify. The page reads dynamic requirements from the database and enforces unique social accounts per user as configured.
+## Leaderboard and campaigns
 
-* **Path** : `/app/whitelist.php`
-* **Requirements (dynamic)** : loaded from table `data`, e.g. `require_twitter`, `require_discord`, `require_youtube`, `require_youtube_subscribe`, `require_telegram_join`, `enforce_unique_socials`, `require_base_transaction`, `base_rpc_url`, `oauth_allowed_origins`.
-* **Settings** : `whitelist_settings` table for capacity and toggle; `whitelist_users` stores registrations.
-* **Social Connections** :
-* X/Twitter OAuth: popup via `/api/oauth_twitter.php`/`includes/config/oauth.php`; scopes include `users.read`.
-* Discord OAuth: popup via `/api/oauth_discord.php` callbacks; scope `identify`.
-* YouTube: OAuth client configured via `data` keys (`youtube_oauth_client_id`, `youtube_channel_id`); subscription check if enabled.
-* Telegram: Join-and-verify flow using bot token and channel id/username via `/api/telegram_verify.php`.
-* **API** : `/api/whitelist_handler.php` validates inputs against dynamic flags and persists registration; enforces Base transaction requirement if enabled.
-* **Security** : restrict popup message origins via `oauth_allowed_origins`; rate-limit submissions; enforce one wallet per set of socials if `enforce_unique_socials` is true.
+The retained scoring design is referral +1, Buddy +2, Samurai +4, Noble +6. Upgrade points, free-mint points, time-period ranking, and campaign snapshots require the final app/indexer policy; the supplied contract summary does not define all of them. `referralCount` and `purchaseCount` are evidence for indexing, not a complete specified leaderboard ABI.
 
-#### Free Mint Page
+## Operational views
 
-Whitelist users see a countdown and can mint when the window opens. Configuration and eligibility checks are performed through APIs and the `data` table.
+Show collection/round identifiers, Robinhood transaction hashes, pending randomness, Base VRF request correlation, CCIP delivery state, selected ticket IDs, attempted payments, and deferred claims. Filter logs by chain and contract version; validate server responses and never ask users for wallet private keys.
 
-* **Path** : `/app/FreeMint.php`
-* **Config** (`data` table): `freemint_start_unix` or `freemint_start_iso`, `freemint_nft_price_usd`, `freemint_max_per_user`.
-* **Eligibility** : calls `/api/whitelist_handler.php?action=check_wallet&wallet=...` to validate whitelist membership before enabling mint.
-* **Click/Claim Queue** : `/api/freemint_click.php` maintains `free_mint_state(hard_cap, claimed_count)` and `free_mint_clicks` with row locks to prevent race conditions.
-* **UX** : countdown to start time; mint button enabled only if time ≥ start, wallet connected, and whitelist=true.
-* **Security** : server-side locking on claims, anti-duplicate checks; later integrated with on-chain free mint contract for final settlement.
+# Security & Validation
 
-#### Rewards Page
+The supplied contract summary describes intended behavior. This repository does not include Solidity sources, final ABIs, independent audit reports, or evidence of a deployed VRF/CCIP lane. An audit, timelock, multisig, or public retry function must not be claimed as completed solely because it appeared in an older draft.
 
-Displays current reward pool, milestones, and recipients/leaderboard information. Integrates with API endpoints and the reward contract lifecycle.
+## Authority and funds
 
-* **Path** : `/app/rewards.php`
-* **Pool Display** : shows current wallet/balance and provides copy/view explorer actions.
-* **Milestones** : renders configured thresholds (e.g., 20k→2M) and status.
-* **Leaderboard** (JS in `core/index.php`):
-  * Totals: `/api/leaderboard_handler.php?action=get_total_users` updates the 5,000-user activation progress.
-  * Leaderboard data: `/api/leaderboard_handler.php?action=get_leaderboard&period=day|week|all&page=...` with pagination.
-  * Recipients modal: dynamically renders recipients and reward amounts when available.
-* **Security** : sanitize API outputs, cache and rate-limit leaderboard endpoints; avoid exposing sensitive admin data.
+Referral owner can change prices, percentages, admin wallet, and Verify connection. Verify owner controls authorized minters, origin types, URI configuration, and revocation. Round settings are stored per round; updates generally apply to future rounds, with permitted empty-round updates. Publish real deployment roles and settings after verification.
 
-#### Landing Page (App Shell)
+The interface does not hold private keys, but contracts hold pool funds, free-position reserves, and deferred payment liabilities. Native ETH is volatile; automation does not remove smart-contract, network, or regulatory risks.
 
-* Provides navigation to Whitelist, Free Mint, and Rewards pages with shared header/footer and styles.
-* Hides or reveals CTAs contextually depending on page and user state (e.g., wallet connection).
+## Required contract checks
 
-### Integrations
+- Registration: once per wallet, registered non-self referrer, zero-address path, exact payment, fixed `referredBy`.
+- Plans: strict price ordering, higher-plan upgrades only, current difference payment, referrer's current basis-point rate, no retroactive payment changes.
+- Funds: admin withdrawable balance excludes pending claims and FOSNFT's remaining free-ticket reserve.
+- Mint: only FOSNFT registers in Processor; exact contribution matching; independent collection rounds; free positions send zero purchase value.
+- Draw: double-weighted entries are removed together after selection; 17 distinct tickets; repeated wallet recipients allowed; rounding residue assigned to primary.
+- Claims: failed pushes create correct liabilities; successful claims cannot repeat; transfers and claims resist reentrancy.
+- Verify: only approved issuers; origin linking; initial recipient versus current owner; revoked records remain official but inactive.
 
-* Wallet connectors for Base network; RPC URL configurable via `data.base_rpc_url`.
-* OAuth providers for X/Twitter, Discord, YouTube; Telegram Bot API for membership verification.
-* Internal APIs under `/api/` for whitelist, freemint, leaderboard, and telegram verification.
-* **Explorer** : Read transaction data and receipts from `BaseScan` for user-facing confirmations and admin diagnostics.
-* **VRF** : Chainlink VRF is funded via **LINK subscription** on Base. User checks rely on `msg.sender` (not `tx.origin`) for Account Abstraction compatibility.
+## Cross-chain checks
 
-### Core App (core/index.php)
+Verify the actual CCIP-supported lane and configured routers/senders, Base VRF environment and authorization, round/request correlation, replay/stale response rejection, and exactly-once finalization. Test delayed messages, failed request delivery, failed return delivery, unavailable fee balances, and rejected recipient transfers.
 
-This is the main single-page application shell. It manages navigation, wallet connections, on-chain NFT minting and purchasing, leaderboard rendering, profile, gallery, and recipients pages. Client logic coordinates with APIs and smart contracts.
+Keep a pending round visible when randomness is unavailable. Do not substitute block timestamps, `prevrandao`, or an operator-selected result for the specified VRF design. A supported retry/recovery path and the fee-funding policy must come from the final implementation; the specification does not supply their callable ABI.
 
-#### Routing & Navigation
+## Operational readiness
 
-* **Router** : `showPage(pageId)` toggles visibility across sections: `overviewContent`, `allCollectionsContent`, `mintNftContent`, `leaderboardContent`, `profileContent`, `recipientsContent`, `galleryContent`, `aboutContent`.
-* **Menu** : sidebar listeners map to pages (Home, Profile, Collection list, Gallery, Leaderboard, Recipients, About). Returning home uses `goHome()` with context to restore previous list view.
-* **Contextual UI** : CTA elements (e.g., "Mint Now") are shown on the overview and hidden on subpages; overlays adjust based on wallet state (e.g., profile overlay when disconnected).
+Use verified full addresses and ABIs per environment, verify deployed bytecode and role owners, check RPC chain ID, and monitor both chains. Multisig/timelock protection, unit/invariant/fuzz tests, independent audit, and privacy/access controls are recommended checks, not verified features of this documentation repository.
 
-#### Wallet Connections
+No implemented 365-day liquidation guarantee, fixed 18× gas multiplier, or no-risk claim is supported by the new contract summary.
 
-* **MetaMask** : `connectMetaMask()` requests accounts, updates localStorage (`walletConnected`, `currentAccount`, `lastConnectionTime`), then invokes `registerOrLoginUser`, `loadProfileData`, `checkRecipientStatus`.
-* **Coinbase** : `connectCoinBase()` uses CoinbaseWalletSDK; provider targets Base Sepolia (id 84432). Event listeners handle `accountsChanged`, `chainChanged`, and `disconnect`.
-* **Auto-restore** : `checkAllWalletConnections()` attempts restoration within 24h by checking `eth_accounts` or Coinbase SDK; on success rehydrates profile and status.
-* **UX** : gallery/profile refresh after connect; overlays prompt connection when required.
+# APIs & Data Models
 
-#### Live ETH Price (USD)
+## Routes implemented in this repository
 
-* Fetch live ETH/USD price from a reliable API and display it in the UI for user context.
-* Values are informational; on-chain logic remains source of truth. Base network gas costs are reflected in wallet prompts.
+| Endpoint | Method | Behavior |
+| :--- | :--- | :--- |
+| `/api/search` | GET | Static Fumadocs/Orama documentation search index |
+| `/api/chat` | POST | Gemini response to JSON containing a string `message` |
 
-#### NFT Minting & Purchase
+Chat requires `GEMINI_API_KEY` and outbound HTTPS to `generativelanguage.googleapis.com`. It uses `gemini-2.5-flash`. Without credentials it returns a configuration error. The assistant is informational; it cannot verify contract deployment, sign transactions, or supply legal/financial advice.
 
-* **Entry** : "Mint Now" resolves `selectedCollectionType` then navigates to `mintNftContent`. If no wallet, shows wallet-required overlay.
-* **On-chain mint** : Using `ethers.js`, calls contract `buyAndMint(collectionType, tokenURI, { value: collectionPrice })`. The `tokenURI` is derived from selected collection metadata; `collectionPrice` is fetched via `collectionPrices(collectionType)`.
-* **Persistence** : Upon confirmation, saves transaction via API (wallet, tx hash, token id/URI, type, amount), increments sold NFTs and user mint counters, updates UI and opens success modal.
-* **State** : Maintains `currentCollectionData`, `selectedCollectionType`; provides helpers like `setRandomNft()` for display.
-* **VRF** : Reward distributions are resolved with Chainlink VRF; randomness is verifiable and tamper-resistant.
+Older `/api/*.php`, `/status`, `/allowlist/proof`, and `/allocation/:wallet` examples are not implemented by this Next.js site. Do not present them as deployed endpoints.
 
-#### Leaderboard & Recipients
+## Main-application integration models
 
-* **Leaderboard** : `loadLeaderboardData(period, page)` calls `/api/leaderboard_handler.php?action=get_leaderboard` to populate podium (top 3) and paginated list; supports periods (day, month, year) and pagination state.
-* **Grand reward progress** : `updateGrandRewardProgress()` fetches total users via API and updates the 5,000-user activation bar.
-* **Recipients** : Modal and recipients page render recent recipients and reward info; UI helpers format and paginate the view.
-* **Points System** :
-* Each valid referral: **+1** point.
-* Collection purchase  **$3** : **+2** points.
-* Collection purchase  **$13** : **+4** points.
-* Collection purchase  **$25** : **+6** points.
+These are recommended indexing fields, not published contract tuple signatures or confirmed REST APIs.
 
-#### Profile & Gallery
+| Model | Important fields |
+| :--- | :--- |
+| Referral user | chain ID, wallet, isRegistered, userTier, referredBy, referralCount, totalEarned, pendingWithdrawals |
+| Ticket | chain ID, FOSNFT address, token ID, collection type, round ID, ticket position, original purchaser, weight, transaction hash |
+| Round | collection type, round ID, stored capacity/contribution/group rules, ticket count, pool balance, request correlation, finalization status |
+| Allocation | round ID, selected ticket, recipient, allocated ETH, transfer outcome, claim transaction |
+| Certificate | Verify address, token ID, originType, originContract, originId, initial recipient, current owner, getStatus result |
 
-* **Profile** : Loads data via `/api/profile_handler.php?wallet_address=...` to update username/avatar; tabs include invited friends, transactions, and settings; referral card is shown when a link exists.
-* **Gallery** : Displays user's NFTs; initialized when opening gallery with a connected wallet.
+Confirm every indexed transaction against the correct chain, contract address/version, and successful receipt. Avoid double-counting repeated events or CCIP deliveries. Display nominal USD calculations separately from actual ETH accounting.
 
-#### APIs & Data Flow
+## Terminology
 
-* **Transactions** : Saved post-mint via transaction handler API (wallet, tx hash, NFT details, amount).
-* **Leaderboard** : `/api/leaderboard_handler.php` for podium/list and diagnostics (test/debug endpoints).
-* **Profile** : `/api/profile_handler.php` for user profile data and referral info.
-* **Explorer Sync** : Periodically read and cross-check user transactions and events from `BaseScan` for transparency.
+- **VRF:** verifiable randomness produced on the specified Base integration.
+- **CCIP:** messaging carrying a round request/result between Base and Robinhood.
+- **Ticket:** a registered round entry associated with a mint; uniqueness of selection is at ticket level.
+- **Deferred payment:** owed ETH recorded for a later `claim()` after direct transfer fails.
+- **Origin certificate:** a separate Verify NFT; issuance and active status are distinct.
 
-#### Security & Reliability
-
-* **On-chain safety** : Relies on contract-side guards (CEI, `nonReentrant`, role gating). Client-side enforces wallet connection, network selection, and amount checks before submitting transactions.
-* **API hygiene** : API responses are validated; lists are paginated; UI avoids blocking on transient failures and logs client-side errors.
-* **Resilience** : Auto-restore wallet sessions, graceful UI fallbacks, and state refresh after critical actions. Gallery/profile auto-refresh on connect.
-* **Failover (Distribution/Payout)** : If the auto-distribution at the 500th mint does not execute, a *public* retry/distribution function can be called to complete the distribution and pay recipients immediately. Payouts are push transfers; if a recipient reverts, the transaction reverts and can be retried.
-
-#### Performance
-
-* Defer heavy UI until navigation into a page; cache leaderboard pages client-side; minimize re-renders; lazy-load images and modals.
-* Use batched API calls for leaderboard and profile where possible; throttle DOM updates when scrolling lists.
-
-## Infrastructure & DevOps
-
-* Environments: dev, testnet, production with dedicated RPC endpoints.
-* CI/CD: automated lint, test, and deployment pipelines.
-* Observability: centralized logs, metrics, uptime and error alerts.
-* Secrets: managed via vaults and restricted IAM policies.
-
-## Security & Compliance
-
-* Threat modeling for contract and web attack surfaces.
-* Key management using HSMs or hardware wallets for admin operations.
-* Regular audits, fuzzing, and bug bounty programs.
-* Privacy: PII minimization, data retention policies, and consent tracking.
-
-All high-privilege transactions should be multi-sig protected and/or timelocked.
-
-## APIs & Data Models
-
-### Endpoints
-
-* `GET /status`: System health and current phases.
-* `POST /allowlist/proof`: Returns Merkle proof for a wallet.
-* `GET /reward/:wallet`: Reward eligibility and claim status.
-
-### Schemas
-
-* **User** : wallet, roles, preferences.
-* **Mint** : tx hash, phase, amount, timestamp.
-* **Reward** : tier, allocation, claimedAt, tx hash.
-
-## Testing & QA
-
-* Smart contracts: unit tests, invariant tests, coverage reports.
-* Web: integration and e2e tests across critical journeys.
-* Testnets: rehearsals with production-like configurations.
-
-## Roadmap
-
-* Alpha on testnet with whitelist-only mint.
-* Public launch with free mint window and reward activation.
-* Post-launch optimizations and additional utilities.
-
-## Glossary & References
-
-* **Merkle Proof** : Compact proof of inclusion in a set using Merkle trees.
-* **Allowlist** : Curated list of eligible wallets for restricted phases.
-* **VRF** : Verifiable Random Function, for auditable randomness.
-
-References: OpenZeppelin Contracts, EIPs (ERC-20/721/1155), Chainlink VRF docs, The Graph.
-
-## FAQ
-
-<details open=""><summary>Why did you choose the Base network?</summary>
-
-Base offers lower gas fees and high throughput while inheriting Ethereum's security. It improves UX and lets us deliver novel primitives not commonly available elsewhere.
-
-</details>
-
-<details open=""><summary>Are some collection purchases free?</summary>
-
-Yes. Specific numbers (10, 100, 200, 300, 400) are free-entry tiers. Users only pay gas; the contracts enforce no fee for these tiers.
-
-</details>
-
-<details open=""><summary>How is randomness guaranteed?</summary>
-
-We use Chainlink VRF for provably fair randomness. Results are verifiable on-chain and cannot be influenced by operators or developers.
-
-</details>
-
-<details open=""><summary>Can the team modify Free Mint or Reward outcomes?</summary>
-
-No. Both flows are fully governed by smart contracts. Operators cannot re-route funds, select recipients, or change allocations beyond contract-configured parameters (often timelocked and multi-sig protected).
-
-</details>
-
-<details open=""><summary>How are leaderboard points calculated?</summary>
-
-Referral: +1 point per valid referral. Collection purchase: $3 → +2, $13 → +4, $25 → +6 points.
-
-</details>
-
-<details open=""><summary>Is the referral program multi-level?</summary>
-
-No. It is linear and single-level. Only your direct referrals count; there is no pyramid structure.
-
-</details>
-
-<details open=""><summary>How do I verify an NFT?</summary>
-
-Three ways: call the on-chain `isVerified` function, use our verification API endpoint, or check via the dedicated verification web page.
-
-</details>
-
-<details open=""><summary>Do I need social connections for the whitelist?</summary>
-
-Yes. The whitelist page enforces connecting your wallet and completing required social verifications (Twitter, Discord, YouTube, Telegram) as configured.
-
-</details>
-
-<details open=""><summary>Where do prices and transaction data come from?</summary>
-
-ETH/USD prices are fetched from a reliable price API for display only. Transaction data and receipts are read from BaseScan to enhance transparency.
-
-</details>
-
-<details open=""><summary>Do free-entry tiers still require gas?</summary>
-
-Yes. Even for free tiers (10/100/200/300/400), users must pay network gas. Gas is paid to validators and is not collected by us.
-
-</details>
-
-<details open=""><summary>Which wallets and networks are supported?</summary>
-
-MetaMask and Coinbase Wallet are supported on the Base network. The app prompts network switching to Base when needed.
-
-</details>
-
-<details open=""><summary>How are admin funds handled?</summary>
-
-Admin shares are routed by contract to designated wallets (preferably multi-sig). Sensitive parameter changes can be timelocked as configured.
-
-</details>
-
-<details open=""><summary>What if Chainlink VRF is delayed or fails?</summary>
-
-The contract logic re-requests or defers resolution until a valid VRF response arrives. There is no manual override to inject custom randomness.
-
-</details>
-
-<details open=""><summary>How are NFT metadata and reveal handled?</summary>
-
-Metadata follows `baseURI` conventions. If a reveal phase exists, it is executed via contract-controlled parameters; final URIs are immutable post-reveal.
-
-</details>
-
-<details open=""><summary>How are referrals validated and abuse prevented?</summary>
-
-Referrals are validated via signed codes or an on-chain registry. Rate limits and uniqueness checks mitigate abuse; only direct referrals are counted.
-
-</details>
-
-<details open=""><summary>How do I receive rewards if I'm selected as a recipient?</summary>
-
-For the main collections (Body/Samurai/Noble), rewards are sent **automatically** to your wallet when the 500th NFT is minted. No claim action is required. For the Growth Campaign Leaderboard rewards, you must manually claim your allocation using the `claim(milestone)` function (the UI provides a one-click flow). A small gas fee is required for campaign claims.
-
-</details>
-
-<details open=""><summary>Can I independently verify my purchases and claims?</summary>
-
-Yes. All purchases and reward claims emit events. You can verify them on BaseScan and cross-check with the contract state.
-
-</details>
-
-Cycle Reset `<details open=""><summary>`How are leaderboard ties resolved?`</summary>`
-
-Ties are broken deterministically according to snapshot rules (e.g., earlier on-chain activity at the snapshot height). Rules are consistent and logged.
-
-</details>
-
-<details open=""><summary>What happens if I switch wallets?</summary>
-
-Ownership and points are wallet-based. Switching wallets creates a new account context; previous purchases/referrals do not automatically transfer.
-
-</details>
-
-<details open=""><summary>Is any part of the system custodial?</summary>
-
-No. Funds for purchases, rewards, and referrals are routed by smart contracts. Servers do not take custody of user funds.
-
-</details>
-
-<details open=""><summary>Why might the displayed ETH price differ from my wallet's quote?</summary>
-
-Displayed prices are informational and may lag or use different sources. Your wallet and on-chain values remain the source of truth at transaction time.
-
-</details>
-
-© 2025 PROJECT NAME — Internal Technical Documentation
-
-This is a living document. Update version and sections as the project evolves.
+See [network metadata](/docs/protocol/platform) and [contract reference](/docs/technical/smart-contracts).

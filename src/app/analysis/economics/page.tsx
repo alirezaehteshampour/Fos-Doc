@@ -1,115 +1,65 @@
 "use client";
 
-import { GlassCard } from "@/components/ui/glass-card";
-import { UniversalChart } from "@/components/charts/universal-chart";
-import { ChartData } from "chart.js";
+import Link from 'next/link';
+import { GlassCard } from '@/components/ui/glass-card';
+import { UniversalChart } from '@/components/charts/universal-chart';
+import type { ChartData } from 'chart.js';
 
-// -- Data from Marketing3.md --
-
-const inputRevenue = 1000;
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const protocolDataPoints: number[] = [];
-const centralizedDataPoints: number[] = [];
-
-for (let i = 0; i < 12; i++) {
-    protocolDataPoints.push(inputRevenue * (i + 1) * 0.95);
-    centralizedDataPoints.push(inputRevenue * (i + 1) * 0.50);
-}
-
-const valueData: ChartData<"line"> = {
-    labels: months,
+const splitData: ChartData<'bar'> = {
+    labels: ['Buddy', 'Samurai', 'Noble'],
     datasets: [
-        {
-            label: 'Autonomous Protocol (95% Return)',
-            data: protocolDataPoints,
-            borderColor: '#06b6d4',
-            backgroundColor: 'rgba(6, 182, 212, 0.1)',
-            fill: true,
-            tension: 0.4
-        },
-        {
-            label: 'Centralized Platform (50% Return)',
-            data: centralizedDataPoints,
-            borderColor: '#94a3b8',
-            backgroundColor: 'rgba(148, 163, 184, 0.1)',
-            fill: true,
-            tension: 0.4,
-            borderDash: [5, 5]
-        }
-    ]
+        { label: 'Pool contribution (%)', data: [95, 97, 98], backgroundColor: '#34d399' },
+        { label: 'Admin fee (%)', data: [5, 3, 2], backgroundColor: '#fb7185' },
+    ],
 };
-
-const costBreakdownData: ChartData<"doughnut"> = {
-    labels: ['Community Rewards', 'Platform Overhead', 'Marketing/Admin'],
-    datasets: [{
-        label: 'Centralized Model',
-        data: [50, 20, 30],
-        backgroundColor: ['#94a3b8', '#fb7185', '#fbbf24'],
-    }]
-};
-
-const fosBreakdownData: ChartData<"doughnut"> = {
-    labels: ['Community Rewards', 'Protocol Burn', 'Ops/Gas'],
-    datasets: [{
-        label: 'FOS Model',
-        data: [95, 4, 1],
-        backgroundColor: ['#34d399', '#06b6d4', '#475569'],
-    }]
-};
-
 
 export default function EconomicsPage() {
     return (
         <div className="space-y-8">
-            <div className="mb-8">
-                <h2 className="text-3xl font-bold text-foreground">Protocol vs. Platform Economics</h2>
-                <p className="text-muted-foreground mt-2">How autonomous code eliminates rent-seeking and maximizes community value.</p>
+            <div>
+                <h2 className="text-3xl font-bold">FOS Collection Economics</h2>
+                <p className="text-muted-foreground mt-2">
+                    Collection-specific fees and funded free positions on Robinhood Chain.
+                </p>
             </div>
-
-            {/* Main Value Chart */}
-            <GlassCard className="p-8">
-                <div className="mb-6">
-                    <h3 className="text-xl font-bold text-foreground">Cumulative Value Returned ($)</h3>
-                    <p className="text-muted-foreground text-sm">Comparison based on $1,000 monthly volume input.</p>
-                </div>
+            <GlassCard>
+                <h3 className="text-xl font-semibold mb-4">Per-ticket contribution</h3>
                 <div className="h-80">
-                    <UniversalChart type="line" data={valueData} />
+                    <UniversalChart type="bar" data={splitData} options={{ scales: { y: { beginAtZero: true, max: 100 } } }} />
                 </div>
+                <p className="text-sm text-muted-foreground mt-4">
+                    These percentages describe the mint payment split, not individual investment returns.
+                    Network gas and Base VRF/CCIP costs are separate.
+                </p>
             </GlassCard>
-
-            <div className="grid md:grid-cols-2 gap-8">
-                <GlassCard>
-                    <h3 className="text-lg font-semibold text-foreground mb-6 text-center">Cost Structure: Centralized</h3>
-                    <div className="h-64 relative">
-                        <UniversalChart type="doughnut" data={costBreakdownData} options={{ cutout: '60%' }} />
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-3xl font-bold text-muted-foreground">50%</span>
-                        </div>
-                    </div>
-                    <p className="text-center mt-4 text-sm font-medium text-rose-500">High Operational Drag</p>
-                </GlassCard>
-
-                <GlassCard>
-                    <h3 className="text-lg font-semibold text-foreground mb-6 text-center">Cost Structure: FOS Protocol</h3>
-                    <div className="h-64 relative">
-                        <UniversalChart type="doughnut" data={fosBreakdownData} options={{ cutout: '60%' }} />
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-3xl font-bold text-emerald-500">95%</span>
-                        </div>
-                    </div>
-                    <p className="text-center mt-4 text-sm font-medium text-emerald-600">Maximized Efficiency</p>
-                </GlassCard>
-            </div>
-
-            <GlassCard className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 border-slate-700 text-white">
-                <div className="p-4">
-                    <h3 className="text-lg font-bold mb-2 text-cyan-400">The "Take Rate" Revolution</h3>
-                    <p className="text-slate-300">
-                        Legacy platforms must extract 20-50% to cover offices, salaries, and sales teams.
-                        FOS operates as immutable code on Base L2, reducing marginal costs to near-zero.
-                        This creates an insurmountable economic moat against centralized competitors.
-                    </p>
+            <GlassCard>
+                <h3 className="text-xl font-semibold mb-4">Full-round nominal accounting</h3>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead><tr><th>Collection</th><th>495 buyer payments</th><th>500-ticket pool</th><th>Remaining admin funds</th></tr></thead>
+                        <tbody>
+                            <tr><td>Buddy</td><td>$1,485</td><td>$1,425</td><td>$60</td></tr>
+                            <tr><td>Samurai</td><td>$6,435</td><td>$6,305</td><td>$130</td></tr>
+                            <tr><td>Noble</td><td>$12,375</td><td>$12,250</td><td>$125</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+                <p className="text-muted-foreground mt-4">
+                    FOSNFT funds positions 10, 100, 200, 300, and 400 from reserved balances.
+                    The pool and remaining admin funds equal purchase inflow before operating costs.
+                    Dollar values are model arithmetic; on-chain prices and balances use ETH.
+                </p>
+            </GlassCard>
+            <GlassCard>
+                <h3 className="text-xl font-semibold mb-2">Independent referral plans</h3>
+                <p className="text-muted-foreground">
+                    The direct referrer’s active $2/$5/$10 plan sets a 50%/60%/82% share of a registration
+                    or upgrade payment. Upgrades pay the current price difference. These receipts are
+                    independent of the round pools and do not change ticket selection weights.
+                </p>
+                <Link href="/docs/market-insights/economics" className="inline-block mt-4 underline">
+                    Read the accounting assumptions and reserve rules
+                </Link>
             </GlassCard>
         </div>
     );

@@ -1,75 +1,24 @@
 ---
 title: About FOS
-description: The Future of Decentralized Digital Collecting
+description: Collectibles, direct referrals, and verifiable distribution architecture
 ---
 
 # About FOS
 
-## Our Mission
+FOS combines digital collectibles, independently managed single-level referrals, and an authenticity-certificate registry. Its user-facing contract architecture is on **Robinhood Chain**. The specified draw architecture uses **Chainlink VRF on Base** and **CCIP** to transport requests and results.
 
-**To democratize the value of digital art.**
+## What the project provides
 
-FOS was built on a simple but powerful question:
+- Buddy, Samurai, and Noble collections with separate 500-ticket rounds.
+- Five gas-only positions per round, funded from reserved FOSNFT balances.
+- Double selection weight for positions 1–100 and 17 distinct selected tickets.
+- Independent $2/$5/$10 referral plans, with commission based on the direct referrer's active plan.
+- Separate Verify ERC-721 certificates with explicit active/revoked status.
 
-> *What if a digital collectibles platform returned its value to the community instead of extracting it?*
+## Transparency and authority
 
-Traditional platforms operate with a centralized intermediary ("the house") that captures the majority of value. FOS replaces that intermediary with **transparent, immutable code**.
+Users sign transactions through their wallets. The interface does not require private keys; funds entering a contract are governed by its accounting and permissions. The owner can configure referral prices and percentages, and Verify can authorize minters and revoke certificates. Global claims that no parameters can ever change do not describe the supplied specification.
 
-We are building a non-custodial, self-sustaining protocol where artists, collectors, and community participants share value through verifiable on-chain mechanisms — openly, fairly, and without intermediaries.
+Completed transactions, active configuration, and deployment verification should be distinguished from future plans. Cross-chain draws need delivery and callback processing after the last mint; automation is not a promise of immediate completion or risk-free use.
 
----
-
-## Our Philosophy: "Code is Law"
-
-At FOS, trust is not placed in individuals, companies, or institutions. **Trust is placed in open, immutable mathematics.**
-
-| Principle | Description |
-| :--- | :--- |
-| **No Black Boxes** | All core protocol logic is publicly deployed and verifiable on-chain. |
-| **No Discretionary Control** | The team cannot pause the protocol, freeze assets, select recipients, or alter outcomes. |
-| **No Custody** | Users never deposit funds into FOS. All interactions occur directly between user wallets and smart contracts. |
-
----
-
-## Our Technology
-
-FOS is not a traditional platform — it is a **decentralized protocol** composed of smart contracts deployed on the **Base Network (Ethereum Layer-2)**.
-
-### Technology Stack
-
-*   **Base Network (L2):** Fast settlement and low transaction costs while inheriting Ethereum's security.
-*   **Chainlink VRF:** Industry-standard, tamper-proof randomness. Outcomes cannot be predicted, influenced, or manipulated.
-*   **ERC-721 Standard:** Every Fos Digital Collectible is a true NFT — owned by the holder, transferable, and permanently recorded on-chain.
-
----
-
-## The Cycle of 500
-
-The FOS ecosystem operates in repeating cycles known as the **Cycle of 500**.
-
-1.  Each cycle begins with the **first mint**.
-2.  The cycle concludes with the **Green Eye** — the 500th collectible.
-3.  The Green Eye programmatically triggers the protocol's **automated reward distribution**.
-
-Each cycle functions as a closed, transparent micro-economy governed entirely by smart contract logic.
-
----
-
-## Our Core Values
-
-### 1. Transparency by Default
-Every transaction, allocation, and protocol action is publicly verifiable on the blockchain in real time.
-
-### 2. Protocol-Level Efficiency
-The protocol operates on a minimal operational margin. After network costs and community allocations, only a small, predefined share is retained.
-
-### 3. Privacy by Design
-We intentionally minimize data collection. FOS does not request names, emails, or personal identifiers. A wallet address is the only identifier used.
-
----
-
-## Join the FOS Community
-
-FOS is not a financial product, investment platform, or game of chance. It is a **decentralized digital collectibles protocol** built for creators, collectors, and builders who value transparency, autonomy, and fairness.
-
-**Mint. Participate. Collect.**
+See [protocol rules](/docs/protocol), [technical reference](/docs/technical), and [roadmap](/docs/roadmap).

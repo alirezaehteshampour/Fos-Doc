@@ -30,7 +30,7 @@ export default function HomePage() {
               FOS Documentation
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-              The decentralized digital collectibles platform with trustless automated rewards on Base L2.
+              The decentralized digital collectibles platform on Robinhood Chain, with verifiable cross-chain draws.
             </p>
 
             <div className="flex flex-wrap gap-3 sm:gap-4 justify-center px-4 sm:px-0">
@@ -96,7 +96,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Referral Program</h3>
               <p className="text-sm text-muted-foreground">
-                Single-level affiliate with 82% commissions.
+                Single-level $2/$5/$10 plans with 50%, 60%, or 82% referral shares.
               </p>
             </div>
           </Link>

@@ -1,73 +1,40 @@
 ---
 title: Smart Contracts Overview
-description: Overview of the FOS smart contract suite
+description: Separate minting, round processing, referral, and certificate contracts
 ---
 
 # Smart Contracts
 
-The FOS protocol is powered by a suite of smart contracts deployed on Base (Ethereum L2).
+## Contract suite
 
-## Contract Suite Overview
-
-| Contract | Purpose |
-| :--- | :--- |
-| **Allocation Distribution** | User participation that awards/mints an NFT per purchase and registers purchasers for allocation distribution outcomes. |
-| **Referral** | Handles a fixed $10 payment and revenue split (82% referrer, 18% admin) when a valid referral is present; otherwise 100% to admin. |
-| **Verification** | Canonical on-chain registry to verify whether a project NFT is officially verified. |
-| **Free Mint** | Scheduled, allowlisted free mint with a special early-user allocation (configurable) of higher-value NFTs. |
-| **Allocation Pool / Leaderboard** | Accrues revenue upon activation threshold and distributes 50/30/20 to top-3 leaderboard at defined milestones. |
-
-## Three-Pool Architecture (Single Contract)
-
-The core protocol implements three distinct pools within a single allocation distribution/mint contract. Pools are isolated logically and accounted separately; a `poolType` (e.g., enum) indicates the active pool for each mint and distribution.
-
-| Pool | Entry Price | Allocation |
+| Contract | Responsibility | Specified network |
 | :--- | :--- | :--- |
-| **Buddy** | ~$3 | $1,000 |
-| **Samurai** | ~$12 | $5,000 |
-| **Noble** | ~$25 | $10,000 |
+| `FOSNFT` | NFT mint, purchase payment, admin balance, free-ticket reserve | Robinhood |
+| `Processor` | Authorized ticket registration, round state, draw, allocations | Robinhood |
+| `Referral` | Registration, plans, upgrades, and direct-referral payments | Robinhood |
+| `Verify` | Separate ERC-721 certificates, origin registry, validity status | Robinhood |
+| VRF/CCIP integration | Carry round requests to Base and return VRF results | Robinhood and Base |
 
-Per-pool state tracks purchasers, dedicated pool balances, and distribution outcomes. Events include the `poolType` to enable precise indexing/analytics.
+Only FOSNFT may register tickets in Processor. Referral is independent of both contracts. Verify is optional and may be connected to FOSNFT and Referral; Processor has no direct Verify connection in the supplied structure.
 
-### Per-Pool Selected Participants & Distribution
+## Three independent collection types
 
-- **Selected participants per pool**: 17 total — 1 (first), 6 (second tier), 10 (third tier).
-- **Split**: 50% to first place, 30% split equally among 6 selected participants, 20% split equally among 10 selected participants.
-- All accounting is pool-scoped, preventing cross-pool mixing of balances or allocations.
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-## Common Standards & Interfaces
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-- **Tokens**: **ERC-721** (current deployment). `ERC-1155` remains optional only if multiple classes are needed. Use OpenZeppelin implementations with `Ownable` or `AccessControl`.
-- **Payments**: `ERC-20` stablecoin or native currency (TBD). All transfers use safe patterns and check return values.
-- **Access Control**: Admin and Operator roles. Admin is multi-sig where possible; time-locked changes for sensitive parameters.
-- **Upgradeability**: Transparent/UUPS proxies (if chosen) via audited libraries; otherwise immutable for reduced attack surface.
+All three target 500 tickets, with 17 selected tickets and 50/30/20 group allocation. There is no specified 100-round lifetime cap. Only the initial weights and price labels are described here; per-round stored settings and current on-chain prices control execution.
 
-## Global Assumptions
+## Standards and authority
 
-- All external calls are wrapped with checks-effects-interactions and `nonReentrant` guards where value transfer occurs.
-- Monotonic parameters (e.g., supply caps) never increase after deployment unless governed via timelocked admin process.
-- Events are emitted for every state change that impacts accounting, access control, minting, verification, and distributions.
+NFT/certificate documentation uses ERC-721. Do not infer ERC-721A, ERC-1155, UUPS upgradeability, timelocks, or audit status from older drafts. Referral owner controls include prices, split basis points, admin wallet, and Verify connection. Verify owner controls include approved minters, origin types, URI configuration, admin wallet, and revocation.
 
-### Monetary Figures Disclaimer
+## Deployment status
 
-All monetary figures referenced in this document (e.g., entry prices, allocation amounts, milestone thresholds) are illustrative protocol parameters used for system design and testing. They do not represent promises, guarantees, expected returns, or user entitlements. Actual allocations depend entirely on protocol execution and selection mechanics.
+Robinhood Chain ID **4663** is reported by the supplied specification and corroborated by the public network registry. The specification provides incomplete addresses for some components and does not supply the final Base-side bridge deployment. Accordingly this reference does not publish operational FOS contract addresses, ABIs, RPC credentials, or callback selectors. The named functions in individual pages are specification references, not a replacement for a verified ABI.
 
-### Deployment References (Per Environment)
-
-Deployed contract addresses and interface versions are tracked per environment (dev, testnet, production) in an internal registry and configuration table.
-
-| Environment | Network | Allocation Distribution | Referral | Verification | Free Mint | Campaign / Leaderboard | ABI / Interface Version |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Dev | Base Sepolia | `0x...` | `0x...` | `0x...` | `0x...` | `0x...` | `v1-alpha` |
-| Testnet | Base Sepolia | `0x...` | `0x...` | `0x...` | `0x...` | `0x...` | `v1-rc` |
-| Mainnet | Base (L2) | `0x...` | `0x...` | `0x...` | `0x...` | `0x...` | `v1.0` |
-
----
-
-## Next: Individual Contract Documentation
-
-- [Allocation Distribution Contract](/docs/technical/allocation-contract)
-- [Referral Contract](/docs/technical/referral-contract)
-- [Verification Contract](/docs/technical/verification-contract)
-- [Free Mint Contract](/docs/technical/free-mint-contract)
-- [Campaign & Leaderboard Contract](/docs/technical/campaign-contract)
+Genesis allowlist and growth campaign contracts remain design material in the [roadmap](/docs/roadmap), not confirmed members of this deployed four-contract suite.

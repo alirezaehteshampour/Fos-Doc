@@ -1,82 +1,57 @@
 ---
 title: Affiliate Protocol
-description: Referral system and commission structure
+description: Single-level referrals with three upgradeable plans
 ---
 
-# The Affiliate Protocol (Referral System)
+# Affiliate Protocol
 
-## Architecture Overview
+Referral is independent of NFT purchases and round allocations. Each wallet registers once with a plan and, optionally, an existing registered direct referrer.
 
-The Fos Affiliate Protocol is a decentralized growth engine designed to reward community expansion. Unlike traditional multi-level marketing (MLM) schemes, this system is Single-Level and Linear, ensuring sustainability and preventing pyramid structures.
+## Plans and payment splits
 
-## Activation Pathways
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
 
-Users participate in the growth economy via two distinct on-chain methods:
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-### Method A: The Partner Route (Via Referral Link)
+## Register and share
 
-**Mechanism:** A new user activates their account using an existing member's code.
+Call `register(address referrer, uint256 tier)` with tier **2**, **5**, or **10** and exact configured payment. The referrer must already be registered and cannot be the registering wallet. Use the zero address to register without a referrer. The wallet address identifies the referral link; `referredBy` records the direct referrer permanently. A registration with a referrer increases that referrer's `referralCount` by one.
 
-**Cost:** $10.00 (ETH Equivalent) + Gas.
+## Upgrade by paying the difference
 
-**Smart Contract Split:** The protocol automatically divides the fee:
-- 82% ($8.20): Allocated to the Referrer.
-- 18% ($1.80): Allocated to the Protocol Treasury.
+Registered users may call `upgrade(uint256 newTier)` to move 2→5, 2→10, or 5→10. Downgrades and registering the same wallet again are prohibited.
 
-### Method B: The Direct Route (No Referral)
+```text
+cost = tierPrice[newTier] - tierPrice[oldTier]
+```
 
-**Mechanism:** A user joins the platform independently without an invite code.
+Read `getUpgradeCost` and the current prices before submitting. Nominal differences are $3, $8, and $5 respectively; actual payment uses the current configured ETH difference. The upgrade is split with the **same original direct referrer**. Without one, the full upgrade payment goes to the admin.
 
-**Cost:** $10.00 (ETH Equivalent) + Gas.
+## Example
 
-**Smart Contract Split:**
-- 100% ($10.00): Allocated to the Protocol Treasury (as no referrer exists to compensate).
+1. A has the $2 plan. B registers through A with the $2 plan. A receives 50% of that payment, nominally $1.
+2. A upgrades to the $10 plan.
+3. B later upgrades from $2 to $5 and pays the nominal $3 difference.
+4. A now receives 82% of that difference, nominally $2.46; the admin receives $0.54.
 
-## Commission Distribution (Pull Pattern)
+If A had stayed on the $2 plan, even a $10 registration by B would use A's 50% rate. A's upgrade changes only subsequent payments; previous payments are never recalculated.
 
-To optimize gas efficiency and security for high-volume referrers, the protocol utilizes a "Claim-Based" (Pull) architecture for commissions.
+## Single-level accounting
 
-**Instant Allocation:** Commissions are calculated and added to the referrer's on-chain balance immediately upon the invitee's transaction.
+If A refers B and B refers C, A can receive a share of B's registration and upgrades. C's registration and upgrades can pay B, not A. Plan levels are price/commission plans, not additional generations of referral compensation.
 
-**User-Controlled Withdrawal:** Referrers may withdraw their accrued earnings at any time via the withdraw() function. This prevents "Dust Attacks" and reentrancy vulnerabilities associated with automatic push payments for frequent earners.
+## Direct payment and deferred claims
 
-**No Human Intermediary:** The entire ledger is managed by the smart contract; the Admin cannot freeze, delay, or manually adjust earned commissions.
+The contract attempts direct ETH payment to the referrer. If that transfer fails, it records the amount in `pendingWithdrawals`; the referrer uses `claim()` to collect it. `withdraw()` is for the admin's available balance, not the referrer's claim function.
 
----
+## Configuration and risk
 
-## The Economic Growth Engine (Affiliate Math)
+The owner can change plan prices, commission basis points, the admin wallet, and the Verify connection. Price ordering must remain `price(2) < price(5) < price(10)`. Initial documented rates are 5000, 6000, and 8200 basis points out of 10000. Read current settings rather than assuming those values are globally immutable.
 
-### The "Fair-Share" Architecture
+Reported test prices of 0.0000002, 0.0000005, and 0.000001 ETH are test settings, not production USD conversion rates. Referral participation and any tax obligations remain the user's responsibility. Payments depend on actual direct-referral activity and do not guarantee income.
 
-The Fos Affiliate Protocol eliminates the complexity of opaque, multi-level marketing schemes. It relies on a transparent, Single-Level Protocol Economy where rewards are mathematically fixed and verifiable.
-
-**Universal Activation:** Participation requires a standardized activation fee of $10.00 (ETH Base).
-
-**The 82/18 Immutable Split:** The smart contract enforces a hard-coded revenue division for every referral event:
-- Referrer Share (82%): $8.20 is allocated directly to the inviter.
-- Protocol Share (18%): $1.80 is allocated to the Operational Treasury.
-
-### Illustrative Fee Allocation Example (Non-Income)
-
-Referral allocations are protocol-defined fee splits for promotional participation. They do not represent wages, investment returns, or guaranteed income. The system places no cap on the number of active connections a user can maintain ("Unlimited Width"), allowing for exponential individual growth within a linear system.
-
-**Unit Economics:**
-
-| Activations | Earnings |
-| :--- | :--- |
-| 1 | $8.20 |
-| 10 | $82.00 |
-| 100 | $820.00 |
-| 1,000 | $8,200.00 |
-
-The Affiliate Protocol is single-level, non-recursive, and does not reward downstream activity beyond direct referrals. No pyramidal compensation structure exists.
-
-### Real-Time Settlement Layer
-
-Unlike traditional affiliate platforms that rely on monthly "Net-30" batch processing, the Fos Protocol operates on Block-Time Settlement.
-
-**Instant Allocation:** Earnings are recorded on the internal ledger immediately upon the successful confirmation of the invitee's transaction.
-
-**Claim-Based Efficiency:** To minimize gas costs for power users and prevent reentrancy attacks, the system utilizes a "Pull" Withdrawal Pattern. Users may aggregate earnings and withdraw to their wallet in a single transaction at their discretion.
-
-Referral allocations are derived solely from protocol fees paid for activation and are not dependent on NFT purchase outcomes.
+See [Referral Contract](/docs/technical/referral-contract) and [Verify](/docs/technical/verification-contract).

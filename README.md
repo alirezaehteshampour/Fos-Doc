@@ -4,6 +4,12 @@ Professional documentation site for the FOS blockchain platform, built with [Fum
 
 ![FOS Docs](public/logo.png)
 
+## Current project specification
+
+User-facing FOS contracts are specified on **Robinhood Chain** (mainnet 4663; testnet 46630). **Base** remains the Chainlink VRF service side, with the specified **CCIP** request/response flow. Referrals now use $2/$5/$10 plans with 50%/60%/82% direct-referrer shares and price-difference upgrades. See the current MDX contract references; this repository does not contain Solidity deployments.
+
+The original PDF is preserved unchanged in `public/archive/whitepaper-2025.pdf`. The revised PDF has editable LaTeX in `whitepaper/whitepaper.tex` and a downloadable copy in `public/whitepaper.tex`. See [whitepaper build instructions](whitepaper/README.md).
+
 ## ✨ Features
 
 - 📚 **15+ Documentation Pages** - Whitepaper, Smart Contracts, API, Platform guides
@@ -19,26 +25,26 @@ Professional documentation site for the FOS blockchain platform, built with [Fum
 
 ### Prerequisites
 
-- **Node.js** 18.x or higher
+- **Node.js** 20.9 or higher (Node.js 24 verified in the cloud environment)
 - **npm** 9.x or higher (comes with Node.js)
 - **Git** (for cloning)
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/fos-docs.git
-cd fos-docs
+git clone https://github.com/alirezaehteshampour/Fos-Doc.git
+cd Fos-Doc
 ```
 
 ### 2. Install Dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 3. Configure Environment
 
-Copy the example environment file:
+The docs and search work without a key. To enable AI chat, set `GEMINI_API_KEY` securely in your cloud deployment environment, or use an ignored local environment file in the cloud checkout:
 
 ```bash
 cp .env.example .env.local
@@ -140,7 +146,7 @@ fos-docs/
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GEMINI_API_KEY` | Yes | Google Gemini API key for AI chat |
+| `GEMINI_API_KEY` | AI chat only | Google Gemini API key; never commit it |
 
 ---
 
@@ -181,6 +187,9 @@ Edit the gradient colors in:
 | `npm run build` | Build for production |
 | `npm start` | Start production server |
 | `npm run lint` | Run ESLint |
+| `npm run docs:generate` | Refresh AI knowledge, consolidated docs, and LaTeX from current MDX |
+| `npm run whitepaper:build` | Generate artifacts and compile the current PDF |
+| `npm run docs:check` | Check links, economics, source equality, PDF content, and AI freshness |
 
 ---
 
@@ -204,3 +213,9 @@ Private - All rights reserved.
 ## 🆘 Support
 
 For issues or questions, contact the FOS development team.
+
+## Documentation maintenance
+
+Edit canonical pages under `content/docs`, then run `npm run whitepaper:build`, `npm run docs:check`, `npm run lint`, and `npm run build`. Python 3, Pandoc, XeLaTeX, and DejaVu fonts are required to regenerate the paper and are available in the prepared cloud environment. Node deployments use the committed PDF, LaTeX, and AI reference; they do not need TeX installed. Inter is vendored with its OFL license, so site builds require no Google Fonts download. Historical pages are explicitly labeled and excluded from the current AI reference.
+
+All preparation was performed in the cloud checkout. Existing cloud tasks are isolated; use their checkout without creating a Git worktree unless explicitly requested.

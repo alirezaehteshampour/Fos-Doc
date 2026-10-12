@@ -1,132 +1,61 @@
 ---
 title: Protocol Overview
-description: Complete documentation for the FOS decentralized digital collectibles platform
+description: Robinhood Chain collectibles, referrals, and asynchronous distributions
 ---
 
 # FOS Protocol Overview
 
-**Project Name:** FOS
+FOS is a digital collectibles project whose NFT minting, referral plans, and authenticity certificates are on **Robinhood Chain**. Base remains the randomness-service chain in the supplied architecture: Chainlink VRF produces the random result there, and Chainlink CCIP carries requests and responses between Base and Robinhood.
 
-**Platform:** A digital collectibles platform offering NFT sales with optional, protocol-defined promotional distributions that are deployed on Ethereum Base with Layer 2 support.
+## Independent components
 
-Three distinct protocol-defined allocation pools corresponding to three NFT price tiers (FOS Buddy, FOS Samurai, FOS Noble).
-
-Users purchase uniquely generated Fos Digital Collectibles. This purchase automatically activates the protocol's trustless Promotional Distribution Logic, which applies a 'Participation Weighting (Non-Financial)' to recognize and reward early buyers.
-
-The system identifies recipients based on the Original Minter's Provenance (Initial Wallet ID + Unique Hash). This unique architecture ensures that reward eligibility is a permanent Loyalty Perk for the original buyer, remaining valid even if the NFT is later sold.
-
----
-
-## Documentation Sections
-
-Navigate to specific protocol documentation:
-
-| Section | Description |
+| Component | Responsibility |
 | :--- | :--- |
-| [Platform Infrastructure](/docs/protocol/platform) | Blockchain architecture, wallet integration, cross-device access |
-| [Collection & Mechanics](/docs/protocol/mechanics) | NFT tiers, minting process, gas model, three pools |
-| [Affiliate Protocol](/docs/protocol/referral) | Referral system, 82/18 split, commission structure |
-| [Community & Growth](/docs/protocol/community) | Leaderboard, campaigns, whitelist, launch strategy |
-| [Legal & Compliance](/docs/protocol/legal) | Disclaimers, policies, regulatory compliance |
-| [Public Roadmap](/docs/protocol/roadmap) | All 16 development phases |
+| FOSNFT | Mint the collectible, receive payment, retain admin fees, and fund free positions |
+| Processor | Register tickets, manage collection rounds, select recipients, and process allocations |
+| Referral | Register one account per wallet, maintain direct referrals, sell plans, and handle upgrades |
+| Verify | Issue a separate ERC-721 authenticity certificate and expose its current status |
 
----
+Referral registration is independent of NFT minting and draws. Verify integrations are optional and require explicit authorization.
 
-## Technical Implementation
+## Collection economics
 
-### Smart Contract Architecture
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-**NFT Standard (ERC-721):** The protocol implements the ERC-721 standard on the Base Network to ensure universal compatibility with wallets and marketplaces.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-**Immutable Uniqueness:** Each Fos Digital Collectible is cryptographically unique, with metadata permanently stored on decentralized file systems (IPFS/Arweave).
+Each collection has independent 500-ticket rounds. Positions 10, 100, 200, 300, and 400 are gas-only for the buyer, with their pool contributions funded from FOSNFT. Tickets 1–100 carry double selection weight; tickets 101–500 carry ordinary weight.
 
-**Incentive Vector (The "Early Adopter" Weighting):** To reward protocol loyalty, the smart contract enforces a Weighted Probability Mechanism:
+## Allocation rules
 
-- **Tier A (Mints 1–100):** These units are assigned a Double Weight Protocol Score (2x), mathematically doubling their allocation probability in the reward algorithm.
-- **Tier B (Mints 101–500):** These units carry a Standard Protocol Score (1x).
+Seventeen **tickets**, not necessarily seventeen wallets, are selected without replacement. One receives 50% of the round pool; six split 30%; ten split 20%. A wallet with several tickets can receive more than one allocation. Integer-rounding residue goes to the first recipient. Transfers are attempted directly; unsuccessful transfers become claimable through `pendingWithdrawals` and `claim()`.
 
-**Immutable Logging:** This weight is assigned atomically at the moment of minting and is permanently recorded in the contract state.
+## Referral plans
 
-### Algorithmic Recipient Selection
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
 
-**Provenance-Based Eligibility:** Reward rights are derived strictly from the Original Minter's Provenance. The protocol binds eligibility to the initial wallet address and the NFT's unique hash.
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-**The "Green Eye" Trigger (Automated Execution):** The cycle is designed for autonomy. When the 500th unit (The Green Eye) is minted, the smart contract automatically executes the distributeRewards() function in the same transaction block.
+Allowed upgrades are 2→5, 2→10, and 5→10. The payment is the difference between configured prices at upgrade time, and the original direct referrer stays fixed.
 
-**Verifiable Randomness (Fairness Mechanism):** The protocol utilizes Chainlink VRF exclusively as a fairness and anti-manipulation mechanism to automate recipient selection.
+## Read more
 
-### Autonomous Capital Flow & Gas Logic
+- [Platform and networks](/docs/protocol/platform)
+- [Collection mechanics](/docs/protocol/mechanics)
+- [Referral program](/docs/referral)
+- [Contract reference](/docs/technical/smart-contracts)
+- [Community and planned campaigns](/docs/protocol/community)
+- [Roadmap](/docs/roadmap)
+- [Legal and risk disclosures](/docs/protocol/legal)
 
-**Atomic Revenue Split:** Upon every transaction, the smart contract performs an immediate separation of funds to ensure the Reward Pool is always fully solvent before operation costs are covered.
+## Documentation status
 
-| Tier | Locked for Rewards |
-| :--- | :--- |
-| FOS Buddy | $2.00 |
-| FOS Samurai | $10.00 |
-| FOS Noble | $20.00 |
-
----
-
-## Detailed Process Flow
-
-### User Journey & Protocol Interaction
-
-**Pre-Mint Visualization:** Prior to execution, the interface renders a preview of the specific NFT attributes (Tier/Collection) to ensure transparency.
-
-**Immutable Consent:** The user executes a one-time signature to acknowledge the protocol terms.
-
-**Atomic Settlement:** Upon confirmation, the user transmits the NFT price (Native ETH). The smart contract atomically mints the asset and registers the buyer's Immutable Provenance.
-
-### Special Access: The Gas-Only Protocol
-
-To democratize access and maintain standardized cycle progression, specific sequence identifiers are designated as "Gas-Only Entries."
-
-**The Designated Tiers:** Mints #10, #100, #200, #300, and #400 of every cycle are exempt from the protocol fee.
-
-**The Mechanic:** For these specific transactions, the smart contract logic bypasses the pricing requirement. The user is required to pay only the Base Network Gas Fee to execute the mint.
-
-### Provenance Registration & Scoring
-
-**Minting Event:** The contract generates a unique tokenId and cryptographically binds it to the minter's address.
-
-**Incentive Scoring:** The protocol automatically assigns the Participation Weight:
-- Mints 1–100: Assigned a 2x Priority Score (Early Adopter Bonus).
-- Mints 101–500: Assigned a 1x Standard Score.
-
-### The Autonomous Distribution Cycle
-
-**The "Green Eye" Trigger:** The cycle is strictly capped at 500 units. The purchase of the 500th NFT (The Green Eye) acts as the Atomic Trigger.
-
-**Verifiable Selection:** The contract invokes Chainlink VRF to secure a tamper-proof random seed.
-
-**Push-Based Settlement:** For the Reward Pool, the smart contract executes Direct Push Transfers, sending ETH automatically to the Recipient wallet addresses.
-
-**Cycle Reset:** Post-distribution, the cycle ID increments, and the pool resets to 0, ensuring the system runs perpetually without manual intervention.
-
----
-
-## Implementation & Security Architecture
-
-### Smart Contract Engineering
-
-The core logic is deployed on Base (Ethereum L2), utilizing industry-standard libraries to ensure asset safety.
-
-**Gas Optimization:** The contract logic is heavily optimized for low-cost execution.
-
-**Reentrancy Protection:** All financial interactions are guarded by nonReentrant modifiers and adhere to the Checks-Effects-Interactions (CEI) pattern.
-
-**Governance Security (Multi-Signature Control):** All high-level protocol controls are protected by Multi-Signature (Multi-Sig) Governance.
-
-### The Decentralized Failover (Public Retry Protocol)
-
-**The Scenario:** In the rare event that the 500th mint transaction runs out of gas or reverts due to network volatility, the cycle effectively "pauses" rather than breaking.
-
-**The Solution:** The retryDraw() function becomes callable by any public wallet. This allows the community to manually trigger the pending distribution.
-
-### The Non-Custodial Interface
-
-**Transparency:** The user dashboard provides real-time visualization of the on-chain ledger.
-
-**Self-Sovereignty:** At no point does the platform take custody of user funds.
-
-**The Verification Registry (Anti-Counterfeit Layer):** Fos deploys a dedicated Verification Smart Contract to protect users from secondary market scams.
+This revision follows the supplied project contract specification. Product rules and reported deployments are distinct from independently verified on-chain behavior. Older claims about globally immutable parameters, same-transaction draws, a fixed 18× gas charge, and an implemented 365-day liquidation function are not established by the new specification. See [security and validation](/docs/technical/security).

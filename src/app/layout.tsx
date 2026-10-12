@@ -1,12 +1,13 @@
 import './globals.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { ReactNode } from 'react';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import type { Metadata } from 'next';
 import { AIChat } from '@/components/ai-chat';
 
-const inter = Inter({
-  subsets: ['latin'],
+const inter = localFont({
+  src: '../../public/fonts/Inter-Variable.ttf',
+  display: 'swap',
   variable: '--font-inter',
 });
 

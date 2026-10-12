@@ -18,7 +18,7 @@ const growthData: ChartData<"bar" | "line"> = {
         {
             label: 'Growth Trend',
             data: [21.4, 45.2, 82.4, 135.0, 211.7],
-            type: 'line' as any,
+            type: 'line' as const,
             borderColor: '#06b6d4',
             borderWidth: 3,
             tension: 0.4,
@@ -70,7 +70,7 @@ export default function Market2025Page() {
         <div className="space-y-8">
             <div className="mb-8">
                 <h2 className="text-3xl font-bold text-foreground">2025 Market Outlook</h2>
-                <p className="text-muted-foreground mt-2">The shift from speculation to utility in the $211B Digital Collectibles market.</p>
+                <p className="text-muted-foreground mt-2">Historical projections retained from the 2025 report. These are not current Robinhood metrics.</p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
@@ -115,7 +115,7 @@ export default function Market2025Page() {
                         <h3 className="text-xl font-bold text-blue-500 mb-2">Key Takeaway</h3>
                         <p className="text-muted-foreground">
                             The market is maturing. Speculation is being replaced by <strong className="text-foreground">high-frequency utility</strong> (SocialFi, Gaming).
-                            Base L2 is positioned as the dominant infrastructure for this consumer wave.
+                            This historical Base-market context is separate from the current FOS user network, Robinhood Chain. Base remains the specified VRF service side.
                         </p>
                     </div>
                 </GlassCard>

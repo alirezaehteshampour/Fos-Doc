@@ -85,13 +85,13 @@ export default function GiveawaysPage() {
         <div className="space-y-8">
             <div className="mb-8">
                 <h2 className="text-3xl font-bold text-foreground">The State of Online Giveaways</h2>
-                <p className="text-muted-foreground mt-2">Why 68% of users distrust traditional sweepstakes and how Web3 solves it.</p>
+                <p className="text-muted-foreground mt-2">Retained 2025 research illustrations; these figures are not measured FOS/Robinhood performance.</p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
                 {/* Row 1: The Problem */}
                 <GlassCard>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">The "Trust Gap"</h3>
+                    <h3 className="text-lg font-semibold text-foreground mb-4">The Trust Gap</h3>
                     <div className="h-64">
                         <UniversalChart type="doughnut" data={trustData} options={{ cutout: '70%' }} />
                     </div>
@@ -108,7 +108,7 @@ export default function GiveawaysPage() {
 
                 {/* Row 2: The Cause */}
                 <GlassCard>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">The "Automation Gap"</h3>
+                    <h3 className="text-lg font-semibold text-foreground mb-4">The Automation Gap</h3>
                     <div className="h-64">
                         <UniversalChart type="pie" data={automationData} />
                     </div>

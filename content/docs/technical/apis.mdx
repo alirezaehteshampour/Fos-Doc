@@ -1,41 +1,41 @@
 ---
 title: APIs & Data Models
-description: API endpoints and data schemas
+description: Implemented documentation APIs and contract integration models
 ---
 
 # APIs & Data Models
 
-## Endpoints
+## Routes implemented in this repository
 
-| Endpoint | Method | Description |
+| Endpoint | Method | Behavior |
 | :--- | :--- | :--- |
-| `/status` | GET | System health and current phases |
-| `/allowlist/proof` | POST | Returns Merkle proof for a wallet |
-| `/allocation/:wallet` | GET | Allocation eligibility and claim status |
+| `/api/search` | GET | Static Fumadocs/Orama documentation search index |
+| `/api/chat` | POST | Gemini response to JSON containing a string `message` |
 
-## Application APIs
+Chat requires `GEMINI_API_KEY` and outbound HTTPS to `generativelanguage.googleapis.com`. It uses `gemini-2.5-flash`. Without credentials it returns a configuration error. The assistant is informational; it cannot verify contract deployment, sign transactions, or supply legal/financial advice.
 
-- **Transactions**: Saved post-mint via transaction handler API (wallet, tx hash, NFT details, amount).
-- **Leaderboard**: `/api/leaderboard_handler.php` for podium/list and diagnostics (test/debug endpoints).
-- **Profile**: `/api/profile_handler.php` for user profile data and referral info.
-- **Explorer Sync**: Periodically read and cross-check user transactions and events from `BaseScan` for transparency.
+Older `/api/*.php`, `/status`, `/allowlist/proof`, and `/allocation/:wallet` examples are not implemented by this Next.js site. Do not present them as deployed endpoints.
 
-## Schemas
+## Main-application integration models
 
-- **User**: wallet, roles, preferences.
-- **Mint**: tx hash, phase, amount, timestamp.
-- **Allocation**: tier, allocation, claimedAt, tx hash.
+These are recommended indexing fields, not published contract tuple signatures or confirmed REST APIs.
 
-## Glossary & References
-
-| Term | Definition |
+| Model | Important fields |
 | :--- | :--- |
-| **Merkle Proof** | Compact proof of inclusion in a set using Merkle trees. |
-| **Allowlist** | Curated list of eligible wallets for restricted phases. |
-| **VRF** | Verifiable Random Function, for auditable randomness. |
-| **Allocation** | Protocol distribution of funds to selected participants based on predefined rules and selection mechanics. |
-| **BaseScan** | The primary block explorer for the Base network, used to inspect transactions, events, and contract state for transparency and audits. |
-| **L2 Security** | Security model whereby the Base network inherits Ethereum's consensus and settlement guarantees while providing higher throughput and lower fees off-layer. |
-| **Chainlink LINK Subscription** | A funded subscription on Chainlink's network that pays for VRF requests and oracles; the protocol relies on this subscription to obtain verifiable randomness on Base. |
+| Referral user | chain ID, wallet, isRegistered, userTier, referredBy, referralCount, totalEarned, pendingWithdrawals |
+| Ticket | chain ID, FOSNFT address, token ID, collection type, round ID, ticket position, original purchaser, weight, transaction hash |
+| Round | collection type, round ID, stored capacity/contribution/group rules, ticket count, pool balance, request correlation, finalization status |
+| Allocation | round ID, selected ticket, recipient, allocated ETH, transfer outcome, claim transaction |
+| Certificate | Verify address, token ID, originType, originContract, originId, initial recipient, current owner, getStatus result |
 
-**References:** OpenZeppelin Contracts, EIPs (ERC-20/721/1155), Chainlink VRF docs, The Graph.
+Confirm every indexed transaction against the correct chain, contract address/version, and successful receipt. Avoid double-counting repeated events or CCIP deliveries. Display nominal USD calculations separately from actual ETH accounting.
+
+## Terminology
+
+- **VRF:** verifiable randomness produced on the specified Base integration.
+- **CCIP:** messaging carrying a round request/result between Base and Robinhood.
+- **Ticket:** a registered round entry associated with a mint; uniqueness of selection is at ticket level.
+- **Deferred payment:** owed ETH recorded for a later `claim()` after direct transfer fails.
+- **Origin certificate:** a separate Verify NFT; issuance and active status are distinct.
+
+See [network metadata](/docs/protocol/platform) and [contract reference](/docs/technical/smart-contracts).

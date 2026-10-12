@@ -41,7 +41,7 @@ export default function AnalysisLayout({
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <header className="mb-12 text-center">
                     <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">FOS Market Intelligence</h1>
-                    <p className="text-muted-foreground">Q4 2025 Strategic Report Series</p>
+                    <p className="text-muted-foreground">Current collection economics and historical 2025 research</p>
                 </header>
 
                 <AnalysisNav />
@@ -51,7 +51,7 @@ export default function AnalysisLayout({
                 </main>
 
                 <footer className="mt-20 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-                    <p>© 2025 FOS Protocol • Market Research Division</p>
+                    <p>© 2026 FOS Protocol • Market Research Division</p>
                 </footer>
             </div>
 

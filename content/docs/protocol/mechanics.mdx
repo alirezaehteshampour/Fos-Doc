@@ -1,119 +1,80 @@
 ---
 title: Collection & Mechanics
-description: NFT tiers, minting process, and protocol mechanics
+description: Round funding, weighted tickets, gas-only positions, and draw lifecycle
 ---
 
-# The Collection & Protocol Mechanics
+# Collection & Protocol Mechanics
 
-## Minting Architecture & User Journey
+## Minting
 
-The user journey is engineered to be a seamless, non-custodial e-commerce experience, grounded in strict on-chain verification.
+Call `buyAndMint(lotteryType, tokenURI)` on FOSNFT on Robinhood Chain. The documented type IDs are 3 (Buddy), 13 (Samurai), and 25 (Noble). A successful transaction mints an NFT, registers a ticket with Processor, and sends the round's configured pool contribution to Processor. Only FOSNFT may register tickets there. If Verify is connected and FOSNFT is approved, a separate authenticity certificate is also issued.
 
-**Protocol Interaction Terms:** Upon connecting, users execute a one-time signature to acknowledge the protocol parameters. This step ensures informed consent regarding the immutable nature of the smart contracts.
+## Prices and accounting
 
-**On-Chain Minting (Source of Truth):** Users initiate the buyAndMint function to purchase a unique Fos Digital Collectible.
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
+| Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
+| Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-**Cost Structure:** The user pays the fixed NFT price PLUS the standard network gas fee required by the Base network.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-**Pricing Oracle:** While the frontend interface displays real-time USD estimates via an API for convenience, the smart contract treats the Native ETH value as the absolute source of truth at the moment of execution.
+For each paid ticket:
 
-**Account Abstraction:** The minting logic explicitly uses msg.sender rather than tx.origin, ensuring full compatibility with ERC-4337 Smart Wallets and future-proofing the protocol.
+```text
+adminCut = price * adminBps / 10000
+prizeShare = price - adminCut
+```
 
-**Provenance Registration:** Every mint event atomically registers the buyer's wallet ID and the NFT's unique attribute hash on-chain. This establishes Immutable Provenance, ensuring that reward rights remain permanently attached to the original minter profile, regardless of secondary market transfers.
+The admin share remains in FOSNFT. There is no additional admin deduction from recipients' allocations. The amount sent to Processor must equal the contribution stored for that round.
 
-## Automated Revenue Allocation (The Zero-Sum Logic)
+## Five gas-only positions
 
-The protocol employs a "Split-Payment" architecture. Upon receipt of funds, the smart contract performs an immediate, atomic division of capital to ensure solvency.
+Positions **10, 100, 200, 300, and 400** are free in every round of every collection. The buyer pays network gas but sends zero purchase value. FOSNFT supplies the full pool contribution for each free ticket. Admin withdrawals must preserve the reserve for remaining free positions.
 
-**Protocol Rewards (The Community Treasury):** A fixed portion of every mint is programmatically locked into the Reward Contract. This capital is isolated and cannot be accessed by the Admin.
+For a full round there are 495 paid positions and 5 funded free positions. In nominal dollars:
 
-| Tier | Allocated per Mint |
-| :--- | :--- |
-| FOS Buddy | $2.00 |
-| FOS Samurai | $10.00 |
-| FOS Noble | $20.00 |
+| Collection | Buyer purchase inflow | Gross admin share from 495 paid positions | Free-position funding | Remaining admin amount | Round pool |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Buddy | $1,485 | $74.25 | $14.25 | $60.00 | $1,425 |
+| Samurai | $6,435 | $193.05 | $63.05 | $130.00 | $6,305 |
+| Noble | $12,375 | $247.50 | $122.50 | $125.00 | $12,250 |
 
-**Operational Margin:** The remaining surplus is routed to the Operational Sink. Unlike centralized systems that extract maximum value, this margin is strictly calculated to cover protocol maintenance, security audits, and development costs.
+These calculations exclude gas, oracle/bridge costs, and any other operating costs. The pool plus remaining admin amount equals the 495 buyers' total purchase payments.
 
-## Gas Sustainability Model (User-Funded Execution)
+## Weights and uniqueness
 
-To maintain a perpetual, autonomous cycle without centralized maintenance, the protocol utilizes a tiered gas responsibility model:
+Tickets 1–100 have two entries each in the selection pool; 101–500 have one. Positions 10 and 100 are both free and double-weighted. The initial full-round selection pool contains 600 entries.
 
-**Standard Mints (1–499):** Participants pay the standard gas fee associated with their own minting transaction.
+After a ticket is selected, all of its entries are removed. It cannot be selected again in that round. A wallet holding multiple tickets may be selected more than once through different tickets. Double weight is a relative draw weight, not a guarantee of an award or a claim that every final inclusion probability is exactly doubled.
 
-**The "Green Eye" Treasury (Mint #500):** The 500th NFT of every generation is designated as a Prestige Collectible with unique system responsibilities.
+## Green Eye and asynchronous draw
 
-**The Mechanic (User-Funded Execution):** The purchaser of the Green Eye (Mint #500) acts as the Executor. They pay the NFT price PLUS the L2 Execution Gas required to process the distribution loop.
+The 500th collectible closes the round and is known as the Green Eye.
 
-**The Trigger:** This transaction automatically executes the distributeRewards() function, closing the cycle and delivering value to all recipients in a single block.
+1. FOSNFT registers ticket 500 with Processor on Robinhood Chain. That round closes to further tickets.
+2. A round-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
+3. Chainlink VRF on Base produces verifiable randomness.
+4. CCIP returns the result to the Robinhood-side integration.
+5. Processor uses the returned randomness and ticket weights to select 17 distinct winning tickets and process allocations.
+6. After the draw completes, the next round of that collection starts automatically.
 
-**Atomic Revert Protection:** If the gas provided is insufficient, or if the contract lacks funds for the VRF fee, the entire transaction reverts atomically. This ensures the Green Eye is never minted without the rewards being successfully triggered.
+The last mint starts this asynchronous sequence. Selection, transfers, and the next round do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
 
-## The Three Tiers (Pool Architecture)
+Do not assume a fixed 18× gas charge or an automatic fee reimbursement. Each transaction has its own gas cost, and oracle/CCIP fees depend on the final integration.
 
-The ecosystem is segmented into three isolated pools. Each pool operates on a 500-unit cycle, where 5 specific units (#10, #100, #200, #300, #400) are designated as "Gas-Only Entries" to ensure accessibility. This results in 495 Revenue-Generating Mints per cycle.
+## Distribution and claims
 
-The following allocation values, percentages, and pool structures are hard-coded protocol parameters enforced by immutable smart contract logic. These figures represent system design constraints, not promises of individual receipt.
+| Group | Selected tickets | Share of pool | Per-ticket share |
+| :--- | ---: | ---: | ---: |
+| Primary | 1 | 50% | 50% plus integer-rounding residue |
+| Secondary | 6 | 30% | 5% |
+| Tertiary | 10 | 20% | 2% |
 
-### FOS Buddy (Entry Tier)
+Processor attempts direct payment. A rejected payment is recorded in `pendingWithdrawals` for a later `claim()` rather than described as reverting every recipient's payment.
 
-| Parameter | Value |
-| :--- | :--- |
-| Unit Price | ~$3.00 (ETH Equivalent) + Gas |
-| Paying Volume | 495 Units (5 Free) |
-| Protocol Revenue | $1,485 ($3 × 495) |
-| Allocated Rewards | $1,000 |
-| Ops Margin | $485 |
+## Round settings
 
-**Distribution Structure:**
-- Primary Recipient: $500 (50%)
-- Secondary Group (x6): $50 each (30%)
-- Tertiary Group (x10): $20 each (20%)
+Capacity, contribution per ticket, group counts/splits, and the number of double-weighted positions are recorded at round start. Changes apply to subsequent rounds; an empty active round may be updated where the contract permits. The target capacity is 500; old 20-ticket settings were tests.
 
-### FOS Samurai (Mid Tier)
-
-| Parameter | Value |
-| :--- | :--- |
-| Unit Price | ~$13.00 (ETH Equivalent) + Gas |
-| Paying Volume | 495 Units (5 Free) |
-| Protocol Revenue | $6,435 ($13 × 495) |
-| Allocated Rewards | $5,000 |
-| Ops Margin | $1,435 |
-
-**Distribution Structure:**
-- Primary Recipient: $2,500 (50%)
-- Secondary Group (x6): $250 each (30%)
-- Tertiary Group (x10): $100 each (20%)
-
-### FOS Noble (Premium Tier)
-
-| Parameter | Value |
-| :--- | :--- |
-| Unit Price | ~$25.00 (ETH Equivalent) + Gas |
-| Paying Volume | 495 Units (5 Free) |
-| Protocol Revenue | $12,375 ($25 × 495) |
-| Allocated Rewards | $10,000 |
-| Ops Margin | $2,375 |
-
-**Distribution Structure:**
-- Primary Recipient: $5,000 (50%)
-- Secondary Group (x6): $500 each (30%)
-- Tertiary Group (x10): $200 each (20%)
-
-## The Referral Activation
-
-Users may optionally activate the Affiliate Protocol to participate in the growth economy.
-
-**Activation Cost:** A fixed fee of $10.00 (ETH Equivalent) + Gas.
-
-**Revenue Split:** The smart contract automatically routes 82% of generated fees to the referrer and 18% to the protocol treasury.
-
-## The Sunset Protocol (365-Day Failsafe)
-
-To prevent "Zombie Pools" or indefinite lock-ups, the protocol enforces a hard-coded 12-Month Liquidation Trigger.
-
-**The Trigger:** If a cycle does not reach 500 mints within 365 days.
-
-**The Action:** A public function liquidatePool() becomes callable.
-
-**The Result:** The accrued Reward Pool is immediately distributed to the current participants (using the standard probability weights), and the cycle resets. This guarantees that user funds are never trapped.
+The new specification does not establish the previously described 365-day `liquidatePool()` mechanism. Do not rely on that recovery path unless it is confirmed in the final deployed contract.

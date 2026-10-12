@@ -1,78 +1,57 @@
 ---
 title: Referral Program
-description: How the FOS affiliate referral system works
+description: Three referral plans, direct-referrer splits, upgrades, and claims
 ---
 
 # Referral Program
 
-The FOS Affiliate Protocol is a single-level referral system that rewards community growth.
+Referral is independent of NFT purchases and round allocations. Each wallet registers once with a plan and, optionally, an existing registered direct referrer.
 
----
+## Plans and payment splits
 
-## How It Works
+| Referrer's active plan | Share of a direct referral's payment | Admin share |
+| :--- | ---: | ---: |
+| $2 plan | 50% | 50% |
+| $5 plan | 60% | 40% |
+| $10 plan | 82% | 18% |
 
-1. **Activate:** Pay a one-time $10 fee (in ETH) to activate your referral account
-2. **Share:** Get your unique referral link
-3. **Earn:** Receive 82% of each direct referral's activation fee
+The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-### The 82/18 Split
+## Register and share
 
-| Recipient | Percentage | Amount |
-| :--- | :--- | :--- |
-| Referrer (You) | 82% | $8.20 |
-| Protocol | 18% | $1.80 |
+Call `register(address referrer, uint256 tier)` with tier **2**, **5**, or **10** and exact configured payment. The referrer must already be registered and cannot be the registering wallet. Use the zero address to register without a referrer. The wallet address identifies the referral link; `referredBy` records the direct referrer permanently. A registration with a referrer increases that referrer's `referralCount` by one.
 
----
+## Upgrade by paying the difference
 
-## Key Features
+Registered users may call `upgrade(uint256 newTier)` to move 2→5, 2→10, or 5→10. Downgrades and registering the same wallet again are prohibited.
 
-### Single-Level Only
+```text
+cost = tierPrice[newTier] - tierPrice[oldTier]
+```
 
-This is **NOT** multi-level marketing. You only earn from direct referrals. There are no tiers, no downstream earnings, and no pyramid structure.
+Read `getUpgradeCost` and the current prices before submitting. Nominal differences are $3, $8, and $5 respectively; actual payment uses the current configured ETH difference. The upgrade is split with the **same original direct referrer**. Without one, the full upgrade payment goes to the admin.
 
-### Instant Allocation
+## Example
 
-Commissions are calculated and added to your on-chain balance immediately when your referral completes their activation.
+1. A has the $2 plan. B registers through A with the $2 plan. A receives 50% of that payment, nominally $1.
+2. A upgrades to the $10 plan.
+3. B later upgrades from $2 to $5 and pays the nominal $3 difference.
+4. A now receives 82% of that difference, nominally $2.46; the admin receives $0.54.
 
-### Pull-Based Withdrawal
+If A had stayed on the $2 plan, even a $10 registration by B would use A's 50% rate. A's upgrade changes only subsequent payments; previous payments are never recalculated.
 
-Your earnings accumulate in the smart contract. Withdraw anytime via the `withdraw()` function in the UI. This design prevents dust attacks and is gas-efficient for active referrers.
+## Single-level accounting
 
-### Unlimited Referrals
+If A refers B and B refers C, A can receive a share of B's registration and upgrades. C's registration and upgrades can pay B, not A. Plan levels are price/commission plans, not additional generations of referral compensation.
 
-There is no cap on how many people you can refer. Grow your network as large as you want.
+## Direct payment and deferred claims
 
----
+The contract attempts direct ETH payment to the referrer. If that transfer fails, it records the amount in `pendingWithdrawals`; the referrer uses `claim()` to collect it. `withdraw()` is for the admin's available balance, not the referrer's claim function.
 
-## Earnings Examples
+## Configuration and risk
 
-| Referrals | Your Earnings |
-| :--- | :--- |
-| 1 | $8.20 |
-| 10 | $82.00 |
-| 50 | $410.00 |
-| 100 | $820.00 |
-| 500 | $4,100.00 |
-| 1,000 | $8,200.00 |
+The owner can change plan prices, commission basis points, the admin wallet, and the Verify connection. Price ordering must remain `price(2) < price(5) < price(10)`. Initial documented rates are 5000, 6000, and 8200 basis points out of 10000. Read current settings rather than assuming those values are globally immutable.
 
----
+Reported test prices of 0.0000002, 0.0000005, and 0.000001 ETH are test settings, not production USD conversion rates. Referral participation and any tax obligations remain the user's responsibility. Payments depend on actual direct-referral activity and do not guarantee income.
 
-## How to Get Started
-
-1. Connect your wallet to FOS
-2. Navigate to the Referral section
-3. Pay the $10 activation fee (in ETH)
-4. Copy your unique referral link
-5. Share with friends and community
-6. Withdraw earnings anytime
-
----
-
-## Important Notes
-
-- Referral participation is **optional** and independent of NFT purchases
-- Earnings are protocol fee splits, not wages or income
-- You are responsible for any tax obligations in your jurisdiction
-- The referral program can be activated without owning an NFT
-
-For technical details, see the [Referral Contract documentation](/docs/technical/referral-contract).
+See [Referral Contract](/docs/technical/referral-contract) and [Verify](/docs/technical/verification-contract).

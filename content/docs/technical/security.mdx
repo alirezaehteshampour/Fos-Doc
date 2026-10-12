@@ -1,44 +1,36 @@
 ---
-title: Security & Infrastructure
-description: Security measures, compliance, and DevOps
+title: Security & Validation
+description: Cross-chain trust, reserves, permissions, and deployment validation
 ---
 
-# Security & Infrastructure
+# Security & Validation
 
-## Infrastructure & DevOps
+The supplied contract summary describes intended behavior. This repository does not include Solidity sources, final ABIs, independent audit reports, or evidence of a deployed VRF/CCIP lane. An audit, timelock, multisig, or public retry function must not be claimed as completed solely because it appeared in an older draft.
 
-- **Environments**: dev, testnet, production with dedicated RPC endpoints.
-- **CI/CD**: automated lint, test, and deployment pipelines.
-- **Observability**: centralized logs, metrics, uptime and error alerts.
-- **Secrets**: managed via vaults and restricted IAM policies.
+## Authority and funds
 
-## Security & Compliance
+Referral owner can change prices, percentages, admin wallet, and Verify connection. Verify owner controls authorized minters, origin types, URI configuration, and revocation. Round settings are stored per round; updates generally apply to future rounds, with permitted empty-round updates. Publish real deployment roles and settings after verification.
 
-- Threat modeling for contract and web attack surfaces.
-- Key management using HSMs or hardware wallets for admin operations.
-- Regular audits, fuzzing, and bug bounty programs.
-- Privacy: PII minimization, data retention policies, and consent tracking.
+The interface does not hold private keys, but contracts hold pool funds, free-position reserves, and deferred payment liabilities. Native ETH is volatile; automation does not remove smart-contract, network, or regulatory risks.
 
-All high-privilege transactions should be multi-sig protected and/or timelocked.
+## Required contract checks
 
-## Security & Reliability (Application)
+- Registration: once per wallet, registered non-self referrer, zero-address path, exact payment, fixed `referredBy`.
+- Plans: strict price ordering, higher-plan upgrades only, current difference payment, referrer's current basis-point rate, no retroactive payment changes.
+- Funds: admin withdrawable balance excludes pending claims and FOSNFT's remaining free-ticket reserve.
+- Mint: only FOSNFT registers in Processor; exact contribution matching; independent collection rounds; free positions send zero purchase value.
+- Draw: double-weighted entries are removed together after selection; 17 distinct tickets; repeated wallet recipients allowed; rounding residue assigned to primary.
+- Claims: failed pushes create correct liabilities; successful claims cannot repeat; transfers and claims resist reentrancy.
+- Verify: only approved issuers; origin linking; initial recipient versus current owner; revoked records remain official but inactive.
 
-- **On-chain safety**: Relies on contract-side guards (CEI, `nonReentrant`, role gating). Client-side enforces wallet connection, network selection, and amount checks before submitting transactions.
-- **API hygiene**: API responses are validated; lists are paginated; UI avoids blocking on transient failures and logs client-side errors.
-- **Rate-Limiting & Access Control**: Endpoints that expose leaderboard data, allocation views, or other potentially sensitive aggregates are protected by strict pagination, IP and key-based rate limiting, and authentication/authorization checks where user-specific data is returned, to mitigate scraping and abuse.
-- **Geoblocking & Access Control:** The application utilizes middleware (e.g., Cloudflare Workers) to enforce strict IP-based blocking for restricted jurisdictions. Access is denied at the edge for requests originating from the United States, Canada, United Kingdom, and the European Economic Area (EEA).
-- **Resilience**: Auto-restore wallet sessions, graceful UI fallbacks, and state refresh after critical actions. Gallery/profile auto-refresh on connect.
-- **Failover (Distribution/Protocol Distribution)**: If the auto-distribution at the 500th mint does not execute, a *public* retry/distribution function can be called to complete the distribution and allocate to selected participants immediately.
+## Cross-chain checks
 
-## Testing & QA
+Verify the actual CCIP-supported lane and configured routers/senders, Base VRF environment and authorization, round/request correlation, replay/stale response rejection, and exactly-once finalization. Test delayed messages, failed request delivery, failed return delivery, unavailable fee balances, and rejected recipient transfers.
 
-- **Smart contracts**: unit tests, invariant tests, coverage reports.
-- **Web**: integration and e2e tests across critical journeys.
-- **Testnets**: rehearsals with production-like configurations.
+Keep a pending round visible when randomness is unavailable. Do not substitute block timestamps, `prevrandao`, or an operator-selected result for the specified VRF design. A supported retry/recovery path and the fee-funding policy must come from the final implementation; the specification does not supply their callable ABI.
 
-## Observability, Testing & Assurance (Contracts)
+## Operational readiness
 
-- Emit comprehensive events for every critical action; index via subgraph for analytics and audits.
-- Testing: unit tests for each contract module; invariant tests for supply/accounting; fuzz tests for edge cases (e.g., boundary times, rounding, reentrancy).
-- Static analysis: run Slither/Mythril; differential testing for randomness-dependent code where feasible.
-- Deployment: if upgradeable, initialize via `initializer` functions; verify all addresses on explorer; store config in a registry.
+Use verified full addresses and ABIs per environment, verify deployed bytecode and role owners, check RPC chain ID, and monitor both chains. Multisig/timelock protection, unit/invariant/fuzz tests, independent audit, and privacy/access controls are recommended checks, not verified features of this documentation repository.
+
+No implemented 365-day liquidation guarantee, fixed 18× gas multiplier, or no-risk claim is supported by the new contract summary.

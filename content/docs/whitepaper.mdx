@@ -1,51 +1,28 @@
 ---
 title: Whitepaper
-description: The FOS Protocol Whitepaper - A Trustless Automated Reward Ecosystem
+description: Updated Robinhood specification with downloadable PDF and editable LaTeX
 ---
 
 # FOS Whitepaper
 
-## The Trustless Automated Reward Ecosystem
+The current whitepaper covers Robinhood user contracts, Base VRF/CCIP messaging, three referral plans and upgrades, collection-specific fees, free-position funding, weighted ticket selection, and Verify certificate status.
 
----
+- [Download the current PDF](/whitepaper.pdf)
+- [Download the editable LaTeX source](/whitepaper.tex)
+- [Download the original December 2025 PDF (historical)](/archive/whitepaper-2025.pdf)
 
-## View Online
+The current PDF is built from the committed LaTeX source. The original PDF is preserved unchanged for historical comparison; its obsolete rules are not current deployment guidance. Missing deployment addresses and unverified operational claims are omitted from the current reference.
 
 <iframe
-    src="/Whitepaper.pdf"
+    src="/whitepaper.pdf"
     className="w-full h-[800px] border rounded-lg shadow-lg"
     title="FOS Whitepaper"
 />
 
----
+## Current rules
 
-## Key Highlights
+Robinhood Chain is the user transaction network. Base remains the VRF service side, connected by the specified CCIP flow. The last of 500 tickets initiates an asynchronous draw. Selected tickets receive a 1/6/10 group distribution using 50/30/20 of the funded pool; failed direct transfers remain claimable.
 
-### The Problem
-Traditional reward and prize platforms operate as centralized intermediaries that extract 35-85% of value through operational overhead, trust costs, and profit margins.
+Referral is independent of minting. The direct referrer's active $2/$5/$10 plan sets a 50%/60%/82% share. Upgrades pay the configured price difference and retain the original direct referrer.
 
-### The Solution
-FOS is an autonomous protocol that automates the entire reward lifecycle on-chain:
-*   **Zero Human Discretion:** All outcomes determined by immutable smart contracts.
-*   **Verifiable Randomness:** Chainlink VRF ensures tamper-proof recipient selection.
-*   **97%+ Efficiency:** Only ~3% retained for protocol maintenance.
-
-### The Technology
-*   **Base Network (Ethereum L2):** Fast, low-cost, secure.
-*   **ERC-721 NFTs:** Every collectible is a true, tradeable on-chain asset.
-*   **Non-Custodial:** Users retain full control of their assets at all times.
-
-### The Cycle of 500
-Each cycle operates as a closed micro-economy:
-1.  Participants mint NFTs (1-499).
-2.  The 500th mint (Green Eye) triggers automated distribution.
-3.  17 recipients selected via Chainlink VRF receive allocations.
-4.  Cycle resets and continues perpetually.
-
----
-
-## Legal Notice
-
-The FOS Digital Collectible is sold as a standalone digital product. Any promotional distribution is ancillary, optional, non-guaranteed, and not consideration for purchase.
-
-FOS is **NOT** available to residents of the United States, Canada, United Kingdom, or European Economic Area.
+See [collection mechanics](/docs/protocol/mechanics), [Referral](/docs/referral), and [technical docs](/docs/technical).

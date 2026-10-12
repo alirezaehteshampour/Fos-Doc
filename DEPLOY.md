@@ -6,7 +6,7 @@ Before deploying, ensure your server has:
 
 | Requirement | Version | Check Command |
 |-------------|---------|---------------|
-| Node.js | 18.x+ | `node --version` |
+| Node.js | 20.9+ | `node --version` |
 | npm | 9.x+ | `npm --version` |
 | Git | Any | `git --version` |
 | PM2 (optional) | Latest | `pm2 --version` |
@@ -29,14 +29,14 @@ Choose the method that fits your infrastructure:
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_ORG/fos-docs.git
-cd fos-docs
+git clone https://github.com/alirezaehteshampour/Fos-Doc.git
+cd Fos-Doc
 ```
 
 ### Step 2: Install Dependencies
 
 ```bash
-npm ci --production=false
+npm ci --include=dev
 ```
 
 ### Step 3: Configure Environment
@@ -46,9 +46,9 @@ cp .env.example .env.local
 nano .env.local  # or vim, or any editor
 ```
 
-Add your Gemini API key:
+Docs and search do not require a key. Enable AI chat by configuring `GEMINI_API_KEY` securely in your hosting provider or ignored cloud-local environment file. Never commit real credentials. Example placeholder:
 ```env
-GEMINI_API_KEY=AIzaSy...your_key_here
+GEMINI_API_KEY=your_key_here
 ```
 
 ### Step 4: Build for Production
@@ -80,9 +80,9 @@ npm install -g pm2
 ### Step 2: Clone & Setup (same as Option 1, Steps 1-4)
 
 ```bash
-git clone https://github.com/YOUR_ORG/fos-docs.git
-cd fos-docs
-npm ci --production=false
+git clone https://github.com/alirezaehteshampour/Fos-Doc.git
+cd Fos-Doc
+npm ci --include=dev
 cp .env.example .env.local
 # Edit .env.local with your GEMINI_API_KEY
 npm run build
@@ -118,8 +118,8 @@ pm2 save
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_ORG/fos-docs.git
-cd fos-docs
+git clone https://github.com/alirezaehteshampour/Fos-Doc.git
+cd Fos-Doc
 ```
 
 ### Step 2: Create Environment File
@@ -190,7 +190,7 @@ sudo certbot --nginx -d docs.fos.ooo
 ### Standard/PM2 Update
 
 ```bash
-cd fos-docs
+cd Fos-Doc
 git pull origin main
 npm ci
 npm run build
@@ -201,7 +201,7 @@ pm2 restart fos-docs  # if using PM2
 ### Docker Update
 
 ```bash
-cd fos-docs
+cd Fos-Doc
 git pull origin main
 docker-compose down
 docker-compose up -d --build
@@ -287,3 +287,9 @@ docker run -d -p 9000:9000 --name portainer \
 ## 📞 Support
 
 For deployment issues, contact the FOS development team.
+
+## Current documentation artifacts
+
+The committed `public/whitepaper.pdf` and `public/whitepaper.tex` are the Robinhood/three-plan edition. Deploy both with the other public assets. The original paper lives under `public/archive/`. Regenerate artifacts before deployment with `npm run whitepaper:build` in the prepared cloud environment, then run `npm run docs:check`, `npm run lint`, and `npm run build`. A production Node/Docker host needs only the committed artifacts, not a LaTeX installation.
+
+Inter is vendored with its license; Google Fonts egress is not required. Gemini chat requires HTTPS access to `generativelanguage.googleapis.com`. A Git push updates repository content; the hosted site changes only when its configured deployment pipeline completes. Verify `/docs/referral`, `/docs/whitepaper`, `/whitepaper.pdf`, and `/whitepaper.tex` on the actual deployment.
