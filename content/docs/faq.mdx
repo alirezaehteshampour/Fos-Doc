@@ -1,6 +1,6 @@
 ---
 title: FAQ
-description: Robinhood networks, referral plans, round draws, deferred claims, and certificates
+description: Robinhood networks, referral plans, cycle selection processes, deferred claims, and certificates
 ---
 
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
@@ -11,7 +11,7 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 <Accordions>
 <Accordion title="What is FOS?">
-FOS is a digital collectibles project with independent referral plans and authenticity certificates. User-facing contracts are on Robinhood Chain. The specified randomness architecture uses Chainlink VRF on Base and CCIP messaging between the networks.
+FOS offers Fos Digital Collectibles with protocol-defined promotional distributions, independent referral plans, and authenticity certificates. User-facing contracts are on Robinhood Chain. The specified randomness architecture uses Chainlink VRF on Base and CCIP messaging between the networks.
 </Accordion>
 <Accordion title="Which network do I use?">
 Use Robinhood Chain for NFT, referral, and Verify transactions. Mainnet is chain ID 4663; Robinhood testnet is 46630. Base is the randomness-service side, not the user minting network. See the [network reference](/docs/protocol/platform) before connecting.
@@ -22,37 +22,37 @@ MetaMask and Coinbase Wallet are documented integration targets for the main app
 <Accordion title="Who can participate?">
 The existing project terms require age 18 or older and restrict the United States, Canada, the United Kingdom, the EEA, China, and sanctioned jurisdictions. Read the [terms](/docs/terms); do not bypass access restrictions using a VPN.
 </Accordion>
-<Accordion title="Is there a legal classification guarantee?">
-No. A product description or the choice of promotional terminology is not a legal determination. The mechanics include paid NFT mints, weighted random ticket selection, and allocations. Applicable law depends on jurisdiction; obtain qualified advice where needed.
+<Accordion title="What is the FOS product and distribution model?">
+FOS sells Fos Digital Collectibles as NFT consumer products. Protocol-defined promotional distributions are a loyalty feature for eligible collectible mint records. Purchasing a collectible does not guarantee an allocation. Selection uses the documented weights and verifiable randomness. This explains the product model; jurisdiction-specific legal questions require qualified advice.
 </Accordion>
 </Accordions>
 
-## Collectibles and rounds
+## Collectibles and cycles
 
 <Accordions>
 <Accordion title="What are the collection prices and fees?">
 Buddy (type 3) has a nominal $3 price and 5% admin fee; Samurai (type 13) is $13 with 3%; Noble (type 25) is $25 with 2%. Actual payments use configured ETH prices. Read [collection economics](/docs/protocol/mechanics) for pool contributions and reserves.
 </Accordion>
 <Accordion title="Which mint positions are free?">
-Positions 10, 100, 200, 300, and 400 in each collection round require zero purchase payment from the user. Network gas still applies. FOSNFT funds their full pool contributions from its reserved balance. This is separate from the planned Genesis whitelist campaign.
+Positions 10, 100, 200, 300, and 400 in each collection cycle require zero purchase payment from the user. Network gas still applies. FOSNFT funds their full pool contributions from its reserved balance. This is separate from the planned Genesis whitelist campaign.
 </Accordion>
 <Accordion title="What does double weight mean?">
-Tickets 1–100 have two selection entries; 101–500 have one. All entries for a selected ticket are removed, so the ticket cannot receive another allocation in that round. Positions 10 and 100 are both free and double-weighted. Weight is not a guaranteed award.
+Collectibles 1–100 have two selection entries; 101–500 have one. All entries for a selected collectible are removed, so the collectible cannot receive another allocation in that cycle. Positions 10 and 100 are both free and double-weighted. Weight is not a guaranteed award.
 </Accordion>
-<Accordion title="What happens at the Green Eye, ticket 500?">
-The collection round closes and starts a CCIP request to the Base VRF integration. Randomness is produced on Base and returned through CCIP to Robinhood. Processor then selects tickets, processes allocations, and starts the next round. This is asynchronous, not a single last-mint transaction.
+<Accordion title="What happens at the Green Eye, collectible 500?">
+The collection cycle closes and starts a CCIP request to the Base VRF integration. Randomness is produced on Base and returned through CCIP to Robinhood. Processor then selects collectibles, processes allocations, and starts the next cycle. This is asynchronous, not a single last-mint transaction.
 </Accordion>
 <Accordion title="Does the last mint always cost 18 times ordinary gas?">
 No fixed 18× multiplier or stipend policy is established by the new specification. Check the wallet estimate and final oracle/CCIP funding policy. Gas and response time vary with the networks and integration.
 </Accordion>
 <Accordion title="How are allocations divided?">
-One ticket receives 50% of the pool, six receive 5% each, and ten receive 2% each. Integer-rounding residue goes to the primary recipient. There are 17 distinct selected tickets; a wallet with multiple tickets may receive more than one allocation.
+For each cycle, the primary selected mint record’s recipient receives 50% of the allocation pool, six records’ recipients receive 5% each, and ten records’ recipients receive 2% each. Integer-rounding residue goes to the primary recipient. Selection covers 17 distinct mint records; a wallet with multiple recorded mints may receive more than one allocation.
 </Accordion>
-<Accordion title="How large is a full round pool?">
-At nominal product prices, including funding for the five free positions: Buddy $1,425; Samurai $6,305; Noble $12,250. These are model calculations, not fixed USD balances or individual award guarantees. Actual contract accounting uses ETH.
+<Accordion title="How large is a full cycle pool?">
+At nominal product prices, including funding for the five free positions: Buddy $1,425; Samurai $6,305; Noble $12,250. These are model calculations, not fixed USD balances or individual allocation guarantees. Actual contract accounting uses ETH.
 </Accordion>
 <Accordion title="Do I need to claim an allocation?">
-Processor attempts direct ETH transfer after draw processing. If a transfer fails, the amount becomes a deferred balance in `pendingWithdrawals`, collectible through `claim()`. A successful last mint alone does not mean the draw or payment has completed.
+Processor attempts direct ETH transfer after selection processing. If a transfer fails, the amount becomes a deferred balance in `pendingWithdrawals`, available to collect through `claim()`. A successful last mint alone does not mean the selection or payment has completed.
 </Accordion>
 <Accordion title="Is there a confirmed 365-day liquidation or public retry function?">
 The old whitepaper described those features. The new contract specification does not establish their final implementation or ABI. Do not rely on those recovery paths without checking the deployed contract.
@@ -78,7 +78,7 @@ No. If A refers B and B refers C, B’s registration/upgrades can pay A, while C
 Direct ETH payment is attempted. If it fails, the deferred amount is stored in `pendingWithdrawals` and the referrer calls `claim()`. The separate `withdraw()` operation is for the admin’s available funds.
 </Accordion>
 <Accordion title="Do I need an NFT to register for referrals?">
-No. Referral is independent of NFT minting and draws. Commission requires real direct-referral payments and does not guarantee income.
+No. Referral is independent of NFT minting and selection processes. Commission requires real direct-referral payments and does not guarantee income.
 </Accordion>
 </Accordions>
 
@@ -92,7 +92,7 @@ Verify issues a separate ERC-721 certificate. Use `getStatus`: 0 means not regis
 FOSNFT mints can issue origin type 2 certificates when Verify is connected and approved. Initial Referral registration can issue origin type 5, origin ID 0, with empty URI. The specification does not define a new certificate on upgrade. These integrations are optional.
 </Accordion>
 <Accordion title="Can all project settings be changed?">
-Supported owner controls include referral prices/rates and Verify issuer/status configuration. Round rules are stored for each round; changes normally apply to future rounds, with supported empty-round updates. The documentation does not claim every parameter is globally immutable.
+Supported owner controls include referral prices/rates and Verify issuer/status configuration. Cycle rules are stored for each cycle; changes normally apply to future cycles, with supported empty-cycle updates. The documentation does not claim every parameter is globally immutable.
 </Accordion>
 <Accordion title="Is the code independently audited and deployed?">
 This repository contains documentation, not the final Solidity source or independent audit reports. The supplied specification describes behavior and reported deployment information. Verify the final code, full addresses, roles, bridge lane, and audit evidence before use.
@@ -101,7 +101,7 @@ This repository contains documentation, not the final Solidity source or indepen
 Retained scoring is direct referral +1, Buddy +2, Samurai +4, Noble +6. The separate growth campaign targets 5,000 users and a 30-day window; deployment, funding, tie-breaks, and snapshots require confirmation. Referral upgrades are not described as new registrations or new referral points.
 </Accordion>
 <Accordion title="What if a transaction fails?">
-Check the receipt on the correct chain. A reverted transaction does not complete the action, but spent network gas is not refunded. Refresh prices and the next ticket position before retrying. Cross-chain delivery failures are distinct from failed mint transactions.
+Check the receipt on the correct chain. A reverted transaction does not complete the action, but spent network gas is not refunded. Refresh prices and the next collectible position before retrying. Cross-chain delivery failures are distinct from failed mint transactions.
 </Accordion>
 <Accordion title="Is the AI assistant active?">
 The documentation site has a Gemini 2.5 Flash integration and current FOS knowledge. Real answers require `GEMINI_API_KEY` in the deployment environment and API network access. The assistant is informational and cannot verify or execute transactions.

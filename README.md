@@ -216,6 +216,8 @@ For issues or questions, contact the FOS development team.
 
 ## Documentation maintenance
 
+Follow the original product-language convention in [docs/terminology.md](docs/terminology.md). Current prose uses Fos Digital Collectible, promotional distribution, recipient, allocation, loyalty reward, and cycle. Keep exact contract identifiers and the underlying mechanics accurate. `npm run docs:check` guards against newly introduced restricted vocabulary.
+
 Edit canonical pages under `content/docs`, then run `npm run whitepaper:build`, `npm run docs:check`, `npm run lint`, and `npm run build`. Python 3, Pandoc, XeLaTeX, and DejaVu fonts are required to regenerate the paper and are available in the prepared cloud environment. Node deployments use the committed PDF, LaTeX, and AI reference; they do not need TeX installed. Inter is vendored with its OFL license, so site builds require no Google Fonts download. Historical pages are explicitly labeled and excluded from the current AI reference.
 
 All preparation was performed in the cloud checkout. Existing cloud tasks are isolated; use their checkout without creating a Git worktree unless explicitly requested.

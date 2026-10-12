@@ -1,64 +1,64 @@
 ---
 title: FOSNFT & Processor
-description: Minting, free-position reserves, rounds, and asynchronous allocations
+description: Minting, free-position reserves, cycles, and asynchronous allocations
 ---
 
 # FOSNFT & Processor
 
 ## Mint entry point
 
-`buyAndMint(lotteryType, tokenURI)` is called on FOSNFT with type 3, 13, or 25. It checks the next position. Ordinary positions require exact configured ETH price; positions 10, 100, 200, 300, and 400 require zero purchase value. Successful execution mints the NFT, registers the ticket through the authorized FOSNFT→Processor path, transfers the matching round contribution, and optionally issues a Verify certificate.
+`buyAndMint(lotteryType, tokenURI)` is called on FOSNFT with type 3, 13, or 25. It checks the next position. Ordinary positions require exact configured ETH price; positions 10, 100, 200, 300, and 400 require zero purchase value. Successful execution mints the NFT, registers the collectible through the authorized FOSNFT→Processor path, transfers the matching cycle contribution, and optionally issues a Verify certificate.
 
 ## Payment split
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
 ```text
 adminCut = price * adminBps / 10000
 prizeShare = price - adminCut
 ```
 
-The admin amount is retained in FOSNFT. Free-position pool contributions are paid from its balance. Admin withdrawal must leave sufficient reserves for free positions still to come. Processor must reject a contribution that differs from the round's stored contribution. No fee is deducted again when recipient allocations are calculated.
+The admin amount is retained in FOSNFT. Free-position pool contributions are paid from its balance. Admin withdrawal must leave sufficient reserves for free positions still to come. Processor must reject a contribution that differs from the cycle's stored contribution. No fee is deducted again when recipient allocations are calculated.
 
-## Round state
+## Cycle state
 
-Each collection has separate consecutive rounds. Ticket registration increments the round ticket count and `purchaseCount[user][type]`. At round start the capacity, per-ticket pool contribution, recipient group counts/percentages, and double-weighted ticket count are stored for that round. Changed settings affect future rounds, except updates permitted for an empty active round.
+Each collection has separate consecutive cycles. Collectible registration increments the cycle collectible count and `purchaseCount[user][type]`. At cycle start the capacity, per-collectible pool contribution, recipient group counts/percentages, and double-weighted collectible count are stored for that cycle. Changed settings affect future cycles, except updates permitted for an empty active cycle.
 
-Target capacity is 500; old 20-ticket examples are historical tests. The specification does not supply the full round-state ABI or the final bridging callback names, so conceptual lifecycle labels must not be treated as callable methods.
+Target capacity is 500; old 20-collectible examples are historical tests. The specification does not supply the full cycle-state ABI or the final bridging callback names, so conceptual lifecycle labels must not be treated as callable methods.
 
 ## Selection pool
 
-Tickets 1–100 contribute two weighted entries; tickets 101–500 one. After selecting a ticket, remove all entries for that ticket before drawing again. Distinct-ticket selection allows the same wallet to be selected via multiple tickets. Positions 10 and 100 combine zero purchase payment with double weight.
+Collectibles 1–100 contribute two weighted entries; collectibles 101–500 one. After selecting a collectible, remove all entries for that collectible before drawing again. Distinct-collectible selection allows the same wallet to be selected via multiple collectibles. Positions 10 and 100 combine zero purchase payment with double weight.
 
 ## Randomness lifecycle
 
-1. FOSNFT registers ticket 500 with Processor on Robinhood Chain. That round closes to further tickets.
-2. A round-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
+1. FOSNFT registers collectible 500 with Processor on Robinhood Chain. That cycle closes to further collectibles.
+2. A cycle-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
 3. Chainlink VRF on Base produces verifiable randomness.
 4. CCIP returns the result to the Robinhood-side integration.
-5. Processor uses the returned randomness and ticket weights to select 17 distinct winning tickets and process allocations.
-6. After the draw completes, the next round of that collection starts automatically.
+5. Processor uses the returned randomness and collectible weights to select 17 distinct collectibles and process allocations.
+6. After the selection completes, the next cycle of that collection starts automatically.
 
-The last mint starts this asynchronous sequence. Selection, transfers, and the next round do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
+The last mint starts this asynchronous sequence. Selection, transfers, and the next cycle do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
 
-Implementation validation must verify request/round binding, allowed CCIP sender/source chain, VRF callback authority, replay protection, stale responses, and exactly-once finalization. Those requirements are not claims that an unaudited deployment already implements them.
+Implementation validation must verify request/cycle binding, allowed CCIP sender/source chain, VRF callback authority, replay protection, stale responses, and exactly-once finalization. Those requirements are not claims that an unaudited deployment already implements them.
 
 ## Allocation and deferred payment
 
-| Group | Count | Group share | Each ticket |
+| Group | Count | Group share | Each collectible |
 | :--- | ---: | ---: | ---: |
 | Primary | 1 | 50% | 50% plus residue |
 | Secondary | 6 | 30% | 5% |
 | Tertiary | 10 | 20% | 2% |
 
-All integer-rounding residue goes to the primary recipient. Direct ETH transfer is attempted; failed transfers are booked in `pendingWithdrawals` and collected with `claim()`. A rejected recipient must not be documented as forcing the entire draw to revert.
+All integer-rounding residue goes to the primary recipient. Direct ETH transfer is attempted; failed transfers are booked in `pendingWithdrawals` and collected with `claim()`. A rejected recipient must not be documented as forcing the entire selection to revert.
 
 ## Unsupported historical assumptions
 
-The supplied update does not establish `liquidatePool()`, a permissionless draw retry ABI, an 18-transfer gas stipend, fee reimbursement, a metadata-retirement guarantee, or a fixed 100-generation limit. Validate those separately if required. Never replace the specified VRF/CCIP flow with production `timestamp`/`prevrandao` selection.
+The supplied update does not establish `liquidatePool()`, a permissionless selection retry ABI, an 18-transfer gas stipend, fee reimbursement, a metadata-retirement guarantee, or a fixed 100-generation limit. Validate those separately if required. Never replace the specified VRF/CCIP flow with production `timestamp`/`prevrandao` selection.

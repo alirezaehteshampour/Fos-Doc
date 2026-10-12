@@ -30,7 +30,7 @@ export default function HomePage() {
               FOS Documentation
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-              The decentralized digital collectibles platform on Robinhood Chain, with verifiable cross-chain draws.
+              The decentralized digital collectibles platform on Robinhood Chain, with verifiable promotional distributions.
             </p>
 
             <div className="flex flex-wrap gap-3 sm:gap-4 justify-center px-4 sm:px-0">

@@ -1,6 +1,6 @@
 ---
 title: Collection Economics
-description: Collection-specific fees, funded free positions, and conserved round accounting
+description: Collection-specific fees, funded free positions, and conserved cycle accounting
 ---
 
 import ChartRegistry from '@/components/charts/chart-registry'
@@ -12,15 +12,15 @@ import { UniversalChart } from '@/components/charts/universal-chart'
 
 The updated product model uses collection-specific admin fees, not a universal 97% community share or a token-burn budget. Network gas and Base VRF/CCIP costs are separate and are not assumed to be zero.
 
-## Per-ticket split
+## Per-collectible split
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
 <div className="my-8 p-4 border rounded-xl">
 <UniversalChart type="bar" data={{
@@ -32,17 +32,17 @@ Dollar amounts describe the product model, not a dollar-denominated contract bal
 }} options={{ scales: { y: { beginAtZero: true, max: 100 } } }} />
 </div>
 
-## A funded round
+## A funded cycle
 
 Five positions are free to the buyer, but all 500 contribute to the pool. FOSNFT funds the five free-position contributions from retained fees/reserves.
 
-| Collection | 495 buyer payments | Paid-position admin fees | Five free contributions | Remaining admin funds | Full round pool |
+| Collection | 495 buyer payments | Paid-position admin fees | Five free contributions | Remaining admin funds | Full cycle pool |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Buddy | $1,485 | $74.25 | $14.25 | $60 | $1,425 |
 | Samurai | $6,435 | $193.05 | $63.05 | $130 | $6,305 |
 | Noble | $12,375 | $247.50 | $122.50 | $125 | $12,250 |
 
-For each collection, **round pool + remaining admin funds = buyer purchase payments**. This assumes nominal product prices, matching round contribution settings, and sufficient FOSNFT reserves. Actual accounting uses ETH and integer rounding. The remaining admin amount is before operational and oracle/bridge costs; it is not a profit forecast.
+For each collection, **cycle pool + remaining admin funds = buyer purchase payments**. This assumes nominal product prices, matching cycle contribution settings, and sufficient FOSNFT reserves. Actual accounting uses ETH and integer rounding. The remaining admin amount is before operational and oracle/bridge costs; it is not a profit forecast.
 
 ## Independent referral accounting
 
@@ -54,7 +54,7 @@ For each collection, **round pool + remaining admin funds = buyer purchase payme
 
 The **referrer's own active plan at payment time** determines the split, for both registration and upgrades. The buyer's plan determines the payment amount, not the commission percentage. Without a referrer, 100% goes to the admin. Dollar labels are nominal plan names; exact payment is the configured ETH price.
 
-Referral receipts are separate from mint pools. They do not fund an individual's draw eligibility or alter ticket weights. Any growth-campaign funding must use available admin balances after user liabilities and free-position reserves.
+Referral receipts are separate from mint pools. They do not fund an individual's selection eligibility or alter collectible weights. Any growth-campaign funding must use available admin balances after user liabilities and free-position reserves.
 
 ## Comparison limits
 

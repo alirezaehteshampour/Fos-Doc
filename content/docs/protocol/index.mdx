@@ -5,34 +5,34 @@ description: Robinhood Chain collectibles, referrals, and asynchronous distribut
 
 # FOS Protocol Overview
 
-FOS is a digital collectibles project whose NFT minting, referral plans, and authenticity certificates are on **Robinhood Chain**. Base remains the randomness-service chain in the supplied architecture: Chainlink VRF produces the random result there, and Chainlink CCIP carries requests and responses between Base and Robinhood.
+FOS offers **Fos Digital Collectibles** as NFT consumer products, with protocol-defined **promotional distributions**, an independent referral program, and authenticity certificates on **Robinhood Chain**. Base remains the randomness-service chain in the supplied architecture: Chainlink VRF produces the random result there, and Chainlink CCIP carries requests and responses between Base and Robinhood.
 
 ## Independent components
 
 | Component | Responsibility |
 | :--- | :--- |
 | FOSNFT | Mint the collectible, receive payment, retain admin fees, and fund free positions |
-| Processor | Register tickets, manage collection rounds, select recipients, and process allocations |
+| Processor | Register collectibles, manage collection cycles, select recipients, and process allocations |
 | Referral | Register one account per wallet, maintain direct referrals, sell plans, and handle upgrades |
 | Verify | Issue a separate ERC-721 authenticity certificate and expose its current status |
 
-Referral registration is independent of NFT minting and draws. Verify integrations are optional and require explicit authorization.
+Referral registration is independent of NFT minting and selection processes. Verify integrations are optional and require explicit authorization.
 
 ## Collection economics
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-Each collection has independent 500-ticket rounds. Positions 10, 100, 200, 300, and 400 are gas-only for the buyer, with their pool contributions funded from FOSNFT. Tickets 1–100 carry double selection weight; tickets 101–500 carry ordinary weight.
+Each collection has independent 500-collectible cycles. Positions 10, 100, 200, 300, and 400 are gas-only for the buyer, with their pool contributions funded from FOSNFT. Collectibles 1–100 carry double selection weight; collectibles 101–500 carry ordinary weight.
 
 ## Allocation rules
 
-Seventeen **tickets**, not necessarily seventeen wallets, are selected without replacement. One receives 50% of the round pool; six split 30%; ten split 20%. A wallet with several tickets can receive more than one allocation. Integer-rounding residue goes to the first recipient. Transfers are attempted directly; unsuccessful transfers become claimable through `pendingWithdrawals` and `claim()`.
+Seventeen distinct **collectible mint records**, not necessarily seventeen wallets, are selected without replacement. The primary record's recipient receives 50% of the cycle allocation pool; six records' recipients split 30%; ten records' recipients split 20%. A wallet with several recorded mints can receive more than one allocation. Integer-rounding residue goes to the first recipient. Transfers are attempted directly; unsuccessful transfers become claimable through `pendingWithdrawals` and `claim()`.
 
 ## Referral plans
 
@@ -58,4 +58,4 @@ Allowed upgrades are 2→5, 2→10, and 5→10. The payment is the difference be
 
 ## Documentation status
 
-This revision follows the supplied project contract specification. Product rules and reported deployments are distinct from independently verified on-chain behavior. Older claims about globally immutable parameters, same-transaction draws, a fixed 18× gas charge, and an implemented 365-day liquidation function are not established by the new specification. See [security and validation](/docs/technical/security).
+This revision follows the supplied project contract specification. Product rules and reported deployments are distinct from independently verified on-chain behavior. Older claims about globally immutable parameters, same-transaction selection processes, a fixed 18× gas charge, and an implemented 365-day liquidation function are not established by the new specification. See [security and validation](/docs/technical/security).

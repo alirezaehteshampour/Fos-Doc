@@ -1,8 +1,8 @@
 # Executive Summary
 
-FOS combines digital collectibles with protocol-defined distributions, an independent single-level referral program, and authenticity certificates. This edition updates the December 2025 whitepaper using the supplied Persian project contract specification. User-facing contracts move to Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
+FOS offers Fos Digital Collectibles as NFT consumer products with protocol-defined promotional distributions, an independent single-level referral program, and authenticity certificates. This edition updates the December 2025 whitepaper using the supplied Persian project contract specification. User-facing contracts move to Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
 
-This whitepaper explains the reported design. It is not an independent contract audit, proof of a live bridge deployment, legal determination, or promise of individual allocations. The documentation repository does not contain the final Solidity sources or deployment ABI bundle. Unverified operational contract addresses are not published here.
+The product vocabulary follows the original FOS documentation: Fos Digital Collectible, promotional distribution, recipient, allocation, loyalty reward, and cycle. Exact contract identifiers remain unchanged in technical references. This whitepaper explains the reported design. It is not an independent contract audit, proof of a live bridge deployment, legal determination, or promise of individual allocations. The documentation repository does not contain the final Solidity sources or deployment ABI bundle. Unverified operational contract addresses are not published here.
 
 ## Vision and mission
 
@@ -13,16 +13,16 @@ The project aims to make collectible participation and allocation accounting vis
 - Robinhood Chain is the user transaction network; Base is retained for the specified VRF integration, connected through CCIP.
 - Referral has nominal $2/$5/$10 plans; the direct referrer's active plan sets 50%/60%/82% commission on registrations and upgrades.
 - Upgrades pay the current configured price difference and retain the original referrer.
-- Buddy/Samurai/Noble use 5%/3%/2% admin fees and funded round pools of nominal $1,425/$6,305/$12,250.
-- Free positions are funded from FOSNFT reserves; weighted uniqueness is at ticket level, not wallet level.
-- Draw completion is asynchronous; failed direct ETH payments become deferred claims.
+- Buddy/Samurai/Noble use 5%/3%/2% admin fees and funded cycle pools of nominal $1,425/$6,305/$12,250.
+- Free positions are funded from FOSNFT reserves; selection uniqueness is recorded per collectible mint, not per wallet.
+- Selection completion is asynchronous; failed direct ETH payments become deferred claims.
 - Verify issues separate ERC-721 certificates and distinguishes existence from current validity.
 
 # Market Context and Comparison Limits
 
 The earlier whitepaper discussed digital collectibles, loyalty systems, and trust in centralized promotions. Those motivations remain relevant context, but historical Base adoption figures do not describe Robinhood adoption. The existing 2025 research is historical and has not been independently refreshed here.
 
-Current economic statements in this edition follow the supplied collection and referral arithmetic. Per-ticket pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification.
+Current economic statements in this edition follow the supplied collection and referral arithmetic. Per-collectible pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification.
 
 The original references are retained in the unchanged historical PDF. Current operational rules should be read from this edition and verified against the actual deployment.
 
@@ -31,7 +31,7 @@ The original references are retained in the unchanged historical PDF. Current op
 
 ## Networks
 
-User-facing FOSNFT, Processor, Referral, and Verify interactions belong on **Robinhood Chain**, not Base. Base serves the specified VRF randomness integration, with CCIP transporting round requests and results.
+User-facing FOSNFT, Processor, Referral, and Verify interactions belong on **Robinhood Chain**, not Base. Base serves the specified VRF randomness integration, with CCIP transporting cycle requests and results.
 
 | Network | Chain ID | Native currency | Role |
 | :--- | ---: | :--- | :--- |
@@ -51,21 +51,21 @@ Verify the selected environment and live RPC chain ID before signing. Never reus
 
 ## ETH pricing and gas
 
-The displayed dollar values are nominal product labels. On-chain ETH prices and round settings are the transaction source of truth. Ordinary mints require the exact configured price; free positions require zero purchase value. Network gas still applies. ETH remains volatile, and neither fixed gas costs nor USD-equivalent awards are guaranteed.
+The displayed dollar values are nominal product labels. On-chain ETH prices and cycle settings are the transaction source of truth. Ordinary mints require the exact configured price; free positions require zero purchase value. Network gas still applies. ETH remains volatile, and neither fixed gas costs nor USD-equivalent awards are guaranteed.
 
 ## Wallet access
 
 Use an EVM wallet configured for the correct Robinhood network. MetaMask and Coinbase Wallet are documented integration targets; connector behavior must be verified in the deployed main application. This Next.js repository hosts documentation and an AI assistant, not the minting application itself.
 
-The interface does not need a user's private key. Contracts nevertheless hold round funds, reserved free-position contributions, and deferred payments according to their rules. An interface described as non-custodial does not mean that funds never enter a contract.
+The interface does not need a user's private key. Contracts nevertheless hold cycle funds, reserved free-position contributions, and deferred payments according to their rules. An interface described as non-custodial does not mean that funds never enter a contract.
 
 ## Cross-chain visibility
 
-Show Robinhood round status and transaction receipts separately from Base VRF and CCIP delivery status. A successful last-mint receipt is not evidence that the remote random result has arrived or that the allocation transaction has completed.
+Show Robinhood cycle status and transaction receipts separately from Base VRF and CCIP delivery status. A successful last-mint receipt is not evidence that the remote random result has arrived or that the allocation transaction has completed.
 
 
 
-## Network and draw architecture
+## Network and promotional distribution architecture
 
 ```{=latex}
 \begin{figure}[H]
@@ -74,7 +74,7 @@ Show Robinhood round status and transaction receipts separately from Base VRF an
 \node[box] (mint) at (0,0) {FOSNFT\\Robinhood Chain};
 \node[box] (processor) at (5.3,0) {Processor\\Robinhood Chain};
 \node[box] (base) at (10.6,0) {VRF integration\\Base};
-\draw[->,thick] (mint) -- node[above,font=\footnotesize] {Ticket + funds} (processor);
+\draw[->,thick] (mint) -- node[above,font=\footnotesize] {Mint + funds} (processor);
 \draw[->,thick] (processor) -- node[above,font=\footnotesize] {CCIP request} (base);
 \draw[->,thick] (base.south) -- ++(0,-1.3) -| node[pos=0.25,below,font=\footnotesize] {CCIP returns VRF result} (processor.south);
 \node[box] (referral) at (0,-4) {Referral\\Independent plans};
@@ -90,34 +90,36 @@ Show Robinhood round status and transaction receipts separately from Base VRF an
 
 ## Minting
 
-Call `buyAndMint(lotteryType, tokenURI)` on FOSNFT on Robinhood Chain. The documented type IDs are 3 (Buddy), 13 (Samurai), and 25 (Noble). A successful transaction mints an NFT, registers a ticket with Processor, and sends the round's configured pool contribution to Processor. Only FOSNFT may register tickets there. If Verify is connected and FOSNFT is approved, a separate authenticity certificate is also issued.
+Call `buyAndMint(collectionType, tokenURI)` on FOSNFT on Robinhood Chain. The documented type IDs are 3 (Buddy), 13 (Samurai), and 25 (Noble). A successful transaction mints a Fos Digital Collectible, registers its mint record with Processor, and sends the cycle's configured allocation-pool contribution to Processor. Only FOSNFT may register those records there. If Verify is connected and FOSNFT is approved, a separate authenticity certificate is also issued.
+
+Throughout this reference, numbered collectibles refer to the mint records used for protocol-defined promotional distributions. Each collectible has one mint record; selection uniqueness applies to that record, while a wallet can have several recorded mints. Product wording does not change the selection mechanism or the number of allocations.
 
 ## Prices and accounting
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-For each paid ticket:
+For each paid collectible:
 
 ```text
 adminCut = price * adminBps / 10000
 prizeShare = price - adminCut
 ```
 
-The admin share remains in FOSNFT. There is no additional admin deduction from recipients' allocations. The amount sent to Processor must equal the contribution stored for that round.
+The admin share remains in FOSNFT. There is no additional admin deduction from recipients' allocations. The amount sent to Processor must equal the contribution stored for that cycle.
 
 ## Five gas-only positions
 
-Positions **10, 100, 200, 300, and 400** are free in every round of every collection. The buyer pays network gas but sends zero purchase value. FOSNFT supplies the full pool contribution for each free ticket. Admin withdrawals must preserve the reserve for remaining free positions.
+Positions **10, 100, 200, 300, and 400** are free in every cycle of every collection. The buyer pays network gas but sends zero purchase value. FOSNFT supplies the full pool contribution for each free collectible. Admin withdrawals must preserve the reserve for remaining free positions.
 
-For a full round there are 495 paid positions and 5 funded free positions. In nominal dollars:
+For a full cycle there are 495 paid positions and 5 funded free positions. In nominal dollars:
 
-| Collection | Buyer purchase inflow | Gross admin share from 495 paid positions | Free-position funding | Remaining admin amount | Round pool |
+| Collection | Buyer purchase inflow | Gross admin share from 495 paid positions | Free-position funding | Remaining admin amount | Cycle pool |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Buddy | $1,485 | $74.25 | $14.25 | $60.00 | $1,425 |
 | Samurai | $6,435 | $193.05 | $63.05 | $130.00 | $6,305 |
@@ -127,28 +129,28 @@ These calculations exclude gas, oracle/bridge costs, and any other operating cos
 
 ## Weights and uniqueness
 
-Tickets 1–100 have two entries each in the selection pool; 101–500 have one. Positions 10 and 100 are both free and double-weighted. The initial full-round selection pool contains 600 entries.
+Collectibles 1–100 have two entries each in the selection pool; 101–500 have one. Positions 10 and 100 are both free and double-weighted. The initial full-cycle selection pool contains 600 entries.
 
-After a ticket is selected, all of its entries are removed. It cannot be selected again in that round. A wallet holding multiple tickets may be selected more than once through different tickets. Double weight is a relative draw weight, not a guarantee of an award or a claim that every final inclusion probability is exactly doubled.
+After a collectible's mint record is selected, all of its weighted entries are removed. That record cannot be selected again in the cycle. A wallet with multiple recorded mints may receive more than one allocation through distinct records. Double weight is a relative selection weight, not a guarantee of an allocation or a claim that every final inclusion probability is exactly doubled.
 
-## Green Eye and asynchronous draw
+## Green Eye and asynchronous selection
 
-The 500th collectible closes the round and is known as the Green Eye.
+The 500th collectible closes the cycle and is known as the Green Eye.
 
-1. FOSNFT registers ticket 500 with Processor on Robinhood Chain. That round closes to further tickets.
-2. A round-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
+1. FOSNFT registers collectible 500 with Processor on Robinhood Chain. That cycle closes to further collectibles.
+2. A cycle-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
 3. Chainlink VRF on Base produces verifiable randomness.
 4. CCIP returns the result to the Robinhood-side integration.
-5. Processor uses the returned randomness and ticket weights to select 17 distinct winning tickets and process allocations.
-6. After the draw completes, the next round of that collection starts automatically.
+5. Processor uses the returned randomness and collectible weights to select 17 distinct collectibles and process allocations.
+6. After the selection completes, the next cycle of that collection starts automatically.
 
-The last mint starts this asynchronous sequence. Selection, transfers, and the next round do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
+The last mint starts this asynchronous sequence. Selection, transfers, and the next cycle do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
 
 Do not assume a fixed 18× gas charge or an automatic fee reimbursement. Each transaction has its own gas cost, and oracle/CCIP fees depend on the final integration.
 
 ## Distribution and claims
 
-| Group | Selected tickets | Share of pool | Per-ticket share |
+| Group | Selected collectibles | Share of pool | Per-collectible share |
 | :--- | ---: | ---: | ---: |
 | Primary | 1 | 50% | 50% plus integer-rounding residue |
 | Secondary | 6 | 30% | 5% |
@@ -156,9 +158,9 @@ Do not assume a fixed 18× gas charge or an automatic fee reimbursement. Each tr
 
 Processor attempts direct payment. A rejected payment is recorded in `pendingWithdrawals` for a later `claim()` rather than described as reverting every recipient's payment.
 
-## Round settings
+## Cycle settings
 
-Capacity, contribution per ticket, group counts/splits, and the number of double-weighted positions are recorded at round start. Changes apply to subsequent rounds; an empty active round may be updated where the contract permits. The target capacity is 500; old 20-ticket settings were tests.
+Capacity, contribution per collectible, group counts/splits, and the number of double-weighted positions are recorded at cycle start. Changes apply to subsequent cycles; an empty active cycle may be updated where the contract permits. The target capacity is 500; old 20-collectible settings were tests.
 
 The new specification does not establish the previously described 365-day `liquidatePool()` mechanism. Do not rely on that recovery path unless it is confirmed in the final deployed contract.
 
@@ -170,14 +172,14 @@ The new specification does not establish the previously described 365-day `liqui
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[box/.style={draw,rounded corners,align=center,text width=3.2cm,minimum height=1cm,font=\small},>=Stealth]
-\node[box] (full) at (0,0) {Ticket 500 closes round};
+\node[box] (full) at (0,0) {Mint 500 closes cycle};
 \node[box] (request) at (5.3,0) {CCIP request to Base};
 \node[box] (vrf) at (10.6,0) {Base VRF result};
 \node[box] (return) at (10.6,-2) {CCIP return to Robinhood};
-\node[box] (select) at (5.3,-2) {Select 17 distinct tickets};
+\node[box] (select) at (5.3,-2) {Select 17 mint records};
 \node[box] (pay) at (0,-2) {Attempt ETH transfers};
 \node[box] (claim) at (0,-4) {Failed payment\\Deferred claim()};
-\node[box] (next) at (5.3,-4) {Draw completed\\Next collection round};
+\node[box] (next) at (5.3,-4) {Distribution processed\\Next collection cycle};
 \draw[->,thick] (full) -- (request);
 \draw[->,thick] (request) -- (vrf);
 \draw[->,thick] (vrf) -- (return);
@@ -186,13 +188,13 @@ The new specification does not establish the previously described 365-day `liqui
 \draw[->,thick] (pay) -- (claim);
 \draw[->,thick] (pay.east) -- ++(.5,0) |- (next.west);
 \end{tikzpicture}
-\caption{Draw processing is separate from the last buyer's mint. Deferred claims remain owed after the draw is completed.}
+\caption{Selection processing is separate from the last buyer's mint. Deferred claims remain owed after the selection is completed.}
 \end{figure}
 ```
 
 # Referral Program
 
-Referral is independent of NFT purchases and round allocations. Each wallet registers once with a plan and, optionally, an existing registered direct referrer.
+Referral is independent of NFT purchases and cycle allocations. Each wallet registers once with a plan and, optionally, an existing registered direct referrer.
 
 ## Plans and payment splits
 
@@ -249,25 +251,25 @@ See [Referral Contract](https://github.com/alirezaehteshampour/Fos-Doc/blob/main
 
 | Contract | Responsibility | Specified network |
 | :--- | :--- | :--- |
-| `FOSNFT` | NFT mint, purchase payment, admin balance, free-ticket reserve | Robinhood |
-| `Processor` | Authorized ticket registration, round state, draw, allocations | Robinhood |
+| `FOSNFT` | NFT mint, purchase payment, admin balance, free-collectible reserve | Robinhood |
+| `Processor` | Authorized collectible registration, cycle state, selection, allocations | Robinhood |
 | `Referral` | Registration, plans, upgrades, and direct-referral payments | Robinhood |
 | `Verify` | Separate ERC-721 certificates, origin registry, validity status | Robinhood |
-| VRF/CCIP integration | Carry round requests to Base and return VRF results | Robinhood and Base |
+| VRF/CCIP integration | Carry cycle requests to Base and return VRF results | Robinhood and Base |
 
-Only FOSNFT may register tickets in Processor. Referral is independent of both contracts. Verify is optional and may be connected to FOSNFT and Referral; Processor has no direct Verify connection in the supplied structure.
+Only FOSNFT may register collectible mint records in Processor. Referral is independent of both contracts. Verify is optional and may be connected to FOSNFT and Referral; Processor has no direct Verify connection in the supplied structure.
 
 ## Three independent collection types
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-All three target 500 tickets, with 17 selected tickets and 50/30/20 group allocation. There is no specified 100-round lifetime cap. Only the initial weights and price labels are described here; per-round stored settings and current on-chain prices control execution.
+All three target 500 collectibles, with 17 selected collectibles and 50/30/20 group allocation. There is no specified 100-cycle lifetime cap. Only the initial weights and price labels are described here; per-cycle stored settings and current on-chain prices control execution.
 
 ## Standards and authority
 
@@ -281,14 +283,14 @@ Genesis allowlist and growth campaign contracts remain design material in the [r
 
 # Verify Contract
 
-Verify issues a separate ERC-721 certificate for supported official events. It does not hold draw pools, run referrals, pay allocations, or perform recipient selection.
+Verify issues a separate ERC-721 certificate for supported official events. It does not hold allocation pools, run referrals, pay allocations, or perform recipient selection.
 
 ## Origins
 
 | ID | Constant | Use |
 | ---: | :--- | :--- |
 | 1 | `ORIGIN_FREE_MINT` | Free mint/campaign |
-| 2 | `ORIGIN_LOTTERY` | Official FOSNFT round mint |
+| 2 | `ORIGIN_LOTTERY` | Official FOSNFT cycle mint |
 | 3 | `ORIGIN_STORY` | Story/content |
 | 4 | `ORIGIN_ADMIN` | Manual admin issuance |
 | 5 | `ORIGIN_REFERRAL` | Initial referral registration |
@@ -342,12 +344,12 @@ Use Robinhood Chain for user transactions. Confirm `eth_chainId` matches the sel
 
 ## Mint interface
 
-1. Read collection type, round state, next ticket position, and exact configured ETH price.
+1. Read collection type, cycle state, next collectible position, and exact configured ETH price.
 2. Show nominal dollar labels separately from the required ETH transaction value.
 3. For positions 10, 100, 200, 300, and 400, send zero purchase value and show the wallet's network gas estimate.
 4. Submit `buyAndMint(lotteryType, tokenURI)` using the verified FOSNFT ABI and address.
-5. Wait for a successful receipt, then refresh NFT/ticket data. Handle next-position races by refreshing and asking the user to sign a new transaction.
-6. After ticket 500, display pending randomness/delivery until the cross-chain result and draw finalization are confirmed. Do not show a receipt as a completed payout.
+5. Wait for a successful receipt, then refresh NFT/collectible data. Handle next-position races by refreshing and asking the user to sign a new transaction.
+6. After collectible 500, display pending randomness/delivery until the cross-chain result and selection finalization are confirmed. Do not show a receipt as completed allocation settlement.
 
 ## Referral interface
 
@@ -365,7 +367,7 @@ The retained scoring design is referral +1, Buddy +2, Samurai +4, Noble +6. Upgr
 
 ## Operational views
 
-Show collection/round identifiers, Robinhood transaction hashes, pending randomness, Base VRF request correlation, CCIP delivery state, selected ticket IDs, attempted payments, and deferred claims. Filter logs by chain and contract version; validate server responses and never ask users for wallet private keys.
+Show collection/cycle identifiers, Robinhood transaction hashes, pending randomness, Base VRF request correlation, CCIP delivery state, selected collectible IDs, attempted payments, and deferred claims. Filter logs by chain and contract version; validate server responses and never ask users for wallet private keys.
 
 # Security & Validation
 
@@ -373,7 +375,7 @@ The supplied contract summary describes intended behavior. This repository does 
 
 ## Authority and funds
 
-Referral owner can change prices, percentages, admin wallet, and Verify connection. Verify owner controls authorized minters, origin types, URI configuration, and revocation. Round settings are stored per round; updates generally apply to future rounds, with permitted empty-round updates. Publish real deployment roles and settings after verification.
+Referral owner can change prices, percentages, admin wallet, and Verify connection. Verify owner controls authorized minters, origin types, URI configuration, and revocation. Cycle settings are stored per cycle; updates generally apply to future cycles, with permitted empty-cycle updates. Publish real deployment roles and settings after verification.
 
 The interface does not hold private keys, but contracts hold pool funds, free-position reserves, and deferred payment liabilities. Native ETH is volatile; automation does not remove smart-contract, network, or regulatory risks.
 
@@ -381,17 +383,17 @@ The interface does not hold private keys, but contracts hold pool funds, free-po
 
 - Registration: once per wallet, registered non-self referrer, zero-address path, exact payment, fixed `referredBy`.
 - Plans: strict price ordering, higher-plan upgrades only, current difference payment, referrer's current basis-point rate, no retroactive payment changes.
-- Funds: admin withdrawable balance excludes pending claims and FOSNFT's remaining free-ticket reserve.
-- Mint: only FOSNFT registers in Processor; exact contribution matching; independent collection rounds; free positions send zero purchase value.
-- Draw: double-weighted entries are removed together after selection; 17 distinct tickets; repeated wallet recipients allowed; rounding residue assigned to primary.
+- Funds: admin withdrawable balance excludes pending claims and FOSNFT's remaining free-collectible reserve.
+- Mint: only FOSNFT registers in Processor; exact contribution matching; independent collection cycles; free positions send zero purchase value.
+- Selection: double-weighted entries are removed together after selection; 17 distinct collectibles; repeated wallet recipients allowed; rounding residue assigned to primary.
 - Claims: failed pushes create correct liabilities; successful claims cannot repeat; transfers and claims resist reentrancy.
 - Verify: only approved issuers; origin linking; initial recipient versus current owner; revoked records remain official but inactive.
 
 ## Cross-chain checks
 
-Verify the actual CCIP-supported lane and configured routers/senders, Base VRF environment and authorization, round/request correlation, replay/stale response rejection, and exactly-once finalization. Test delayed messages, failed request delivery, failed return delivery, unavailable fee balances, and rejected recipient transfers.
+Verify the actual CCIP-supported lane and configured routers/senders, Base VRF environment and authorization, cycle/request correlation, replay/stale response rejection, and exactly-once finalization. Test delayed messages, failed request delivery, failed return delivery, unavailable fee balances, and rejected recipient transfers.
 
-Keep a pending round visible when randomness is unavailable. Do not substitute block timestamps, `prevrandao`, or an operator-selected result for the specified VRF design. A supported retry/recovery path and the fee-funding policy must come from the final implementation; the specification does not supply their callable ABI.
+Keep a pending cycle visible when randomness is unavailable. Do not substitute block timestamps, `prevrandao`, or an operator-selected result for the specified VRF design. A supported retry/recovery path and the fee-funding policy must come from the final implementation; the specification does not supply their callable ABI.
 
 ## Operational readiness
 
@@ -412,15 +414,15 @@ No implemented 365-day liquidation guarantee, fixed 18× gas multiplier, or no-r
 
 Referral `referralCount` records direct registrations; `purchaseCount[user][type]` records collection activity. The final app/indexer must define the ranking period, free-position treatment, and tie-breaking. Referral upgrades change the plan and commission rate, not the number of direct registrations; no new upgrade-points rule is supplied.
 
-Points are recognition metrics and are distinct from ticket selection weight and referral commissions. Changing a referral plan does not change the 1–100 double-weight rule in a draw.
+Points are recognition metrics and are distinct from collectible selection weight and referral commissions. Changing a referral plan does not change the 1–100 double-weight rule in a selection.
 
 ## Genesis access
 
-The retained roadmap proposes social verification through X, Discord, YouTube, and Telegram, followed by a gas-only Genesis campaign for eligible wallets. Actual launch dates, quotas, proof format, and early-adopter benefits require campaign configuration. Genesis eligibility must not be confused with the five ordinary round positions that are free for the buyer.
+The retained roadmap proposes social verification through X, Discord, YouTube, and Telegram, followed by a gas-only Genesis campaign for eligible wallets. Actual launch dates, quotas, proof format, and early-adopter benefits require campaign configuration. Genesis eligibility must not be confused with the five ordinary cycle positions that are free for the buyer.
 
 ## Growth campaign
 
-The planned separate campaign targets 5,000 users and a 30-day window, with milestones and a top-three 50/30/20 split. Activation, funds, deployment, and snapshots are not verified in the new contract summary. Any funding must use available admin receipts after free-position reserves and deferred user liabilities, never Processor's round pool.
+The planned separate campaign targets 5,000 users and a 30-day window, with milestones and a top-three 50/30/20 split. Activation, funds, deployment, and snapshots are not verified in the new contract summary. Any funding must use available admin receipts after free-position reserves and deferred user liabilities, never Processor's cycle pool.
 
 See [Leaderboard](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/leaderboard.mdx), [Campaigns](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/campaigns/index.mdx), [campaign design](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/technical/campaign-contract.mdx), and the [16-phase roadmap](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/roadmap.mdx).
 
@@ -440,9 +442,9 @@ Confirm the user-count source, activation authority/date, funding window, increm
 
 ## Leaderboard
 
-Retained product scoring is direct referral +1, Buddy purchase +2, Samurai +4, Noble +6. The supplied summary provides `referralCount` and `purchaseCount`; it does not establish an on-chain global ranking or new points for referral upgrades. Verify the app/indexer scoring and snapshots before making payout claims.
+Retained product scoring is direct referral +1, Buddy purchase +2, Samurai +4, Noble +6. The supplied summary provides `referralCount` and `purchaseCount`; it does not establish an on-chain global ranking or new points for referral upgrades. Verify the app/indexer scoring and snapshots before making allocation settlement claims.
 
-The campaign is separate from the 500-ticket round's 17-recipient draw. Its planned three-account 50/30/20 split must not be confused with the round's 1/6/10 ticket groups. See [Growth Campaign](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/campaigns/growth.mdx).
+The campaign is separate from the 500-collectible cycle's 17-recipient selection. Its planned three-account 50/30/20 split must not be confused with the cycle's 1/6/10 collectible groups. See [Growth Campaign](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/campaigns/growth.mdx).
 
 # Public Roadmap
 
@@ -466,7 +468,7 @@ Following the whitelist period, a dedicated Free-Mint Campaign is opened exclusi
 
 - Whitelisted users may mint selected FOS Digital Collectibles
 - Participation requires network gas only (no protocol fee during this window)
-- Genesis assets and any Processor round eligibility must follow the separately published campaign configuration
+- Genesis assets and any Processor cycle eligibility must follow the separately published campaign configuration
 - The objective of this phase is to reward early contributors and establish the first active user base
 
 This phase reinforces our principle of accessibility and loyalty recognition, while remaining fully aligned with the protocol's product-first architecture.
@@ -491,7 +493,7 @@ After stability validation, the protocol becomes publicly accessible.
 - Continued growth through community-driven initiatives
 - Expansion of ecosystem transparency and engagement tools
 
-Rounds follow their stored settings and asynchronous randomness lifecycle. Authorized owner controls and oracle/bridge operations remain part of the documented architecture.
+Cycles follow their stored settings and asynchronous randomness lifecycle. Authorized owner controls and oracle/bridge operations remain part of the documented architecture.
 
 ## Phase 5 — Growth Campaign (Activated at 5,000 Users)
 
@@ -651,9 +653,9 @@ The earlier edition described founder, Solidity engineering, and prospective adv
 
 NFT acquisition does not guarantee an allocation, income, liquidity, resale value, or capital appreciation. Selection is weighted and probabilistic. The nominal dollar examples are explanatory; actual configured ETH prices, integer rounding, balances, and completed transactions control on-chain results.
 
-Users face smart-contract, key-management, network, oracle, bridge-delivery, market-volatility, and regulatory risks. Round pools, free-position reserves, and deferred payments are held and accounted for in contracts. A non-custodial interface does not mean funds never enter a contract or that loss is impossible.
+Users face smart-contract, key-management, network, oracle, bridge-delivery, market-volatility, and regulatory risks. Cycle pools, free-position reserves, and deferred payments are held and accounted for in contracts. A non-custodial interface does not mean funds never enter a contract or that loss is impossible.
 
-The existing project access policy requires adults and restricts the United States, Canada, United Kingdom, EEA, China, and sanctioned jurisdictions. Do not bypass those restrictions. Terminology such as collectible, ticket, lottery, reward, or promotional allocation does not independently establish legal status. Obtain qualified jurisdiction-specific advice; the technical specification is not a legal opinion.
+The existing project access policy requires adults and restricts the United States, Canada, United Kingdom, EEA, China, and sanctioned jurisdictions. Do not bypass those restrictions. Project terminology does not independently establish legal status. Obtain qualified jurisdiction-specific advice; the technical specification is not a legal opinion.
 
 Read the project's current Terms of Service and Privacy Policy. Final blockchain transactions cannot be reversed by this documentation interface. Network fees are spent even for reverted transactions. Completed sales and any statutory consumer rights depend on applicable terms and law; this document does not create or waive legal rights.
 
@@ -661,7 +663,7 @@ Read the project's current Terms of Service and Privacy Policy. Final blockchain
 
 The retained sixteen-phase roadmap includes Genesis access, gradual rollout, growth incentives, experiments, desktop improvements, expanded wallets, additional networks, dashboards, profiles, priority access, loyalty, evolving collectibles, missions, and prospective governance. These are plans rather than proof of launch. A future governance or chain deployment requires its own specification, security review, roles, and rollout evidence.
 
-The specified Base randomness leg is infrastructure for Robinhood draws; it is not evidence that the user's minting transaction occurs on Base or that arbitrary multi-chain pool deployments already exist. New collection tiers and campaign adapters must preserve pool isolation, free-position funding, and user payment liabilities.
+The specified Base randomness leg is infrastructure for Robinhood selection processes; it is not evidence that the user's minting transaction occurs on Base or that arbitrary multi-chain pool deployments already exist. New collection tiers and campaign adapters must preserve pool isolation, free-position funding, and user payment liabilities.
 
 # Appendix: Fee Funding and Failure Cases
 
@@ -670,8 +672,8 @@ The specified Base randomness leg is infrastructure for Robinhood draws; it is n
 | Incorrect purchase value | Ordinary mints require exact configured price; free positions require zero purchase value |
 | Next position changes before confirmation | Refresh the next position and amount; rely on actual contract checks |
 | Insufficient free-position reserve | Funding must cover the configured contribution; admin withdrawal must preserve remaining reserves |
-| VRF or CCIP delay | Round awaits a valid correlated result; no immediate completion promise |
-| Repeated or stale result | Final implementation must validate sender, round correlation, and exactly-once finalization |
+| VRF or CCIP delay | Cycle awaits a valid correlated result; no immediate completion promise |
+| Repeated or stale result | Final implementation must validate sender, cycle correlation, and exactly-once finalization |
 | Selected wallet rejects ETH | Record a deferred amount in pendingWithdrawals for claim() |
 | Referrer rejects ETH | Record a deferred amount for that referrer to claim() |
 | No referrer | Full registration or upgrade payment is allocated to admin |
@@ -686,9 +688,9 @@ No fixed 18-times gas multiplier, unconditional fee reimbursement, deployed publ
 | Robinhood Chain | User-facing project network; mainnet registry ID 4663 |
 | Base VRF side | Specified service-chain integration where Chainlink VRF produces randomness |
 | CCIP | Transport for requests/results across the specified chains |
-| Round | Collection-scoped set of up to the stored capacity, targeted at 500 tickets |
-| Green Eye | Final target-position collectible that closes the round and initiates randomness processing |
-| Ticket | Registered draw entry; distinct from wallet-level uniqueness |
+| Cycle | Collection-scoped set of up to the stored capacity, targeted at 500 collectibles |
+| Green Eye | Final target-position collectible that closes the cycle and initiates randomness processing |
+| Collectible | Registered selection entry; distinct from wallet-level uniqueness |
 | Weight | Two selection entries for positions 1–100, one for later positions |
 | Deferred claim | Recorded payment liability after a direct transfer fails |
 | Basis points | Rate units out of 10000; 8200 bps is 82 percent |

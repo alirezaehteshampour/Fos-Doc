@@ -1,6 +1,6 @@
 # Review the updated FOS documentation
 
-These are browser captures from the tested cloud production build of commit `25479aec208327a1e721dd26d01c63b347075ae1`, taken October 12, 2026. They show the implementation for review; they are not an interactive hosted preview or proof of a completed live deployment.
+These are browser captures from the tested cloud production build, refreshed October 12, 2026 after restoring the original FOS product terminology. They show the implementation for review; they are not an interactive hosted preview or proof of a completed live deployment.
 
 ## Whitepaper downloads
 
@@ -8,7 +8,7 @@ These are browser captures from the tested cloud production build of commit `254
 - [Editable LaTeX](https://raw.githubusercontent.com/alirezaehteshampour/Fos-Doc/main/public/whitepaper.tex)
 - [View PDF on GitHub](../../public/whitepaper.pdf)
 
-The public downloads were verified to return HTTP 200 and match the current cloud files byte-for-byte. The revised PDF has 18 pages. Its source reproduces it byte-for-byte; the unchanged original and embedding-based historical facsimile are described in [whitepaper provenance](../../whitepaper/README.md).
+The PDF and LaTeX are committed alongside the site. GitHub links require the same repository access as the code; an inaccessible repository/file may return 404. The source reproduces the revised PDF byte-for-byte; the unchanged original and embedding-based historical facsimile are described in [whitepaper provenance](../../whitepaper/README.md).
 
 ## Verified behavior
 

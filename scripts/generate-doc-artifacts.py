@@ -49,9 +49,9 @@ for filename, paths in [('fos.md', protocol_paths), ('Fos Technical Doc.md', tec
 
 intro = '''# Executive Summary
 
-FOS combines digital collectibles with protocol-defined distributions, an independent single-level referral program, and authenticity certificates. This edition updates the December 2025 whitepaper using the supplied Persian project contract specification. User-facing contracts move to Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
+FOS offers Fos Digital Collectibles as NFT consumer products with protocol-defined promotional distributions, an independent single-level referral program, and authenticity certificates. This edition updates the December 2025 whitepaper using the supplied Persian project contract specification. User-facing contracts move to Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
 
-This whitepaper explains the reported design. It is not an independent contract audit, proof of a live bridge deployment, legal determination, or promise of individual allocations. The documentation repository does not contain the final Solidity sources or deployment ABI bundle. Unverified operational contract addresses are not published here.
+The product vocabulary follows the original FOS documentation: Fos Digital Collectible, promotional distribution, recipient, allocation, loyalty reward, and cycle. Exact contract identifiers remain unchanged in technical references. This whitepaper explains the reported design. It is not an independent contract audit, proof of a live bridge deployment, legal determination, or promise of individual allocations. The documentation repository does not contain the final Solidity sources or deployment ABI bundle. Unverified operational contract addresses are not published here.
 
 ## Vision and mission
 
@@ -62,16 +62,16 @@ The project aims to make collectible participation and allocation accounting vis
 - Robinhood Chain is the user transaction network; Base is retained for the specified VRF integration, connected through CCIP.
 - Referral has nominal $2/$5/$10 plans; the direct referrer's active plan sets 50%/60%/82% commission on registrations and upgrades.
 - Upgrades pay the current configured price difference and retain the original referrer.
-- Buddy/Samurai/Noble use 5%/3%/2% admin fees and funded round pools of nominal $1,425/$6,305/$12,250.
-- Free positions are funded from FOSNFT reserves; weighted uniqueness is at ticket level, not wallet level.
-- Draw completion is asynchronous; failed direct ETH payments become deferred claims.
+- Buddy/Samurai/Noble use 5%/3%/2% admin fees and funded cycle pools of nominal $1,425/$6,305/$12,250.
+- Free positions are funded from FOSNFT reserves; selection uniqueness is recorded per collectible mint, not per wallet.
+- Selection completion is asynchronous; failed direct ETH payments become deferred claims.
 - Verify issues separate ERC-721 certificates and distinguishes existence from current validity.
 
 # Market Context and Comparison Limits
 
 The earlier whitepaper discussed digital collectibles, loyalty systems, and trust in centralized promotions. Those motivations remain relevant context, but historical Base adoption figures do not describe Robinhood adoption. The existing 2025 research is historical and has not been independently refreshed here.
 
-Current economic statements in this edition follow the supplied collection and referral arithmetic. Per-ticket pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification.
+Current economic statements in this edition follow the supplied collection and referral arithmetic. Per-collectible pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification.
 
 The original references are retained in the unchanged historical PDF. Current operational rules should be read from this edition and verified against the actual deployment.
 '''
@@ -84,7 +84,7 @@ sections = [
 ]
 architecture = r'''
 
-## Network and draw architecture
+## Network and promotional distribution architecture
 
 ```{=latex}
 \begin{figure}[H]
@@ -93,7 +93,7 @@ architecture = r'''
 \node[box] (mint) at (0,0) {FOSNFT\\Robinhood Chain};
 \node[box] (processor) at (5.3,0) {Processor\\Robinhood Chain};
 \node[box] (base) at (10.6,0) {VRF integration\\Base};
-\draw[->,thick] (mint) -- node[above,font=\footnotesize] {Ticket + funds} (processor);
+\draw[->,thick] (mint) -- node[above,font=\footnotesize] {Mint + funds} (processor);
 \draw[->,thick] (processor) -- node[above,font=\footnotesize] {CCIP request} (base);
 \draw[->,thick] (base.south) -- ++(0,-1.3) -| node[pos=0.25,below,font=\footnotesize] {CCIP returns VRF result} (processor.south);
 \node[box] (referral) at (0,-4) {Referral\\Independent plans};
@@ -115,14 +115,14 @@ lifecycle = r'''
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[box/.style={draw,rounded corners,align=center,text width=3.2cm,minimum height=1cm,font=\small},>=Stealth]
-\node[box] (full) at (0,0) {Ticket 500 closes round};
+\node[box] (full) at (0,0) {Mint 500 closes cycle};
 \node[box] (request) at (5.3,0) {CCIP request to Base};
 \node[box] (vrf) at (10.6,0) {Base VRF result};
 \node[box] (return) at (10.6,-2) {CCIP return to Robinhood};
-\node[box] (select) at (5.3,-2) {Select 17 distinct tickets};
+\node[box] (select) at (5.3,-2) {Select 17 mint records};
 \node[box] (pay) at (0,-2) {Attempt ETH transfers};
 \node[box] (claim) at (0,-4) {Failed payment\\Deferred claim()};
-\node[box] (next) at (5.3,-4) {Draw completed\\Next collection round};
+\node[box] (next) at (5.3,-4) {Distribution processed\\Next collection cycle};
 \draw[->,thick] (full) -- (request);
 \draw[->,thick] (request) -- (vrf);
 \draw[->,thick] (vrf) -- (return);
@@ -131,7 +131,7 @@ lifecycle = r'''
 \draw[->,thick] (pay) -- (claim);
 \draw[->,thick] (pay.east) -- ++(.5,0) |- (next.west);
 \end{tikzpicture}
-\caption{Draw processing is separate from the last buyer's mint. Deferred claims remain owed after the draw is completed.}
+\caption{Selection processing is separate from the last buyer's mint. Deferred claims remain owed after the selection is completed.}
 \end{figure}
 ```
 
@@ -153,9 +153,9 @@ The earlier edition described founder, Solidity engineering, and prospective adv
 
 NFT acquisition does not guarantee an allocation, income, liquidity, resale value, or capital appreciation. Selection is weighted and probabilistic. The nominal dollar examples are explanatory; actual configured ETH prices, integer rounding, balances, and completed transactions control on-chain results.
 
-Users face smart-contract, key-management, network, oracle, bridge-delivery, market-volatility, and regulatory risks. Round pools, free-position reserves, and deferred payments are held and accounted for in contracts. A non-custodial interface does not mean funds never enter a contract or that loss is impossible.
+Users face smart-contract, key-management, network, oracle, bridge-delivery, market-volatility, and regulatory risks. Cycle pools, free-position reserves, and deferred payments are held and accounted for in contracts. A non-custodial interface does not mean funds never enter a contract or that loss is impossible.
 
-The existing project access policy requires adults and restricts the United States, Canada, United Kingdom, EEA, China, and sanctioned jurisdictions. Do not bypass those restrictions. Terminology such as collectible, ticket, lottery, reward, or promotional allocation does not independently establish legal status. Obtain qualified jurisdiction-specific advice; the technical specification is not a legal opinion.
+The existing project access policy requires adults and restricts the United States, Canada, United Kingdom, EEA, China, and sanctioned jurisdictions. Do not bypass those restrictions. Project terminology does not independently establish legal status. Obtain qualified jurisdiction-specific advice; the technical specification is not a legal opinion.
 
 Read the project's current Terms of Service and Privacy Policy. Final blockchain transactions cannot be reversed by this documentation interface. Network fees are spent even for reverted transactions. Completed sales and any statutory consumer rights depend on applicable terms and law; this document does not create or waive legal rights.
 
@@ -163,7 +163,7 @@ Read the project's current Terms of Service and Privacy Policy. Final blockchain
 
 The retained sixteen-phase roadmap includes Genesis access, gradual rollout, growth incentives, experiments, desktop improvements, expanded wallets, additional networks, dashboards, profiles, priority access, loyalty, evolving collectibles, missions, and prospective governance. These are plans rather than proof of launch. A future governance or chain deployment requires its own specification, security review, roles, and rollout evidence.
 
-The specified Base randomness leg is infrastructure for Robinhood draws; it is not evidence that the user's minting transaction occurs on Base or that arbitrary multi-chain pool deployments already exist. New collection tiers and campaign adapters must preserve pool isolation, free-position funding, and user payment liabilities.
+The specified Base randomness leg is infrastructure for Robinhood selection processes; it is not evidence that the user's minting transaction occurs on Base or that arbitrary multi-chain pool deployments already exist. New collection tiers and campaign adapters must preserve pool isolation, free-position funding, and user payment liabilities.
 
 # Appendix: Fee Funding and Failure Cases
 
@@ -172,8 +172,8 @@ The specified Base randomness leg is infrastructure for Robinhood draws; it is n
 | Incorrect purchase value | Ordinary mints require exact configured price; free positions require zero purchase value |
 | Next position changes before confirmation | Refresh the next position and amount; rely on actual contract checks |
 | Insufficient free-position reserve | Funding must cover the configured contribution; admin withdrawal must preserve remaining reserves |
-| VRF or CCIP delay | Round awaits a valid correlated result; no immediate completion promise |
-| Repeated or stale result | Final implementation must validate sender, round correlation, and exactly-once finalization |
+| VRF or CCIP delay | Cycle awaits a valid correlated result; no immediate completion promise |
+| Repeated or stale result | Final implementation must validate sender, cycle correlation, and exactly-once finalization |
 | Selected wallet rejects ETH | Record a deferred amount in pendingWithdrawals for claim() |
 | Referrer rejects ETH | Record a deferred amount for that referrer to claim() |
 | No referrer | Full registration or upgrade payment is allocated to admin |
@@ -188,9 +188,9 @@ No fixed 18-times gas multiplier, unconditional fee reimbursement, deployed publ
 | Robinhood Chain | User-facing project network; mainnet registry ID 4663 |
 | Base VRF side | Specified service-chain integration where Chainlink VRF produces randomness |
 | CCIP | Transport for requests/results across the specified chains |
-| Round | Collection-scoped set of up to the stored capacity, targeted at 500 tickets |
-| Green Eye | Final target-position collectible that closes the round and initiates randomness processing |
-| Ticket | Registered draw entry; distinct from wallet-level uniqueness |
+| Cycle | Collection-scoped set of up to the stored capacity, targeted at 500 collectibles |
+| Green Eye | Final target-position collectible that closes the cycle and initiates randomness processing |
+| Collectible | Registered selection entry; distinct from wallet-level uniqueness |
 | Weight | Two selection entries for positions 1–100, one for later positions |
 | Deferred claim | Recorded payment liability after a direct transfer fails |
 | Basis points | Rate units out of 10000; 8200 bps is 82 percent |

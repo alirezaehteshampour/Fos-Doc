@@ -5,13 +5,13 @@ description: Collectibles, direct referrals, and verifiable distribution archite
 
 # About FOS
 
-FOS combines digital collectibles, independently managed single-level referrals, and an authenticity-certificate registry. Its user-facing contract architecture is on **Robinhood Chain**. The specified draw architecture uses **Chainlink VRF on Base** and **CCIP** to transport requests and results.
+FOS combines digital collectibles, independently managed single-level referrals, and an authenticity-certificate registry. Its user-facing contract architecture is on **Robinhood Chain**. The specified selection architecture uses **Chainlink VRF on Base** and **CCIP** to transport requests and results.
 
 ## What the project provides
 
-- Buddy, Samurai, and Noble collections with separate 500-ticket rounds.
-- Five gas-only positions per round, funded from reserved FOSNFT balances.
-- Double selection weight for positions 1–100 and 17 distinct selected tickets.
+- Buddy, Samurai, and Noble collections with separate 500-collectible cycles.
+- Five gas-only positions per cycle, funded from reserved FOSNFT balances.
+- Double selection weight for positions 1–100 and 17 distinct collectibles.
 - Independent $2/$5/$10 referral plans, with commission based on the direct referrer's active plan.
 - Separate Verify ERC-721 certificates with explicit active/revoked status.
 
@@ -19,6 +19,6 @@ FOS combines digital collectibles, independently managed single-level referrals,
 
 Users sign transactions through their wallets. The interface does not require private keys; funds entering a contract are governed by its accounting and permissions. The owner can configure referral prices and percentages, and Verify can authorize minters and revoke certificates. Global claims that no parameters can ever change do not describe the supplied specification.
 
-Completed transactions, active configuration, and deployment verification should be distinguished from future plans. Cross-chain draws need delivery and callback processing after the last mint; automation is not a promise of immediate completion or risk-free use.
+Completed transactions, active configuration, and deployment verification should be distinguished from future plans. Cross-chain selection processes need delivery and callback processing after the last mint; automation is not a promise of immediate completion or risk-free use.
 
 See [protocol rules](/docs/protocol), [technical reference](/docs/technical), and [roadmap](/docs/roadmap).

@@ -1,40 +1,42 @@
 ---
 title: Collection & Mechanics
-description: Round funding, weighted tickets, gas-only positions, and draw lifecycle
+description: Cycle funding, weighted collectibles, gas-only positions, and selection lifecycle
 ---
 
 # Collection & Protocol Mechanics
 
 ## Minting
 
-Call `buyAndMint(lotteryType, tokenURI)` on FOSNFT on Robinhood Chain. The documented type IDs are 3 (Buddy), 13 (Samurai), and 25 (Noble). A successful transaction mints an NFT, registers a ticket with Processor, and sends the round's configured pool contribution to Processor. Only FOSNFT may register tickets there. If Verify is connected and FOSNFT is approved, a separate authenticity certificate is also issued.
+Call `buyAndMint(collectionType, tokenURI)` on FOSNFT on Robinhood Chain. The documented type IDs are 3 (Buddy), 13 (Samurai), and 25 (Noble). A successful transaction mints a Fos Digital Collectible, registers its mint record with Processor, and sends the cycle's configured allocation-pool contribution to Processor. Only FOSNFT may register those records there. If Verify is connected and FOSNFT is approved, a separate authenticity certificate is also issued.
+
+Throughout this reference, numbered collectibles refer to the mint records used for protocol-defined promotional distributions. Each collectible has one mint record; selection uniqueness applies to that record, while a wallet can have several recorded mints. Product wording does not change the selection mechanism or the number of allocations.
 
 ## Prices and accounting
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-For each paid ticket:
+For each paid collectible:
 
 ```text
 adminCut = price * adminBps / 10000
 prizeShare = price - adminCut
 ```
 
-The admin share remains in FOSNFT. There is no additional admin deduction from recipients' allocations. The amount sent to Processor must equal the contribution stored for that round.
+The admin share remains in FOSNFT. There is no additional admin deduction from recipients' allocations. The amount sent to Processor must equal the contribution stored for that cycle.
 
 ## Five gas-only positions
 
-Positions **10, 100, 200, 300, and 400** are free in every round of every collection. The buyer pays network gas but sends zero purchase value. FOSNFT supplies the full pool contribution for each free ticket. Admin withdrawals must preserve the reserve for remaining free positions.
+Positions **10, 100, 200, 300, and 400** are free in every cycle of every collection. The buyer pays network gas but sends zero purchase value. FOSNFT supplies the full pool contribution for each free collectible. Admin withdrawals must preserve the reserve for remaining free positions.
 
-For a full round there are 495 paid positions and 5 funded free positions. In nominal dollars:
+For a full cycle there are 495 paid positions and 5 funded free positions. In nominal dollars:
 
-| Collection | Buyer purchase inflow | Gross admin share from 495 paid positions | Free-position funding | Remaining admin amount | Round pool |
+| Collection | Buyer purchase inflow | Gross admin share from 495 paid positions | Free-position funding | Remaining admin amount | Cycle pool |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Buddy | $1,485 | $74.25 | $14.25 | $60.00 | $1,425 |
 | Samurai | $6,435 | $193.05 | $63.05 | $130.00 | $6,305 |
@@ -44,28 +46,28 @@ These calculations exclude gas, oracle/bridge costs, and any other operating cos
 
 ## Weights and uniqueness
 
-Tickets 1–100 have two entries each in the selection pool; 101–500 have one. Positions 10 and 100 are both free and double-weighted. The initial full-round selection pool contains 600 entries.
+Collectibles 1–100 have two entries each in the selection pool; 101–500 have one. Positions 10 and 100 are both free and double-weighted. The initial full-cycle selection pool contains 600 entries.
 
-After a ticket is selected, all of its entries are removed. It cannot be selected again in that round. A wallet holding multiple tickets may be selected more than once through different tickets. Double weight is a relative draw weight, not a guarantee of an award or a claim that every final inclusion probability is exactly doubled.
+After a collectible's mint record is selected, all of its weighted entries are removed. That record cannot be selected again in the cycle. A wallet with multiple recorded mints may receive more than one allocation through distinct records. Double weight is a relative selection weight, not a guarantee of an allocation or a claim that every final inclusion probability is exactly doubled.
 
-## Green Eye and asynchronous draw
+## Green Eye and asynchronous selection
 
-The 500th collectible closes the round and is known as the Green Eye.
+The 500th collectible closes the cycle and is known as the Green Eye.
 
-1. FOSNFT registers ticket 500 with Processor on Robinhood Chain. That round closes to further tickets.
-2. A round-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
+1. FOSNFT registers collectible 500 with Processor on Robinhood Chain. That cycle closes to further collectibles.
+2. A cycle-specific randomness request is sent through Chainlink CCIP to the Base-side integration.
 3. Chainlink VRF on Base produces verifiable randomness.
 4. CCIP returns the result to the Robinhood-side integration.
-5. Processor uses the returned randomness and ticket weights to select 17 distinct winning tickets and process allocations.
-6. After the draw completes, the next round of that collection starts automatically.
+5. Processor uses the returned randomness and collectible weights to select 17 distinct collectibles and process allocations.
+6. After the selection completes, the next cycle of that collection starts automatically.
 
-The last mint starts this asynchronous sequence. Selection, transfers, and the next round do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
+The last mint starts this asynchronous sequence. Selection, transfers, and the next cycle do **not** all finish in the last buyer's transaction. Bridge contract names, callbacks, fee funding, supported CCIP lane, and deployed bridge addresses must be checked against the final implementation; this repository contains documentation, not those Solidity contracts.
 
 Do not assume a fixed 18× gas charge or an automatic fee reimbursement. Each transaction has its own gas cost, and oracle/CCIP fees depend on the final integration.
 
 ## Distribution and claims
 
-| Group | Selected tickets | Share of pool | Per-ticket share |
+| Group | Selected collectibles | Share of pool | Per-collectible share |
 | :--- | ---: | ---: | ---: |
 | Primary | 1 | 50% | 50% plus integer-rounding residue |
 | Secondary | 6 | 30% | 5% |
@@ -73,8 +75,8 @@ Do not assume a fixed 18× gas charge or an automatic fee reimbursement. Each tr
 
 Processor attempts direct payment. A rejected payment is recorded in `pendingWithdrawals` for a later `claim()` rather than described as reverting every recipient's payment.
 
-## Round settings
+## Cycle settings
 
-Capacity, contribution per ticket, group counts/splits, and the number of double-weighted positions are recorded at round start. Changes apply to subsequent rounds; an empty active round may be updated where the contract permits. The target capacity is 500; old 20-ticket settings were tests.
+Capacity, contribution per collectible, group counts/splits, and the number of double-weighted positions are recorded at cycle start. Changes apply to subsequent cycles; an empty active cycle may be updated where the contract permits. The target capacity is 500; old 20-collectible settings were tests.
 
 The new specification does not establish the previously described 365-day `liquidatePool()` mechanism. Do not rely on that recovery path unless it is confirmed in the final deployed contract.

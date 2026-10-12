@@ -23,9 +23,9 @@ These are recommended indexing fields, not published contract tuple signatures o
 | Model | Important fields |
 | :--- | :--- |
 | Referral user | chain ID, wallet, isRegistered, userTier, referredBy, referralCount, totalEarned, pendingWithdrawals |
-| Ticket | chain ID, FOSNFT address, token ID, collection type, round ID, ticket position, original purchaser, weight, transaction hash |
-| Round | collection type, round ID, stored capacity/contribution/group rules, ticket count, pool balance, request correlation, finalization status |
-| Allocation | round ID, selected ticket, recipient, allocated ETH, transfer outcome, claim transaction |
+| Collectible | chain ID, FOSNFT address, token ID, collection type, cycle ID, collectible position, original purchaser, weight, transaction hash |
+| Cycle | collection type, cycle ID, stored capacity/contribution/group rules, collectible count, pool balance, request correlation, finalization status |
+| Allocation | cycle ID, selected collectible, recipient, allocated ETH, transfer outcome, claim transaction |
 | Certificate | Verify address, token ID, originType, originContract, originId, initial recipient, current owner, getStatus result |
 
 Confirm every indexed transaction against the correct chain, contract address/version, and successful receipt. Avoid double-counting repeated events or CCIP deliveries. Display nominal USD calculations separately from actual ETH accounting.
@@ -33,8 +33,8 @@ Confirm every indexed transaction against the correct chain, contract address/ve
 ## Terminology
 
 - **VRF:** verifiable randomness produced on the specified Base integration.
-- **CCIP:** messaging carrying a round request/result between Base and Robinhood.
-- **Ticket:** a registered round entry associated with a mint; uniqueness of selection is at ticket level.
+- **CCIP:** messaging carrying a cycle request/result between Base and Robinhood.
+- **Collectible:** a registered cycle entry associated with a mint; uniqueness of selection is at collectible level.
 - **Deferred payment:** owed ETH recorded for a later `claim()` after direct transfer fails.
 - **Origin certificate:** a separate Verify NFT; issuance and active status are distinct.
 

@@ -1,6 +1,6 @@
 ---
 title: Main Application Integration
-description: Robinhood wallet setup and round, referral, and certificate UI requirements
+description: Robinhood wallet setup and cycle, referral, and certificate UI requirements
 ---
 
 # Main Application Integration
@@ -13,12 +13,12 @@ Use Robinhood Chain for user transactions. Confirm `eth_chainId` matches the sel
 
 ## Mint interface
 
-1. Read collection type, round state, next ticket position, and exact configured ETH price.
+1. Read collection type, cycle state, next collectible position, and exact configured ETH price.
 2. Show nominal dollar labels separately from the required ETH transaction value.
 3. For positions 10, 100, 200, 300, and 400, send zero purchase value and show the wallet's network gas estimate.
 4. Submit `buyAndMint(lotteryType, tokenURI)` using the verified FOSNFT ABI and address.
-5. Wait for a successful receipt, then refresh NFT/ticket data. Handle next-position races by refreshing and asking the user to sign a new transaction.
-6. After ticket 500, display pending randomness/delivery until the cross-chain result and draw finalization are confirmed. Do not show a receipt as a completed payout.
+5. Wait for a successful receipt, then refresh NFT/collectible data. Handle next-position races by refreshing and asking the user to sign a new transaction.
+6. After collectible 500, display pending randomness/delivery until the cross-chain result and selection finalization are confirmed. Do not show a receipt as completed allocation settlement.
 
 ## Referral interface
 
@@ -36,4 +36,4 @@ The retained scoring design is referral +1, Buddy +2, Samurai +4, Noble +6. Upgr
 
 ## Operational views
 
-Show collection/round identifiers, Robinhood transaction hashes, pending randomness, Base VRF request correlation, CCIP delivery state, selected ticket IDs, attempted payments, and deferred claims. Filter logs by chain and contract version; validate server responses and never ask users for wallet private keys.
+Show collection/cycle identifiers, Robinhood transaction hashes, pending randomness, Base VRF request correlation, CCIP delivery state, selected collectible IDs, attempted payments, and deferred claims. Filter logs by chain and contract version; validate server responses and never ask users for wallet private keys.

@@ -1,6 +1,6 @@
 ---
 title: Smart Contracts Overview
-description: Separate minting, round processing, referral, and certificate contracts
+description: Separate minting, cycle processing, referral, and certificate contracts
 ---
 
 # Smart Contracts
@@ -9,25 +9,25 @@ description: Separate minting, round processing, referral, and certificate contr
 
 | Contract | Responsibility | Specified network |
 | :--- | :--- | :--- |
-| `FOSNFT` | NFT mint, purchase payment, admin balance, free-ticket reserve | Robinhood |
-| `Processor` | Authorized ticket registration, round state, draw, allocations | Robinhood |
+| `FOSNFT` | NFT mint, purchase payment, admin balance, free-collectible reserve | Robinhood |
+| `Processor` | Authorized collectible registration, cycle state, selection, allocations | Robinhood |
 | `Referral` | Registration, plans, upgrades, and direct-referral payments | Robinhood |
 | `Verify` | Separate ERC-721 certificates, origin registry, validity status | Robinhood |
-| VRF/CCIP integration | Carry round requests to Base and return VRF results | Robinhood and Base |
+| VRF/CCIP integration | Carry cycle requests to Base and return VRF results | Robinhood and Base |
 
-Only FOSNFT may register tickets in Processor. Referral is independent of both contracts. Verify is optional and may be connected to FOSNFT and Referral; Processor has no direct Verify connection in the supplied structure.
+Only FOSNFT may register collectible mint records in Processor. Referral is independent of both contracts. Verify is optional and may be connected to FOSNFT and Referral; Processor has no direct Verify connection in the supplied structure.
 
 ## Three independent collection types
 
-| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per ticket | Full 500-ticket pool |
+| Collection | Type ID | Nominal price | Admin fee | Admin per paid mint | Pool contribution per collectible | Full 500-collectible pool |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Buddy | 3 | $3 | 5% | $0.15 | $2.85 | $1,425 |
 | Samurai | 13 | $13 | 3% | $0.39 | $12.61 | $6,305 |
 | Noble | 25 | $25 | 2% | $0.50 | $24.50 | $12,250 |
 
-Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed award. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
+Dollar amounts describe the product model, not a dollar-denominated contract balance or guaranteed allocation. Payments and allocations use native ETH. Read the configured on-chain price before sending a transaction; the production USD-to-ETH conversion policy is not supplied in the contract specification.
 
-All three target 500 tickets, with 17 selected tickets and 50/30/20 group allocation. There is no specified 100-round lifetime cap. Only the initial weights and price labels are described here; per-round stored settings and current on-chain prices control execution.
+All three target 500 collectibles, with 17 selected collectibles and 50/30/20 group allocation. There is no specified 100-cycle lifetime cap. Only the initial weights and price labels are described here; per-cycle stored settings and current on-chain prices control execution.
 
 ## Standards and authority
 

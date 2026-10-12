@@ -23,7 +23,7 @@ export default function EconomicsPage() {
                 </p>
             </div>
             <GlassCard>
-                <h3 className="text-xl font-semibold mb-4">Per-ticket contribution</h3>
+                <h3 className="text-xl font-semibold mb-4">Per-collectible contribution</h3>
                 <div className="h-80">
                     <UniversalChart type="bar" data={splitData} options={{ scales: { y: { beginAtZero: true, max: 100 } } }} />
                 </div>
@@ -33,10 +33,10 @@ export default function EconomicsPage() {
                 </p>
             </GlassCard>
             <GlassCard>
-                <h3 className="text-xl font-semibold mb-4">Full-round nominal accounting</h3>
+                <h3 className="text-xl font-semibold mb-4">Full-cycle nominal accounting</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead><tr><th>Collection</th><th>495 buyer payments</th><th>500-ticket pool</th><th>Remaining admin funds</th></tr></thead>
+                        <thead><tr><th>Collection</th><th>495 buyer payments</th><th>500-collectible pool</th><th>Remaining admin funds</th></tr></thead>
                         <tbody>
                             <tr><td>Buddy</td><td>$1,485</td><td>$1,425</td><td>$60</td></tr>
                             <tr><td>Samurai</td><td>$6,435</td><td>$6,305</td><td>$130</td></tr>
@@ -55,7 +55,7 @@ export default function EconomicsPage() {
                 <p className="text-muted-foreground">
                     The direct referrer’s active $2/$5/$10 plan sets a 50%/60%/82% share of a registration
                     or upgrade payment. Upgrades pay the current price difference. These receipts are
-                    independent of the round pools and do not change ticket selection weights.
+                    independent of the cycle pools and do not change collectible selection weights.
                 </p>
                 <Link href="/docs/market-insights/economics" className="inline-block mt-4 underline">
                     Read the accounting assumptions and reserve rules

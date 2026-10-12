@@ -1,20 +1,20 @@
 ---
 title: Free Mint Architecture
-description: Per-round free positions and separate Genesis campaign plans
+description: Per-cycle free positions and separate Genesis campaign plans
 ---
 
 # Free Mint Architecture
 
-## Specified per-round free positions
+## Specified per-cycle free positions
 
-FOSNFT makes positions 10, 100, 200, 300, and 400 free in each Buddy/Samurai/Noble round. The user sends zero purchase value and pays network gas. FOSNFT funds each ticket's configured pool contribution from its own balance; admin withdrawals preserve the reserve for remaining free positions. Tickets 10 and 100 also have double selection weight.
+FOSNFT makes positions 10, 100, 200, 300, and 400 free in each Buddy/Samurai/Noble cycle. The user sends zero purchase value and pays network gas. FOSNFT funds each collectible's configured pool contribution from its own balance; admin withdrawals preserve the reserve for remaining free positions. Collectibles 10 and 100 also have double selection weight.
 
 These positions use the ordinary `buyAndMint(lotteryType, tokenURI)` path. They are not restricted to a Genesis allowlist in the supplied summary.
 
 ## Separate Genesis campaign
 
-The older roadmap describes a social whitelist and gas-only Genesis mint window, potentially using Merkle proofs and limited per-wallet allocations. The updated four-contract specification does not define that campaign's deployed contract, proof layout, quotas, dates, early-adopter bonus, or inclusion in paid collection rounds.
+The older roadmap describes a social whitelist and gas-only Genesis mint window, potentially using Merkle proofs and limited per-wallet allocations. The updated four-contract specification does not define that campaign's deployed contract, proof layout, quotas, dates, early-adopter bonus, or inclusion in paid collection cycles.
 
-Treat those details as planned campaign configuration until published. A Verify origin category for free mint (type 1) enables certificate classification; it does not by itself implement an allowlist campaign. Do not promise that a Genesis asset automatically includes a Processor ticket or higher-tier allocation.
+Treat those details as planned campaign configuration until published. A Verify origin category for free mint (type 1) enables certificate classification; it does not by itself implement an allowlist campaign. Do not promise that a Genesis asset automatically includes a Processor collectible or higher-tier allocation.
 
 See [Free Mint Campaign](/docs/campaigns/free-mint) and [FOSNFT & Processor](/docs/technical/allocation-contract).

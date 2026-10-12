@@ -15,6 +15,27 @@ assert hashlib.sha256((ROOT/'public/archive/whitepaper-2025.pdf').read_bytes()).
 assert (ROOT/'public/whitepaper.tex').read_bytes() == (ROOT/'whitepaper/whitepaper.tex').read_bytes()
 
 current = [p for p in DOCS.rglob('*.mdx') if 'archive_legacy' not in p.parts]
+
+# Preserve the original language policy while allowing existing policy exclusions,
+# historical research, and exact Solidity identifiers inside code spans.
+baseline = 'fffadfefd38eea1bb3b39cfaeabd77f89c7f9bf5'
+restricted = re.compile(r'\b(?:lottery|lotteries|lotto|gambling|gamble|igaming|bet|betting|wager|tickets?|win|wins|winners?|winning|prizes?|jackpot|payouts?)\b', re.I)
+
+def prose(text):
+    return re.sub(r'```.*?```|`[^`]+`', '', text, flags=re.S)
+
+for file in current:
+    relative = file.relative_to(ROOT).as_posix()
+    original = subprocess.check_output(['git', 'show', f'{baseline}:{relative}'], cwd=ROOT, text=True)
+    approved = {line.strip() for line in prose(original).splitlines() if restricted.search(line)}
+    for line in prose(file.read_text()).splitlines():
+        if restricted.search(line):
+            assert line.strip() in approved, f'New restricted product wording in {relative}: {line}'
+
+assert not restricted.search(prose((ROOT/'whitepaper/whitepaper.md').read_text())), 'Restricted vocabulary in current whitepaper prose'
+assistant = (ROOT/'src/app/api/chat/route.ts').read_text()
+for preferred in ['Fos Digital Collectible', 'promotional', 'recipient', 'allocation', 'loyalty reward']:
+    assert preferred in assistant, f'Missing original AI vocabulary guidance: {preferred}'
 for file in current:
     for slug in re.findall(r'\]\((/docs[^)#?\s]*)', file.read_text()):
         relative = slug.removeprefix('/docs').strip('/')
@@ -46,8 +67,10 @@ for relative in ['protocol/mechanics.mdx','market-insights/economics.mdx']:
 pdf_text=subprocess.check_output(['pdftotext',str(ROOT/'public/whitepaper.pdf'),'-'],text=True)
 for term in ['Robinhood','CCIP','pendingWithdrawals','getStatus','6,305','12,250','50%','60%','82%']:
     assert term in pdf_text, f'Missing PDF rule: {term}'
+assert not restricted.search(pdf_text), 'Restricted product vocabulary in rendered current PDF'
 page=(DOCS/'whitepaper.mdx').read_text()
 assert 'src="/whitepaper.pdf"' in page and '/Whitepaper.pdf' not in page
 
 print(f'PASS: {len(current)} current documentation pages have valid internal links; historical originals are labeled.')
 print('PASS: original PDF hash, downloadable LaTeX equality, current PDF rules, AI reference, and economic conservation.')
+print('PASS: current product vocabulary follows Git history; exact technical names and original policy/research context are preserved.')

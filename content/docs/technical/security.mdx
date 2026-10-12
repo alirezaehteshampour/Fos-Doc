@@ -9,7 +9,7 @@ The supplied contract summary describes intended behavior. This repository does 
 
 ## Authority and funds
 
-Referral owner can change prices, percentages, admin wallet, and Verify connection. Verify owner controls authorized minters, origin types, URI configuration, and revocation. Round settings are stored per round; updates generally apply to future rounds, with permitted empty-round updates. Publish real deployment roles and settings after verification.
+Referral owner can change prices, percentages, admin wallet, and Verify connection. Verify owner controls authorized minters, origin types, URI configuration, and revocation. Cycle settings are stored per cycle; updates generally apply to future cycles, with permitted empty-cycle updates. Publish real deployment roles and settings after verification.
 
 The interface does not hold private keys, but contracts hold pool funds, free-position reserves, and deferred payment liabilities. Native ETH is volatile; automation does not remove smart-contract, network, or regulatory risks.
 
@@ -17,17 +17,17 @@ The interface does not hold private keys, but contracts hold pool funds, free-po
 
 - Registration: once per wallet, registered non-self referrer, zero-address path, exact payment, fixed `referredBy`.
 - Plans: strict price ordering, higher-plan upgrades only, current difference payment, referrer's current basis-point rate, no retroactive payment changes.
-- Funds: admin withdrawable balance excludes pending claims and FOSNFT's remaining free-ticket reserve.
-- Mint: only FOSNFT registers in Processor; exact contribution matching; independent collection rounds; free positions send zero purchase value.
-- Draw: double-weighted entries are removed together after selection; 17 distinct tickets; repeated wallet recipients allowed; rounding residue assigned to primary.
+- Funds: admin withdrawable balance excludes pending claims and FOSNFT's remaining free-collectible reserve.
+- Mint: only FOSNFT registers in Processor; exact contribution matching; independent collection cycles; free positions send zero purchase value.
+- Selection: double-weighted entries are removed together after selection; 17 distinct collectibles; repeated wallet recipients allowed; rounding residue assigned to primary.
 - Claims: failed pushes create correct liabilities; successful claims cannot repeat; transfers and claims resist reentrancy.
 - Verify: only approved issuers; origin linking; initial recipient versus current owner; revoked records remain official but inactive.
 
 ## Cross-chain checks
 
-Verify the actual CCIP-supported lane and configured routers/senders, Base VRF environment and authorization, round/request correlation, replay/stale response rejection, and exactly-once finalization. Test delayed messages, failed request delivery, failed return delivery, unavailable fee balances, and rejected recipient transfers.
+Verify the actual CCIP-supported lane and configured routers/senders, Base VRF environment and authorization, cycle/request correlation, replay/stale response rejection, and exactly-once finalization. Test delayed messages, failed request delivery, failed return delivery, unavailable fee balances, and rejected recipient transfers.
 
-Keep a pending round visible when randomness is unavailable. Do not substitute block timestamps, `prevrandao`, or an operator-selected result for the specified VRF design. A supported retry/recovery path and the fee-funding policy must come from the final implementation; the specification does not supply their callable ABI.
+Keep a pending cycle visible when randomness is unavailable. Do not substitute block timestamps, `prevrandao`, or an operator-selected result for the specified VRF design. A supported retry/recovery path and the fee-funding policy must come from the final implementation; the specification does not supply their callable ABI.
 
 ## Operational readiness
 
