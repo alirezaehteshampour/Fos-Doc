@@ -1,0 +1,18 @@
+{
+  "source": "https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-4663.json",
+  "commit": "4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b",
+  "checkedAt": "2026-10-20",
+  "remoteSha256": "c4bd4142234b1ba9fffeadff83f39643209a06828bb0e82f6207532ed48f85d0",
+  "observations": {
+    "name": "Robinhood Chain",
+    "chainId": 4663,
+    "nativeCurrency": {
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "infoURL": "https://docs.robinhood.com/chain",
+    "rpc": "https://rpc.mainnet.chain.robinhood.com",
+    "explorer": "https://robinhoodchain.blockscout.com"
+  }
+}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { BarChart3, PieChart, TrendingUp, LayoutDashboard } from "lucide-react";
+import { withoutBasePath } from '../../site.config.mjs';
 
 const navItems = [
     {
@@ -12,8 +13,8 @@ const navItems = [
         icon: LayoutDashboard,
     },
     {
-        title: "Market 2025",
-        href: "/analysis/market-2025",
+        title: "Market Research",
+        href: "/analysis/market",
         icon: TrendingUp,
     },
     {
@@ -29,10 +30,10 @@ const navItems = [
 ];
 
 export function AnalysisNav() {
-    const pathname = usePathname();
+    const pathname = withoutBasePath(usePathname());
 
     return (
-        <nav className="flex items-center space-x-1 bg-card/50 dark:bg-card/30 backdrop-blur-md border border-border p-1 rounded-full shadow-lg mb-8 mx-auto w-fit">
+        <nav className="flex flex-wrap justify-center gap-1 bg-card/50 dark:bg-card/30 backdrop-blur-md border border-border p-1 rounded-2xl shadow-lg mb-8 mx-auto w-fit">
             {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (

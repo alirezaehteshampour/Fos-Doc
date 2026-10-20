@@ -1,6 +1,6 @@
 # Executive Summary
 
-FOS offers Fos Digital Collectibles as NFT consumer products with protocol-defined promotional distributions, an independent single-level referral program, and authenticity certificates. This edition updates the December 2025 whitepaper using the supplied Persian project contract specification. User-facing contracts move to Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
+FOS offers Fos Digital Collectibles as NFT consumer products with protocol-defined promotional distributions, an independent single-level referral program, and authenticity certificates. This whitepaper describes the current project contract specification. User-facing contracts are on Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
 
 The product vocabulary follows the original FOS documentation: Fos Digital Collectible, promotional distribution, recipient, allocation, loyalty reward, and cycle. Exact contract identifiers remain unchanged in technical references. This whitepaper explains the reported design. It is not an independent contract audit, proof of a live bridge deployment, legal determination, or promise of individual allocations. The documentation repository does not contain the final Solidity sources or deployment ABI bundle. Unverified operational contract addresses are not published here.
 
@@ -8,7 +8,7 @@ The product vocabulary follows the original FOS documentation: Fos Digital Colle
 
 The project aims to make collectible participation and allocation accounting visible through on-chain records rather than opaque operator databases. Its practical goals are clear contract responsibilities, explicit fee and reserve accounting, verifiable randomness, and accessible user information. Owner configuration permissions and cross-chain delivery dependencies are part of that design, not exceptions to it.
 
-## What changed in this edition
+## Protocol summary
 
 - Robinhood Chain is the user transaction network; Base is retained for the specified VRF integration, connected through CCIP.
 - Referral has nominal $2/$5/$10 plans; the direct referrer's active plan sets 50%/60%/82% commission on registrations and upgrades.
@@ -18,13 +18,11 @@ The project aims to make collectible participation and allocation accounting vis
 - Selection completion is asynchronous; failed direct ETH payments become deferred claims.
 - Verify issues separate ERC-721 certificates and distinguishes existence from current validity.
 
-# Market Context and Comparison Limits
+# Market Context
 
-The earlier whitepaper discussed digital collectibles, loyalty systems, and trust in centralized promotions. Those motivations remain relevant context, but historical Base adoption figures do not describe Robinhood adoption. The existing 2025 research is historical and has not been independently refreshed here.
+The market research in this edition was refreshed on October 20, 2026 using pinned network registries, Chainlink service documentation, and the ERC-721 standard. It separates verified infrastructure evidence, the FOS product specification, and proposed measures of adoption. The complete reports and citations follow the contract sections.
 
-Current economic statements in this edition follow the supplied collection and referral arithmetic. Per-collectible pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification.
-
-The original references are retained in the unchanged historical PDF. Current operational rules should be read from this edition and verified against the actual deployment.
+Per-collectible pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification. Network registry entries and service documentation do not measure actual FOS users or verify its deployment.
 
 
 # Platform Infrastructure
@@ -243,7 +241,7 @@ The owner can change plan prices, commission basis points, the admin wallet, and
 
 Reported test prices of 0.0000002, 0.0000005, and 0.000001 ETH are test settings, not production USD conversion rates. Referral participation and any tax obligations remain the user's responsibility. Payments depend on actual direct-referral activity and do not guarantee income.
 
-See [Referral Contract](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/technical/referral-contract.mdx) and [Verify](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/technical/verification-contract.mdx).
+See [Referral Contract](https://fos.ooo/document/docs/technical/referral-contract) and [Verify](https://fos.ooo/document/docs/technical/verification-contract).
 
 # Smart Contracts
 
@@ -279,7 +277,7 @@ NFT/certificate documentation uses ERC-721. Do not infer ERC-721A, ERC-1155, UUP
 
 Robinhood Chain ID **4663** is reported by the supplied specification and corroborated by the public network registry. The specification provides incomplete addresses for some components and does not supply the final Base-side bridge deployment. Accordingly this reference does not publish operational FOS contract addresses, ABIs, RPC credentials, or callback selectors. The named functions in individual pages are specification references, not a replacement for a verified ABI.
 
-Genesis allowlist and growth campaign contracts remain design material in the [roadmap](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/roadmap.mdx), not confirmed members of this deployed four-contract suite.
+Genesis allowlist and growth campaign contracts remain design material in the [roadmap](https://fos.ooo/document/docs/roadmap), not confirmed members of this deployed four-contract suite.
 
 # Verify Contract
 
@@ -340,7 +338,7 @@ This Next.js repository is the documentation website. Older PHP paths and wallet
 
 ## Wallet and network
 
-Use Robinhood Chain for user transactions. Confirm `eth_chainId` matches the selected environment: mainnet 4663, testnet 46630. A Base wallet balance or Base Sepolia chain ID is not a substitute. Obtain RPC/explorer settings from the [network reference](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/protocol/platform.mdx), keeping environments separate.
+Use Robinhood Chain for user transactions. Confirm `eth_chainId` matches the selected environment: mainnet 4663, testnet 46630. A Base wallet balance or Base Sepolia chain ID is not a substitute. Obtain RPC/explorer settings from the [network reference](https://fos.ooo/document/docs/protocol/platform), keeping environments separate.
 
 ## Mint interface
 
@@ -424,7 +422,7 @@ The retained roadmap proposes social verification through X, Discord, YouTube, a
 
 The planned separate campaign targets 5,000 users and a 30-day window, with milestones and a top-three 50/30/20 split. Activation, funds, deployment, and snapshots are not verified in the new contract summary. Any funding must use available admin receipts after free-position reserves and deferred user liabilities, never Processor's cycle pool.
 
-See [Leaderboard](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/leaderboard.mdx), [Campaigns](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/campaigns/index.mdx), [campaign design](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/technical/campaign-contract.mdx), and the [16-phase roadmap](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/roadmap.mdx).
+See [Leaderboard](https://fos.ooo/document/docs/leaderboard), [Campaigns](https://fos.ooo/document/docs/campaigns), [campaign design](https://fos.ooo/document/docs/technical/campaign-contract), and the [16-phase roadmap](https://fos.ooo/document/docs/roadmap).
 
 # Campaign & Leaderboard Design
 
@@ -444,7 +442,7 @@ Confirm the user-count source, activation authority/date, funding window, increm
 
 Retained product scoring is direct referral +1, Buddy purchase +2, Samurai +4, Noble +6. The supplied summary provides `referralCount` and `purchaseCount`; it does not establish an on-chain global ranking or new points for referral upgrades. Verify the app/indexer scoring and snapshots before making allocation settlement claims.
 
-The campaign is separate from the 500-collectible cycle's 17-recipient selection. Its planned three-account 50/30/20 split must not be confused with the cycle's 1/6/10 collectible groups. See [Growth Campaign](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/campaigns/growth.mdx).
+The campaign is separate from the 500-collectible cycle's 17-recipient selection. Its planned three-account 50/30/20 split must not be confused with the cycle's 1/6/10 collectible groups. See [Growth Campaign](https://fos.ooo/document/docs/campaigns/growth).
 
 # Public Roadmap
 
@@ -644,10 +642,98 @@ A gradual introduction of responsible user-driven decision participation.
 
 Governance is introduced thoughtfully — step-by-step, with stability first.
 
+# Digital Collectibles & Loyalty Market Research
+
+**Research updated: October 20, 2026.** This report uses source-checked network metadata, service documentation, and the ERC-721 standard to evaluate the current FOS opportunity. It separates verified infrastructure facts, the supplied FOS product specification, and proposed measures of adoption.
+
+## Current ecosystem evidence
+
+| Observation | Source evidence | Meaning for FOS |
+| :--- | :--- | :--- |
+| Robinhood mainnet is registered as chain 4663, with native ETH | Mainnet network registry [1] | Wallet configuration and user purchase flows must target Robinhood |
+| Robinhood testnet is a separate chain, 46630 | Testnet network registry [2] | Test activity must be excluded from production adoption measurements |
+| Chainlink lists Robinhood mainnet/testnet and Base mainnet chain selectors | Chainlink selector registry [3] | Chain identity can be cross-checked; a registry entry does not establish an active FOS messaging lane |
+| Chainlink documents VRF v2.5 on Base mainnet | Vendor supported-network documentation [4] | The specified Base randomness leg has a documented service target; final integration and funding still need validation |
+| ERC-721 is a final standard for non-fungible assets | ERC-721 standard [5] | Collectible ownership and transfer interfaces can use an established standard |
+
+The Chainlink selector values checked in this revision are Robinhood mainnet **6180753054346818345**, Robinhood testnet **2032988798112970440**, and Base mainnet **15971525489660198786**. These are messaging selectors, not wallet chain IDs, contract addresses, adoption counts, or evidence of a deployed FOS bridge.
+
+## Market segments and product fit
+
+| Segment | User need | Current FOS model | Measure of actual demand |
+| :--- | :--- | :--- | :--- |
+| Digital collectors | Identifiable collectibles and visible provenance | ERC-721 collectibles and optional Verify certificates | Distinct production minters, completed acquisitions, repeat participation |
+| Community participants | Clear participation rules and transparent allocation accounting | 500-collectible cycles, published weights, verifiable selection, and deferred claims | Cycle completion time, successful allocations, claim completion |
+| Community advocates | Simple direct referral attribution | Independent $2/$5/$10 plans with a fixed direct referrer | Direct registrations, paid upgrades, retained active referrers |
+| Integrators | Inspectable interfaces and reliable state | Separate FOSNFT, Processor, Referral, and Verify responsibilities | Verified deployment interfaces, successful integration and delivery tests |
+
+These are product-fit hypotheses, not evidence that the segments have already adopted FOS. The cited infrastructure sources do not report FOS users, sales, market share, or revenue.
+
+## Economic accessibility
+
+The supplied product model sets nominal collectible prices at $3, $13, and $25. Actual purchase prices are configured in ETH. Five positions per 500-collectible cycle are gas-only for the purchaser: **1% of cycle positions**. Their allocation contributions remain funded from FOSNFT reserves.
+
+Per-collectible allocation-pool fractions are **95%, 97%, and 98%**, respectively. These describe accounting flows; they are not individual returns, market-wide retention rates, or evidence that operations have zero cost. Gas, oracle fees, message delivery, and user-claim costs affect the practical experience. See [collection economics](https://fos.ooo/document/docs/market-insights/economics) for the complete conservation tables.
+
+## Competitive evaluation
+
+Evaluate any collectibles or loyalty platform against the same criteria: asset ownership, explicit fees, eligibility rules, recipient-selection evidence, settlement status, administrative powers, and recovery from rejected transfers. FOS's specified design offers explicit cycle rules and separate contract responsibilities; it also introduces a cross-chain service dependency that must be monitored. This is a design comparison, not a measured ranking against named competitors.
+
+## Adoption measurement plan
+
+Record the reporting period, chain, verified contract addresses, successful receipts, and deduplication rules before publishing activity statistics. Distinguish unique wallets from people, registrations from active participants, primary acquisitions from secondary transfers, and accrued allocations from completed payments. Exclude testnet traffic, failed transactions, self-transfers, and repeated indexer events from production totals.
+
+The cited sources do not supply a measured FOS adoption or market-size series. Publish such figures only with the underlying dataset, period, chain scope, and measurement method. This report makes no numerical market-size or platform-share forecast.
+
+## Sources
+
+1. [Robinhood mainnet network registry](https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-4663.json) — pinned source revision, checked October 20, 2026.
+2. [Robinhood testnet network registry](https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-46630.json) — pinned source revision, checked October 20, 2026.
+3. [Chainlink chain selector registry](https://raw.githubusercontent.com/smartcontractkit/chain-selectors/9a0d5970fd1edad07dc066f67f41a9dceafae231/selectors.yml) — pinned source revision, checked October 20, 2026.
+4. [Chainlink VRF v2.5 supported networks](https://raw.githubusercontent.com/smartcontractkit/documentation/b368069a966afd6a4521af48eb2990af4ab2d75e/src/content/vrf/v2-5/supported-networks.mdx) — pinned source revision, checked October 20, 2026.
+5. [ERC-721 token standard](https://raw.githubusercontent.com/ethereum/ercs/48dc87a2897c1d412d6df688c2d7df1229f2b30c/ERCS/erc-721.md) — pinned source revision, checked October 20, 2026.
+
+# Promotional Distribution Trust Research
+
+**Research updated: October 20, 2026.** The analysis below evaluates observable trust controls for digital collectibles and promotional distributions. It does not present an unsourced consumer survey or claim that smart contracts establish legal compliance.
+
+## Evidence that users can inspect
+
+| Question | FOS information to expose | Verification basis |
+| :--- | :--- | :--- |
+| What asset did I receive? | Collection, token ID, original mint record, current ownership | ERC-721 ownership and transfer interfaces [5] |
+| What was the purchase charge? | Exact configured ETH price, admin share, and cycle contribution | FOSNFT/Processor state and successful transaction receipt |
+| How was selection performed? | Stored cycle weights, request correlation, Base VRF response, and return delivery | VRF service documentation [4], messaging chain identities [3], and final deployed integration |
+| Was my allocation paid? | Allocated amount, direct-transfer result, or deferred claim balance | Processor accounting and confirmed claim receipt |
+| Is a certificate currently active? | Verify origin and getStatus result | Specified Verify contract state; official existence alone is insufficient |
+| Who may change configuration? | Actual owners, supported settings, and future-cycle effects | Final contract permissions and current on-chain values |
+
+The product specification describes these mechanisms. Public evidence of a deployed FOS service must come from verified addresses and actual transactions; external protocol documentation alone cannot supply it.
+
+## User journey and failure visibility
+
+Show purchase confirmation separately from promotional distribution completion. The last mint initiates the specified Base VRF/CCIP flow; a successful mint receipt does not show that randomness has returned. A rejected ETH transfer should show a deferred claim rather than disappear from the interface.
+
+Display collectible selection weights and 1/6/10 recipient groups clearly. A wallet may have multiple eligible mint records, but each selected record is removed from further selection in that cycle. Purchasing a collectible does not guarantee an allocation.
+
+## What to measure
+
+Use actual event and transaction data to report request-to-result latency, delivery success, direct-transfer success, deferred claims created, and deferred claims completed. State the observation window and sample size. Separate failures caused by user transaction inputs from pending cross-chain messages and rejected recipient transfers.
+
+Usability claims require measured task completion, support requests, or a documented user study. Numerical survey, conversion, retention, and comparison claims should include the underlying dataset, sample definition, observation period, and method. This report does not invent study results or present unmeasured FOS performance as observed data.
+
+## Sources
+
+1. [Robinhood mainnet network registry](https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-4663.json) — pinned source revision, checked October 20, 2026.
+2. [Robinhood testnet network registry](https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-46630.json) — pinned source revision, checked October 20, 2026.
+3. [Chainlink chain selector registry](https://raw.githubusercontent.com/smartcontractkit/chain-selectors/9a0d5970fd1edad07dc066f67f41a9dceafae231/selectors.yml) — pinned source revision, checked October 20, 2026.
+4. [Chainlink VRF v2.5 supported networks](https://raw.githubusercontent.com/smartcontractkit/documentation/b368069a966afd6a4521af48eb2990af4ab2d75e/src/content/vrf/v2-5/supported-networks.mdx) — pinned source revision, checked October 20, 2026.
+5. [ERC-721 token standard](https://raw.githubusercontent.com/ethereum/ercs/48dc87a2897c1d412d6df688c2d7df1229f2b30c/ERCS/erc-721.md) — pinned source revision, checked October 20, 2026.
+
 
 # Team and Governance Scope
 
-The earlier edition described founder, Solidity engineering, and prospective advisory roles. This revision does not invent individual identities, audit sign-offs, or implemented multisig/timelock deployments. Document actual owners and admin roles from the final contracts. Referral configuration authority and Verify revocation authority are described above; they must not be replaced by a blanket claim that no rules can change.
+Project responsibilities include product development, Solidity engineering, and security review. Individual identities, audit sign-offs, and multisig/timelock deployments must be supported by published evidence. Document actual owners and admin roles from the final contracts. Referral configuration authority and Verify revocation authority are described above; they must not be replaced by a blanket claim that no rules can change.
 
 # Risks, Eligibility, and Legal Notice
 
@@ -705,6 +791,6 @@ The specification supports ERC-721 certificates and native ETH payments. It does
 3. Ethereum network registry: [Robinhood mainnet](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-4663.json) and [testnet](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-46630.json). These corroborate network metadata, not project deployment.
 4. Official documentation linked by that registry: [Robinhood Chain](https://docs.robinhood.com/chain).
 5. [Chainlink VRF documentation](https://docs.chain.link/vrf) and [CCIP documentation](https://docs.chain.link/ccip). Service documentation is not proof of a deployed FOS lane.
-6. Historical December 2025 whitepaper retained byte-for-byte in `public/archive/whitepaper-2025.pdf`, including its original research references.
+6. Current market research source revisions and integrity hashes are recorded in the repository under `docs/research/2026-10-20/manifest.json`.
 
-The original PDF was produced by LaTeX, but its exact original editable source is not recoverable from the PDF alone. `original-facsimile.tex` preserves its pages visually by embedding the unchanged PDF; it is not presented as the recovered original typesetting source. This edition's `whitepaper.tex` is a complete editable source for the revised PDF.
+The editable `whitepaper.tex` source compiles to the current published PDF.

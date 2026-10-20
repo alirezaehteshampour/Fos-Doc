@@ -7,22 +7,22 @@ export default function AnalysisLandingPage() {
         <div className="space-y-8">
             <div className="grid md:grid-cols-3 gap-6">
                 <ReportCard
-                    title="The 2025 Outlook"
-                    description="Historical market projections and Base context; not Robinhood adoption data."
+                    title="Current Market Research"
+                    description="Source-checked ecosystem evidence, user segments, and adoption measures."
                     icon={TrendingUp}
-                    href="/analysis/market-2025"
+                    href="/analysis/market"
                     color="text-blue-500"
                 />
                 <ReportCard
                     title="Online Giveaways"
-                    description="Analysis of the 'Transparency Gap' and broken state of current sweepstakes."
+                    description="Inspectable selection, settlement status, and measurable user trust."
                     icon={ShieldAlert}
                     href="/analysis/giveaways"
                     color="text-rose-500"
                 />
                 <ReportCard
                     title="Protocol Economics"
-                    description="Comparative analysis of Platform 'Take Rates' vs. Autonomous Protocol Efficiency."
+                    description="Current mint fees, funded free positions, and conserved cycle accounting."
                     icon={Coins}
                     href="/analysis/economics"
                     color="text-emerald-500"
@@ -34,16 +34,15 @@ export default function AnalysisLandingPage() {
                     <h2 className="text-2xl font-bold mb-4">Executive Summary</h2>
                     <div className="space-y-4 text-slate-300">
                         <p>
-                            The digital collectibles market is projected to grow from <strong>$21B to $211B</strong> by 2030, driven by a shift from speculation to utility.
-                            Brands are increasingly adopting automated reward ecosystems to replace legacy loyalty programs.
+                            Research refreshed October 20, 2026, using pinned Robinhood network registries, Chainlink service documentation, and the ERC-721 standard. The reports separate verified infrastructure facts from product-fit analysis and measured adoption.
                         </p>
                         <p>
-                            <strong>FOS Protocol</strong> addresses the transparency gap in the $37B affiliate and sweepstakes market by leveraging
+                            <strong>FOS Protocol</strong> uses
                             <strong> Robinhood Chain</strong> for user transactions and the specified Base VRF/CCIP flow for randomness. Pool contribution fractions are collection-specific: 95%, 97%, and 98%; they are not individual returns.
                         </p>
                     </div>
                     <div className="mt-6">
-                        <Link href="/analysis/market-2025" className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium">
+                        <Link href="/analysis/market" className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium">
                             Start Reading Report <ArrowRight className="ml-2 w-4 h-4" />
                         </Link>
                     </div>

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import localFont from 'next/font/local';
 import type { Metadata } from 'next';
 import { AIChat } from '@/components/ai-chat';
+import { withBasePath } from '../../site.config.mjs';
 
 const inter = localFont({
   src: '../../public/fonts/Inter-Variable.ttf',
@@ -12,6 +13,7 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fos.ooo'),
   title: {
     template: '%s | FOS Documentation',
     default: 'FOS Documentation - Blockchain Platform',
@@ -27,18 +29,18 @@ export const metadata: Metadata = {
     siteName: 'FOS Documentation',
     title: 'FOS Documentation - Blockchain Platform',
     description: 'Official documentation for FOS blockchain platform',
-    images: ['/logo.png'],
+    images: [withBasePath('/logo.png')],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'FOS Documentation',
     description: 'Official documentation for FOS blockchain platform',
-    images: ['/logo.png'],
+    images: [withBasePath('/logo.png')],
   },
   icons: {
-    icon: '/favicon.png',
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
+    icon: withBasePath('/favicon.png'),
+    shortcut: withBasePath('/favicon.png'),
+    apple: withBasePath('/favicon.png'),
   },
   robots: {
     index: true,
@@ -54,6 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           search={{
             options: {
               type: 'static',
+              api: withBasePath('/api/search'),
             },
           }}
         >

@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 banner: (
                     <div className="p-3 rounded-lg bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 mb-4">
                         <p className="text-xs font-medium text-primary">🚀 FOS v1.0</p>
-                        <p className="text-xs text-muted-foreground">Production Ready</p>
+                        <p className="text-xs text-muted-foreground">Protocol & Developer Guides</p>
                     </div>
                 ),
             }}

@@ -1,0 +1,11 @@
+{
+  "source": "https://raw.githubusercontent.com/smartcontractkit/chain-selectors/9a0d5970fd1edad07dc066f67f41a9dceafae231/selectors.yml",
+  "commit": "9a0d5970fd1edad07dc066f67f41a9dceafae231",
+  "checkedAt": "2026-10-20",
+  "remoteSha256": "0ffc152a8af3dca3f29925b176ac2c14319c1bded661e3ce6c0c9ab787443d24",
+  "observations": {
+    "4663": "6180753054346818345",
+    "46630": "2032988798112970440",
+    "8453": "15971525489660198786"
+  }
+}

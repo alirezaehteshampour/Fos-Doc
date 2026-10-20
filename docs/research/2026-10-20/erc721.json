@@ -1,0 +1,12 @@
+{
+  "source": "https://raw.githubusercontent.com/ethereum/ercs/48dc87a2897c1d412d6df688c2d7df1229f2b30c/ERCS/erc-721.md",
+  "commit": "48dc87a2897c1d412d6df688c2d7df1229f2b30c",
+  "checkedAt": "2026-10-20",
+  "remoteSha256": "238787165c08ac748928ffad57a24045802174bb38220af9e7b63c44778b7372",
+  "observations": {
+    "standard": 721,
+    "title": "Non-Fungible Token Standard",
+    "status": "Final",
+    "created": "2018-01-24"
+  }
+}

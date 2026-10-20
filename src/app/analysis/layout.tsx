@@ -2,6 +2,7 @@ import ChartRegistry from "@/components/charts/chart-registry";
 import { AnalysisNav } from "@/components/analysis-nav";
 import Link from "next/link";
 import Image from "next/image";
+import { withBasePath } from '../../../site.config.mjs';
 
 export default function AnalysisLayout({
     children,
@@ -17,7 +18,7 @@ export default function AnalysisLayout({
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <Image
-                            src="/logo.png"
+                            src={withBasePath('/logo.png')}
                             alt="FOS Logo"
                             width={32}
                             height={32}
@@ -41,7 +42,7 @@ export default function AnalysisLayout({
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <header className="mb-12 text-center">
                     <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">FOS Market Intelligence</h1>
-                    <p className="text-muted-foreground">Current collection economics and historical 2025 research</p>
+                    <p className="text-muted-foreground">Source-checked ecosystem research and collection economics · October 2026</p>
                 </header>
 
                 <AnalysisNav />

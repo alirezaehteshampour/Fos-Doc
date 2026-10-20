@@ -155,33 +155,7 @@ docker-compose logs -f
 
 ## 🔧 Reverse Proxy Setup (Nginx)
 
-For production, use Nginx as a reverse proxy:
-
-```nginx
-server {
-    listen 80;
-    server_name docs.fos.ooo;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-### Enable SSL with Certbot
-
-```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d docs.fos.ooo
-```
+For the existing `fos.ooo/document` mount, use only the documentation-specific locations in **Hosting only the documentation under /document** below. Keep the main website, its TLS configuration, and its other upstreams unchanged.
 
 ---
 
@@ -290,6 +264,36 @@ For deployment issues, contact the FOS development team.
 
 ## Current documentation artifacts
 
-The committed `public/whitepaper.pdf` and `public/whitepaper.tex` are the Robinhood/three-plan edition. Deploy both with the other public assets. The original paper lives under `public/archive/`. Regenerate artifacts before deployment with `npm run whitepaper:build` in the prepared cloud environment, then run `npm run docs:check`, `npm run lint`, and `npm run build`. A production Node/Docker host needs only the committed artifacts, not a LaTeX installation.
+The committed `public/whitepaper.pdf` and `public/whitepaper.tex` are the Robinhood/three-plan edition. Deploy both with the other public assets. Prior editions remain in Git history and are not published. Regenerate artifacts before deployment with `npm run whitepaper:build` in the prepared cloud environment, then run `npm run docs:check`, `npm run lint`, and `npm run build`. A production Node/Docker host needs only the committed artifacts, not a LaTeX installation.
 
 Inter is vendored with its license; Google Fonts egress is not required. Gemini chat requires HTTPS access to `generativelanguage.googleapis.com`. A Git push updates repository content; the hosted site changes only when its configured deployment pipeline completes. Verify `/docs/referral`, `/docs/whitepaper`, `/whitepaper.pdf`, and `/whitepaper.tex` on the actual deployment.
+
+## Hosting only the documentation under /document
+
+The app now builds for `/document` by default. Keep the prefix when forwarding requests to the documentation server. Build-time `NEXT_PUBLIC_BASE_PATH` controls the prefix; use an empty value only for a root deployment and rebuild afterward.
+
+Only these documentation locations are relevant to an existing Nginx server block. Preserve all other site locations, TLS settings, and upstreams:
+
+```nginx
+location = /document {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+location ^~ /document/ {
+    # No trailing slash after the upstream: preserve /document in the request.
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Use the actual documentation upstream port. Do not route missing documentation assets to the main website's HTML fallback. `/document/whitepaper.pdf` must return `application/pdf` and begin with `%PDF-`; `/document/logo.png` and the generated image URLs must return images. Search and chat use `/document/api/...`. Confirm navigation stays under `/document`.
+
+Proxy the exact `/document` URL too. Do not force it to `/document/`: Next.js canonicalizes the trailing slash back to `/document`, so forcing a slash in Nginx would create a redirect loop.
+
+After deployment, check the whitepaper iframe and both PDF links, logo images on homepage/docs/research, mobile navigation, and an actual search. Historical `/document/archive/whitepaper-2025.pdf` and `/document/docs/archive_legacy/...` must return 404. Old research bookmarks redirect to the current report; old article content is not published.

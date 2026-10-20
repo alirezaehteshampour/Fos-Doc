@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { withBasePath } from '../../site.config.mjs';
 
 export default function HomePage() {
   return (
@@ -17,7 +18,7 @@ export default function HomePage() {
               <div className="relative">
                 <div className="absolute inset-0 blur-2xl bg-gradient-to-r from-orange-500/40 via-pink-500/40 to-purple-500/40 rounded-full scale-150" />
                 <Image
-                  src="/logo.png"
+                  src={withBasePath('/logo.png')}
                   alt="FOS Logo"
                   width={80}
                   height={80}
@@ -180,7 +181,7 @@ export default function HomePage() {
       <footer className="py-6 sm:py-8 border-t border-border">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Image src="/logo.png" alt="FOS" width={24} height={24} className="rounded" />
+            <Image src={withBasePath('/logo.png')} alt="FOS" width={24} height={24} className="rounded" />
             <span className="text-sm text-muted-foreground">© {new Date().getFullYear()} FOS. All rights reserved.</span>
           </div>
           <div className="flex gap-4 text-sm text-muted-foreground">

@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-10-20",
+  "sources": [
+    {
+      "id": "robinhood-mainnet",
+      "title": "Robinhood mainnet network registry",
+      "url": "https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-4663.json",
+      "commit": "4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b",
+      "sha256": "a04a2fe7a9d1635d1bcc134d129b7e04e7c24c91e8afcb8c3b2e163b4c8c41fc",
+      "snapshot": "docs/research/2026-10-20/robinhood-mainnet.json",
+      "remoteSha256": "c4bd4142234b1ba9fffeadff83f39643209a06828bb0e82f6207532ed48f85d0"
+    },
+    {
+      "id": "robinhood-testnet",
+      "title": "Robinhood testnet network registry",
+      "url": "https://raw.githubusercontent.com/ethereum-lists/chains/4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b/_data/chains/eip155-46630.json",
+      "commit": "4a2f1946a185a3e218f7f0b16a9d2f3746c2b40b",
+      "sha256": "a338110d9b0fb3ce4184b9193c0e45c05ec0194d9f4d33f5b20af41299049ac9",
+      "snapshot": "docs/research/2026-10-20/robinhood-testnet.json",
+      "remoteSha256": "36142d363fa83f77fa6ebfa3d5b62b409dc5080c161c0e4eae8cef4d499c2362"
+    },
+    {
+      "id": "chainlink-selectors",
+      "title": "Chainlink chain selector registry",
+      "url": "https://raw.githubusercontent.com/smartcontractkit/chain-selectors/9a0d5970fd1edad07dc066f67f41a9dceafae231/selectors.yml",
+      "commit": "9a0d5970fd1edad07dc066f67f41a9dceafae231",
+      "sha256": "d28f0bb5d0edc6ffacdc76f00385143f50d10fc6113a9b36c265d95eb40d6677",
+      "snapshot": "docs/research/2026-10-20/chainlink-selectors.json",
+      "remoteSha256": "0ffc152a8af3dca3f29925b176ac2c14319c1bded661e3ce6c0c9ab787443d24"
+    },
+    {
+      "id": "chainlink-vrf",
+      "title": "Chainlink VRF v2.5 supported networks",
+      "url": "https://raw.githubusercontent.com/smartcontractkit/documentation/b368069a966afd6a4521af48eb2990af4ab2d75e/src/content/vrf/v2-5/supported-networks.mdx",
+      "commit": "b368069a966afd6a4521af48eb2990af4ab2d75e",
+      "sha256": "4736b86881a78417526ab233638618e5b0053c49d84cf961cc3359951931f4f1",
+      "snapshot": "docs/research/2026-10-20/chainlink-vrf.json",
+      "remoteSha256": "d6dd8affadb0693e86f2c3590c89fd16eeab8a5a057d0e254904c98dce726e83"
+    },
+    {
+      "id": "erc721",
+      "title": "ERC-721 token standard",
+      "url": "https://raw.githubusercontent.com/ethereum/ercs/48dc87a2897c1d412d6df688c2d7df1229f2b30c/ERCS/erc-721.md",
+      "commit": "48dc87a2897c1d412d6df688c2d7df1229f2b30c",
+      "sha256": "14c9f8e3e9dfce5d6028a53e531d3c57cd699babdc7fe4ba0452cf5a818d3618",
+      "snapshot": "docs/research/2026-10-20/erc721.json",
+      "remoteSha256": "238787165c08ac748928ffad57a24045802174bb38220af9e7b63c44778b7372"
+    }
+  ],
+  "observations": {
+    "mainnetChainId": 4663,
+    "testnetChainId": 46630,
+    "nativeCurrency": "ETH",
+    "robinhoodMainnetSelector": "6180753054346818345",
+    "robinhoodTestnetSelector": "2032988798112970440",
+    "baseMainnetSelector": "15971525489660198786"
+  }
+}

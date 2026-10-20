@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { withBasePath } from '../../site.config.mjs';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -32,7 +33,7 @@ export function AIChat() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch(withBasePath('/api/chat'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

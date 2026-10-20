@@ -1,0 +1,10 @@
+{
+  "source": "https://raw.githubusercontent.com/smartcontractkit/documentation/b368069a966afd6a4521af48eb2990af4ab2d75e/src/content/vrf/v2-5/supported-networks.mdx",
+  "commit": "b368069a966afd6a4521af48eb2990af4ab2d75e",
+  "checkedAt": "2026-10-20",
+  "remoteSha256": "d6dd8affadb0693e86f2c3590c89fd16eeab8a5a057d0e254904c98dce726e83",
+  "observations": {
+    "product": "Chainlink VRF v2.5",
+    "baseMainnetDocumented": true
+  }
+}

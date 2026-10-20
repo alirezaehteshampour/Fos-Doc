@@ -9,12 +9,14 @@ import { notFound } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import ChartRegistry from '@/components/charts/chart-registry';
 import { UniversalChart } from '@/components/charts/universal-chart';
+import { WhitepaperViewer } from '@/components/whitepaper-viewer';
 
 // Custom MDX components including charts
 const customMdxComponents = {
     ...defaultMdxComponents,
     UniversalChart,
     ChartRegistry,
+    WhitepaperViewer,
 };
 
 interface PageProps {

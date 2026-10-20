@@ -49,7 +49,7 @@ for filename, paths in [('fos.md', protocol_paths), ('Fos Technical Doc.md', tec
 
 intro = '''# Executive Summary
 
-FOS offers Fos Digital Collectibles as NFT consumer products with protocol-defined promotional distributions, an independent single-level referral program, and authenticity certificates. This edition updates the December 2025 whitepaper using the supplied Persian project contract specification. User-facing contracts move to Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
+FOS offers Fos Digital Collectibles as NFT consumer products with protocol-defined promotional distributions, an independent single-level referral program, and authenticity certificates. This whitepaper describes the current project contract specification. User-facing contracts are on Robinhood Chain. Base remains the specified randomness-service chain through Chainlink VRF and CCIP.
 
 The product vocabulary follows the original FOS documentation: Fos Digital Collectible, promotional distribution, recipient, allocation, loyalty reward, and cycle. Exact contract identifiers remain unchanged in technical references. This whitepaper explains the reported design. It is not an independent contract audit, proof of a live bridge deployment, legal determination, or promise of individual allocations. The documentation repository does not contain the final Solidity sources or deployment ABI bundle. Unverified operational contract addresses are not published here.
 
@@ -57,7 +57,7 @@ The product vocabulary follows the original FOS documentation: Fos Digital Colle
 
 The project aims to make collectible participation and allocation accounting visible through on-chain records rather than opaque operator databases. Its practical goals are clear contract responsibilities, explicit fee and reserve accounting, verifiable randomness, and accessible user information. Owner configuration permissions and cross-chain delivery dependencies are part of that design, not exceptions to it.
 
-## What changed in this edition
+## Protocol summary
 
 - Robinhood Chain is the user transaction network; Base is retained for the specified VRF integration, connected through CCIP.
 - Referral has nominal $2/$5/$10 plans; the direct referrer's active plan sets 50%/60%/82% commission on registrations and upgrades.
@@ -67,13 +67,11 @@ The project aims to make collectible participation and allocation accounting vis
 - Selection completion is asynchronous; failed direct ETH payments become deferred claims.
 - Verify issues separate ERC-721 certificates and distinguishes existence from current validity.
 
-# Market Context and Comparison Limits
+# Market Context
 
-The earlier whitepaper discussed digital collectibles, loyalty systems, and trust in centralized promotions. Those motivations remain relevant context, but historical Base adoption figures do not describe Robinhood adoption. The existing 2025 research is historical and has not been independently refreshed here.
+The market research in this edition was refreshed on October 20, 2026 using pinned network registries, Chainlink service documentation, and the ERC-721 standard. It separates verified infrastructure evidence, the FOS product specification, and proposed measures of adoption. The complete reports and citations follow the contract sections.
 
-Current economic statements in this edition follow the supplied collection and referral arithmetic. Per-collectible pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification.
-
-The original references are retained in the unchanged historical PDF. Current operational rules should be read from this edition and verified against the actual deployment.
+Per-collectible pool fractions are 95%, 97%, and 98% by collection, not a universal project-wide return rate. Gas, oracle, bridge, audit, development, and compliance costs are not assumed to vanish. Neither automation nor a terminology choice determines regulatory classification. Network registry entries and service documentation do not measure actual FOS users or verify its deployment.
 '''
 
 sections = [
@@ -81,6 +79,7 @@ sections = [
     'technical/smart-contracts.mdx', 'technical/verification-contract.mdx',
     'technical/application.mdx', 'technical/security.mdx',
     'protocol/community.mdx', 'technical/campaign-contract.mdx', 'roadmap.mdx',
+    'market-insights/market.mdx', 'market-insights/giveaways.mdx',
 ]
 architecture = r'''
 
@@ -147,7 +146,7 @@ for section in sections:
 whitepaper += '''
 # Team and Governance Scope
 
-The earlier edition described founder, Solidity engineering, and prospective advisory roles. This revision does not invent individual identities, audit sign-offs, or implemented multisig/timelock deployments. Document actual owners and admin roles from the final contracts. Referral configuration authority and Verify revocation authority are described above; they must not be replaced by a blanket claim that no rules can change.
+Project responsibilities include product development, Solidity engineering, and security review. Individual identities, audit sign-offs, and multisig/timelock deployments must be supported by published evidence. Document actual owners and admin roles from the final contracts. Referral configuration authority and Verify revocation authority are described above; they must not be replaced by a blanket claim that no rules can change.
 
 # Risks, Eligibility, and Legal Notice
 
@@ -205,9 +204,9 @@ The specification supports ERC-721 certificates and native ETH payments. It does
 3. Ethereum network registry: [Robinhood mainnet](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-4663.json) and [testnet](https://github.com/ethereum-lists/chains/blob/master/_data/chains/eip155-46630.json). These corroborate network metadata, not project deployment.
 4. Official documentation linked by that registry: [Robinhood Chain](https://docs.robinhood.com/chain).
 5. [Chainlink VRF documentation](https://docs.chain.link/vrf) and [CCIP documentation](https://docs.chain.link/ccip). Service documentation is not proof of a deployed FOS lane.
-6. Historical December 2025 whitepaper retained byte-for-byte in `public/archive/whitepaper-2025.pdf`, including its original research references.
+6. Current market research source revisions and integrity hashes are recorded in the repository under `docs/research/2026-10-20/manifest.json`.
 
-The original PDF was produced by LaTeX, but its exact original editable source is not recoverable from the PDF alone. `original-facsimile.tex` preserves its pages visually by embedding the unchanged PDF; it is not presented as the recovered original typesetting source. This edition's `whitepaper.tex` is a complete editable source for the revised PDF.
+The editable `whitepaper.tex` source compiles to the current published PDF.
 '''
 
 # Use verified repository source links, without inventing a documentation deployment hostname.
@@ -217,7 +216,7 @@ def source_link(match):
     if not target.exists():
         target = DOCS / slug / 'index.mdx'
     assert target.is_file(), f'Broken current reference: {match.group(1)}'
-    return '](https://github.com/alirezaehteshampour/Fos-Doc/blob/main/content/docs/' + target.relative_to(DOCS).as_posix() + ')'
+    return '](https://fos.ooo/document' + match.group(1) + ')'
 
 whitepaper = re.sub(r'\]\((/docs[^)]*)\)', source_link, whitepaper)
 (ROOT / 'whitepaper/whitepaper.md').write_text(whitepaper)
@@ -229,14 +228,15 @@ subprocess.run([
     '-V', 'mainfont=DejaVu Serif', '-V', 'monofont=DejaVu Sans Mono',
     '-M', 'title=FOS: The Digital Collectibles and Allocation Protocol',
     '-M', 'subtitle=Robinhood Chain / Base VRF and CCIP / Three-Plan Referral Edition',
-    '-M', 'author=FOS Project Documentation', '-M', 'date=October 12, 2026',
+    '-M', 'author=FOS Project Documentation', '-M', 'date=October 20, 2026',
     '-o', str(ROOT/'whitepaper/whitepaper.tex'),
 ],check=True)
 
 # Keep code identifiers legible while allowing long inline identifiers to wrap.
 p = ROOT/'whitepaper/whitepaper.tex'
 tex = p.read_text().replace('\\begin{document}',
-    '\\usepackage{tikz}\n\\usepackage{float}\n\\usetikzlibrary{arrows.meta}\n'
+    '\\usepackage{tikz}\n\\usepackage{float}\n\\usepackage{tocloft}\n'
+    '\\setlength{\\cftsecnumwidth}{2.5em}\n\\usetikzlibrary{arrows.meta}\n'
     '\\setcounter{tocdepth}{1}\n\\emergencystretch=3em\n\\begin{document}')
 tex = tex.replace('\\tableofcontents', '\\tableofcontents\n\\clearpage')
 tex = tex.replace('\\setcounter{tocdepth}{2}', '\\setcounter{tocdepth}{1}')

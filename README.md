@@ -8,7 +8,7 @@ Professional documentation site for the FOS blockchain platform, built with [Fum
 
 User-facing FOS contracts are specified on **Robinhood Chain** (mainnet 4663; testnet 46630). **Base** remains the Chainlink VRF service side, with the specified **CCIP** request/response flow. Referrals now use $2/$5/$10 plans with 50%/60%/82% direct-referrer shares and price-difference upgrades. See the current MDX contract references; this repository does not contain Solidity deployments.
 
-The original PDF is preserved unchanged in `public/archive/whitepaper-2025.pdf`. The revised PDF has editable LaTeX in `whitepaper/whitepaper.tex` and a downloadable copy in `public/whitepaper.tex`. See [whitepaper build instructions](whitepaper/README.md).
+The revised PDF has editable LaTeX in `whitepaper/whitepaper.tex` and a downloadable copy in `public/whitepaper.tex`. See [whitepaper build instructions](whitepaper/README.md).
 
 ## ✨ Features
 
@@ -64,7 +64,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000)
+The default deployment path is `/document`. Open the corresponding `/document` path on your development host. For a site served at the domain root, set `NEXT_PUBLIC_BASE_PATH=""` **before building**.
 
 ---
 
@@ -91,7 +91,7 @@ npm run build
 npm start
 ```
 
-The app runs on port **3000** by default.
+The app runs on port **3000** by default, with `/document` as its build-time base path.
 
 #### Using PM2 (Recommended for Production)
 
@@ -189,7 +189,8 @@ Edit the gradient colors in:
 | `npm run lint` | Run ESLint |
 | `npm run docs:generate` | Refresh AI knowledge, consolidated docs, and LaTeX from current MDX |
 | `npm run whitepaper:build` | Generate artifacts and compile the current PDF |
-| `npm run docs:check` | Check links, economics, source equality, PDF content, and AI freshness |
+| `npm run docs:check` | Check links, economics, source equality, PDF content, research citations, and AI freshness |
+| `npm run deployment:check -- URL` | Validate the running documentation mount, assets, PDF response, and removed-history routes |
 
 ---
 
@@ -218,6 +219,8 @@ For issues or questions, contact the FOS development team.
 
 Follow the original product-language convention in [docs/terminology.md](docs/terminology.md). Current prose uses Fos Digital Collectible, promotional distribution, recipient, allocation, loyalty reward, and cycle. Keep exact contract identifiers and the underlying mechanics accurate. `npm run docs:check` guards against newly introduced restricted vocabulary.
 
-Edit canonical pages under `content/docs`, then run `npm run whitepaper:build`, `npm run docs:check`, `npm run lint`, and `npm run build`. Python 3, Pandoc, XeLaTeX, and DejaVu fonts are required to regenerate the paper and are available in the prepared cloud environment. Node deployments use the committed PDF, LaTeX, and AI reference; they do not need TeX installed. Inter is vendored with its OFL license, so site builds require no Google Fonts download. Historical pages are explicitly labeled and excluded from the current AI reference.
+Edit canonical pages under `content/docs`, then run `npm run whitepaper:build`, `npm run docs:check`, `npm run lint`, and `npm run build`. Python 3, Pandoc, XeLaTeX, and DejaVu fonts are required to regenerate the paper and are available in the prepared cloud environment. Node deployments use the committed PDF, LaTeX, and AI reference; they do not need TeX installed. Inter is vendored with its OFL license, so site builds require no Google Fonts download. Prior editions remain in Git history; historical pages and PDF downloads are not included in the site.
 
 All preparation was performed in the cloud checkout. Existing cloud tasks are isolated; use their checkout without creating a Git worktree unless explicitly requested.
+
+The default public mount is `https://fos.ooo/document`. Read the scoped reverse-proxy instructions in [DEPLOY.md](DEPLOY.md) before deploying under the main website; the upstream must retain the `/document` request prefix. Logo artwork is unchanged. The current market research cites pinned sources checked October 20, 2026, with integrity snapshots under `docs/research`.

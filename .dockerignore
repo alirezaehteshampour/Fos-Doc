@@ -1,0 +1,14 @@
+.git
+node_modules
+.next
+out
+build
+.env*
+!.env.example
+whitepaper/*.pdf
+whitepaper/*.aux
+whitepaper/*.log
+whitepaper/*.out
+whitepaper/*.toc
+whitepaper/*facsimile*
+docs/review/*.png

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "docs:generate": "python3 scripts/generate-doc-artifacts.py",
     "whitepaper:build": "bash scripts/build-whitepaper.sh",
-    "docs:check": "python3 scripts/check-docs.py"
+    "docs:check": "python3 scripts/check-docs.py",
+    "deployment:check": "python3 scripts/check-deployment.py"
   },
   "dependencies": {
     "@google/genai": "^1.31.0",
